@@ -128,6 +128,19 @@ class SkillBundleTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("career-context-data", output.read_text(encoding="utf-8"))
 
+    def test_extracted_skill_renders_guided_writing_and_public_profile(self):
+        skill = self.extracted()
+        source = self.source()
+        output = self.directory / 'guided.html'
+        result = self.command(skill, source, output, '--guided')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        markup = output.read_text(encoding='utf-8')
+        packet = json.loads(re.search(r'<script id="career-context-data" type="application/json">(.*?)</script>', markup, re.S)[1])
+        self.assertEqual(packet['publicProfile']['overview'], '')
+        self.assertIn('data-path-step="write"', markup)
+        self.assertIn('id="public-export"', markup)
+        self.assertIn('function publicProjection', markup)
+
     def test_extracted_skill_preserves_the_complete_document(self):
         skill = self.extracted()
         source = self.directory / 'complete.json'

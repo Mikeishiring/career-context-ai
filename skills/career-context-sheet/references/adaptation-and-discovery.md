@@ -6,7 +6,7 @@ Use the optional `profile` fields to preserve disciplines, target roles, emphasi
 
 ## Start with the work, then discover sources
 
-Establish the decision the output should support: a role application, career change, promotion, interview, portfolio or open-ended record. Reuse the stated audience and objective. With no target, make a broad archive and a general resume; do not invent an ideal role from available records.
+Establish the decision the output should support: a role application, career change, promotion, interview, portfolio or open-ended record. Reuse the stated audience and objective. With no target, make a broad archive; create a general resume only when a resume is requested. Do not invent an ideal role from available records.
 
 Map responsibilities, projects and periods before choosing platforms. Work may leave photographs, notebooks, rosters, repairs, client briefs, certificates, physical objects or oral accounts instead of tickets and dashboards. Sparse digital records do not imply weak contribution. Separate a credential from demonstrated practice, an unused proposal from a delivered change, and a reference resume's style from its owner's facts.
 

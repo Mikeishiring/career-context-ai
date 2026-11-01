@@ -8,8 +8,9 @@ if(typeof ResizeObserver!=='undefined')new ResizeObserver(sizeHeader).observe(do
 else window.addEventListener('resize',sizeHeader);
 function routeDocument(scroll=false){
  let id='';try{id=decodeURIComponent(location.hash.slice(1));}catch{}
- const target=document.getElementById(id);
- const view=target?.closest('.document-view')?.id||'work';
+ const pathStep=packet.journey&&['gather','review','deepen','connect','write','practice'].some(s=>id==='path-'+s);
+ const target=document.getElementById(pathStep?'path':id);
+ const view=target?.closest('.document-view')?.id||(packet.journey&&!id?'path':'work');
  document.querySelectorAll('.document-view').forEach(el=>el.hidden=el.id!==view);
  document.querySelector('.hero').hidden=view!=='work';
  document.querySelectorAll('[data-view]').forEach(link=>{
@@ -33,7 +34,7 @@ function routeDocument(scroll=false){
  if(storySelect)storySelect.value=selectedStory;
  if(view==='interview'&&id.startsWith('prep-story-'))document.querySelector('.opening').open=false;
  if(view==='interview'&&id==='interview')document.querySelector('.opening')?.setAttribute('open','');
- if(scroll&&target){
+ if(scroll&&target&&!pathStep){
   target.scrollIntoView({block:'start'});
   if(target.matches('.quarter-reading,.prep-story,.account')){target.tabIndex=-1;target.focus({preventScroll:true});}
   if(target.matches('details.source,.capability-index')){target.open=true;target.querySelector('summary').focus({preventScroll:true});}

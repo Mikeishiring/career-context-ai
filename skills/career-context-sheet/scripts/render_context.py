@@ -31,6 +31,8 @@ def load_helper(name):
 
 
 sections = load_helper('document_sections')
+guided_path = load_helper('guided_path')
+public_profile = load_helper('public_profile')
 _interview_renderer = None
 
 def check_text(value, label, maximum=100_000):
@@ -42,7 +44,7 @@ def keys(value, allowed, label):
         raise ValueError(f'{label} has an unsupported field or is not an object')
 
 def validate(data):
-    keys(data, ['schema', 'updatedAt', 'reviewStatus', 'person', 'accounts', 'sources', 'synthetic', 'profile', 'collection', 'presentation', 'timeline', 'interview', 'rehearsal'], 'Sheet')
+    keys(data, ['schema', 'updatedAt', 'reviewStatus', 'person', 'accounts', 'sources', 'synthetic', 'profile', 'collection', 'presentation', 'timeline', 'interview', 'rehearsal', 'journey', 'publicProfile'], 'Sheet')
     if 'presentation' in data:
         presentation = data['presentation']
         keys(presentation, ['headline', 'files'], 'Presentation')
@@ -136,6 +138,8 @@ def validate(data):
             _interview_renderer = load_helper('render_interview')
         _interview_renderer.validate_projection(data, data['interview'], sections.evidence_fingerprint(data))
     sections.validate_rehearsal(data, check_text, keys)
+    guided_path.validate(data, check_text, keys)
+    public_profile.validate(data, check_text, keys)
     if used != source_ids: raise ValueError('Remove unreferenced source records from the packet')
     # HTML loading temporarily attaches image bytes. They live outside the
     # canonical JSON and have their own image and complete-document bounds.
@@ -249,12 +253,12 @@ def account_capabilities(account):
 
 
 def preserve_views(previous, incoming):
-    missing = [key for key in ['timeline', 'interview'] if previous.get(key) and not incoming.get(key)]
+    missing = [key for key in ['timeline', 'interview', 'journey', 'publicProfile'] if previous.get(key) and not incoming.get(key)]
     if missing:
         raise ValueError('Update would remove ' + ', '.join(missing) + '. Retain the complete packet; use --allow-remove-views only for intentional removal.')
 
 
-def render(source, destination, *, overwrite=True, allow_view_removal=False):
+def render(source, destination, *, overwrite=True, allow_view_removal=False, guided=False):
     if source.suffix.lower() in {'.html', '.htm'} and re.search(r'<script[^>]+id=[\"\']career-draft-data[\"\']', source.read_text(encoding='utf-8')):
         raise ValueError('This file contains notebook edits. Use merge_notebook.py to reconcile them before rendering the complete document.')
     data = load_packet(source); validate(data); packet = copy.deepcopy(data)
@@ -264,6 +268,10 @@ def render(source, destination, *, overwrite=True, allow_view_removal=False):
         except (ValueError, KeyError, TypeError):
             previous = None
         if isinstance(previous, dict): preserve_views(previous, packet)
+    if guided and 'journey' not in packet:
+        packet['journey'] = guided_path.initial_state(packet, sections.evidence_fingerprint(packet))
+    if 'journey' in packet and 'publicProfile' not in packet:
+        packet['publicProfile'] = public_profile.initial_state(packet, sections.evidence_fingerprint(packet))
     esc = html.escape
     def paragraphs(text): return ''.join(f'<p>{esc(p)}</p>' for p in text.split('\n\n') if p.strip())
     def bullets(items): return '<ul>' + ''.join(f'<li>{esc(i)}</li>' for i in items) + '</ul>' if items else ''
@@ -292,6 +300,15 @@ def render(source, destination, *, overwrite=True, allow_view_removal=False):
     coverage = ''.join('<tr>' + ''.join('<td>' + esc(location[field].replace('_', ' ') if field == 'status' else location[field]) + '</td>'
                                       for field in ['platform', 'location', 'status', 'scope', 'nextStep']) + '</tr>' for location in packet.get('collection', []))
     values = {
+        'PATH': guided_path.render(packet, sections.evidence_fingerprint(packet)),
+        'PATHNAV': '<a href="#path" data-view="path">Your path</a>' if 'journey' in packet else '',
+        'HOME': '#path' if 'journey' in packet else '#work',
+        'PATHCSS': (SKILL / 'assets/path.css').read_text(encoding='utf-8') if 'journey' in packet or 'publicProfile' in packet else '',
+        'PATHSCRIPT': (SKILL / 'assets/path.js').read_text(encoding='utf-8') if 'journey' in packet else '',
+        'PUBLIC': public_profile.render(packet, sections.evidence_fingerprint(packet)),
+        'PUBLICNAV': '<a href="#profile" data-view="profile">Profile</a>' if 'publicProfile' in packet else '',
+        'PUBLICCSS': (SKILL / 'assets/public-profile.css').read_text(encoding='utf-8') if 'publicProfile' in packet else '',
+        'PUBLICSCRIPT': (SKILL / 'assets/public-profile.js').read_text(encoding='utf-8') if 'publicProfile' in packet else '',
         'SECTIONSCSS': (SKILL / 'assets/sections.css').read_text(encoding='utf-8'),
         'SECTIONSSCRIPT': (SKILL / 'assets/sections.js').read_text(encoding='utf-8'),
         'TIMELINE': sections.timeline_html(packet),
@@ -339,6 +356,7 @@ def main(argv=None):
     parser.add_argument("output", type=Path, nargs='?', help="HTML destination")
     parser.add_argument("--inspect", action="store_true", help="Read the canonical evidence fingerprint for embedded interview preparation")
     parser.add_argument("--force", action="store_true", help="Replace an existing output")
+    parser.add_argument("--guided", action="store_true", help="Add a guided path with a retained starting draft and private review notes")
     parser.add_argument("--allow-remove-views", action="store_true", help="Explicitly allow removing an existing timeline or interview view")
     args = parser.parse_args(argv)
     try:
@@ -361,7 +379,7 @@ def main(argv=None):
             raise ValueError("Output already exists; use --force to replace it.")
         if not destination.parent.is_dir():
             raise ValueError("Create the output folder first.")
-        result = render(source, destination, overwrite=args.force, allow_view_removal=args.allow_remove_views)
+        result = render(source, destination, overwrite=args.force, allow_view_removal=args.allow_remove_views, guided=args.guided)
     except (ValueError, KeyError, TypeError, OSError) as error:
         parser.exit(2, f"Could not create the sheet: {error}\n")
     print(json.dumps(result))
