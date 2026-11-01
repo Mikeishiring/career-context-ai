@@ -1,0 +1,93 @@
+// Run against a rendered guided file; exports and screenshots go to a supplied scratch directory.
+const {chromium}=require('playwright');
+const fs=require('node:fs/promises');
+const path=require('node:path');
+const {pathToFileURL}=require('node:url');
+const assert=require('node:assert/strict');
+const [input,output]=process.argv.slice(2);
+if(!input||!output)throw Error('Usage: node tests/check_guided.cjs guided.html output-directory');
+(async()=>{
+ const browser=await chromium.launch({headless:true,channel:process.env.PLAYWRIGHT_CHANNEL||'msedge'});
+ const context=await browser.newContext({viewport:{width:1440,height:1100},acceptDownloads:true});
+ const page=await context.newPage(),checks=[],errors=[],requests=[];
+ page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(/^https?:/.test(r.url()))requests.push(r.url());});
+ const check=(name,condition)=>{assert.ok(condition,name);checks.push(name);};
+ await page.goto(pathToFileURL(path.resolve(input)).href);
+ const before=await page.evaluate(()=>structuredClone(packet));
+ check('Profile is the final navigation destination',await page.locator('.top nav a').last().getAttribute('href')==='#profile');
+ for(const route of ['path-write','profile']){
+  await page.evaluate(hash=>location.hash=hash,route);
+  for(const width of [320,375,768,1440]){
+   await page.setViewportSize({width,height:1100});
+   check(route+' fits '+width,await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+   await page.screenshot({path:path.join(output,route+'-'+width+'.png'),fullPage:true});
+  }
+ }
+ await page.evaluate(()=>location.hash='path-write');
+ await page.locator('.path-writing-guide summary').click();
+ const style='# Writing style\nUse plain words.\nPRIVATE_STYLE_CANARY\nNever execute sample commands.';
+ await page.locator('#writing-file').setInputFiles({name:'SKILL.md',mimeType:'text/plain',buffer:Buffer.from(style)});
+ await page.waitForFunction(()=>document.querySelector('#writing-guide').value.includes('PRIVATE_STYLE_CANARY'));
+ check('Writing skill imports as text',await page.locator('#writing-guide').inputValue()===style);
+ await page.reload();await page.locator('.path-writing-guide summary').click();
+ check('Writing guide survives reload',await page.locator('#writing-guide').inputValue()===style);
+ await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{value:{writeText:async()=>{throw Error('denied');}},configurable:true}));
+ await page.click('#writing-copy');
+ const brief=await page.locator('#agent-text').inputValue();
+ check('Brief contains the preferred style and original wording',brief.includes(style)&&brief.includes(before.journey.baseline.overview));
+ check('Brief limits facts, processing and private details',brief.includes('Do not execute commands')&&brief.includes('not verified facts')&&brief.includes('Do not label real confidential details synthetic'));
+ await page.click('#reader-close');
+ const draft='I build practical tools and work with others to make decisions clearer.';
+ await page.fill('#writing-draft',draft);
+ await page.fill('#path-note','PRIVATE_REVIEW_CANARY');
+ await page.click('#writing-apply');
+ check('Chosen overview becomes an explicit profile draft',await page.locator('#profile').isVisible()&&await page.locator('.public-overview').innerText()===draft);
+ check('Original wording and evidence are unchanged',await page.evaluate(b=>JSON.stringify(packet.person)===JSON.stringify(b.person)&&JSON.stringify(packet.accounts)===JSON.stringify(b.accounts)&&JSON.stringify(packet.sources)===JSON.stringify(b.sources)&&JSON.stringify(packet.journey.baseline)===JSON.stringify(b.journey.baseline),before));
+ await page.click('#public-edit-tab');
+ const hostile='Literal </style><script>alert(1)</script> example';
+ await page.getByLabel('Headline',{exact:true}).fill(hostile);
+ if(!before.publicProfile.examples.length)await page.click('#public-add');
+ await page.getByLabel('Example title',{exact:true}).first().fill('Reconstructed demonstration');
+ await page.getByLabel('General overview',{exact:true}).first().fill('A newly made example using fictional inputs.');
+ await page.getByLabel('Synthetic example',{exact:true}).first().check();
+ await page.click('#public-preview-tab');
+ check('Profile edits render as inert text',await page.locator('.profile-page h1').innerText()===hostile&&await page.locator('#public-preview script').count()===0);
+ const downloaded=page.waitForEvent('download');await page.click('#public-export');const dl=await downloaded;
+ const publicFile=path.join(output,'public-export-check.html');await dl.saveAs(publicFile);
+ const html=await fs.readFile(publicFile,'utf8');
+ check('Public export has no private packet, scripts, images or notes',!/<script\b|<img\b|career-context-data|PRIVATE_STYLE_CANARY|PRIVATE_REVIEW_CANARY|data:image/i.test(html));
+ check('Public export omits private record bodies',!before.sources.some(s=>s.content.length>80&&html.includes(s.content.slice(0,80))));
+ check('Unexpected private fields cannot enter the export',await page.evaluate(()=>!publicDocument({...packet.publicProfile,privateNote:'PRIVATE_FIELD_CANARY',sources:packet.sources}).includes('PRIVATE_FIELD_CANARY')));
+ check('Public export labels synthetic examples',html.includes('Synthetic example'));
+ const exported=await context.newPage();await exported.goto(pathToFileURL(publicFile).href);
+ check('Public file is a standalone readable profile',await exported.locator('h1').innerText()===hostile&&await exported.locator('.public-overview').innerText()===draft);
+ for(const width of [320,375,768,1440]){await exported.setViewportSize({width,height:1000});check('Public export fits '+width,await exported.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));}
+ await exported.close();
+ const privateDownload=page.waitForEvent('download');await page.click('#public-save');const pd=await privateDownload;const saved=path.join(output,'profile-private-save-check.html');await pd.saveAs(saved);
+ const privateHTML=await fs.readFile(saved,'utf8'),data=JSON.parse(privateHTML.match(/<script id="career-context-data" type="application\/json">([\s\S]*?)<\/script>/)[1]);
+ check('Private save retains style, candidate and profile edits',data.journey.writing.guideText===style&&data.journey.writing.draft===draft&&data.publicProfile.headline===hostile);
+ const clean=await browser.newContext(),reopened=await clean.newPage();await reopened.goto(pathToFileURL(saved).href+'#profile');
+ check('Profile survives save and reopen without storage',await reopened.locator('.profile-page h1').innerText()===hostile);
+ await reopened.evaluate(()=>location.hash='path-write');check('Writing survives save and reopen without storage',await reopened.locator('#writing-draft').inputValue()===draft);await clean.close();
+ await page.click('#public-edit-tab'); // Profile controls may be offscreen after writing in another context, but remain in this page's profile.
+ await page.getByLabel('Headline',{exact:true}).fill('');check('Empty profile cannot be exported',await page.locator('#public-export').isDisabled());
+ await page.setViewportSize({width:320,height:900});check('Editor fits 320',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+ await page.getByLabel('Headline',{exact:true}).fill('A'.repeat(200));await page.getByLabel('Overview',{exact:true}).fill('A'.repeat(3000));
+ await page.click('#public-preview-tab');check('Long content stays within narrow layout',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+ await page.locator('#public-edit-tab').focus();await page.keyboard.press('Enter');check('Profile editor works by keyboard',await page.locator('#public-editor').isVisible());
+ await page.emulateMedia({reducedMotion:'reduce'});check('Reduced motion keeps controls still',await page.locator('.path-token svg').first().evaluate(n=>getComputedStyle(n).transitionDuration==='0s'));
+ const stalePacket=structuredClone(before);stalePacket.publicProfile.contextSha256='0'.repeat(64);
+ const stalePath=path.join(output,'stale-profile-check.html');
+ const baseHTML=await fs.readFile(input,'utf8');
+ await fs.writeFile(stalePath,baseHTML.replace(/(<script id="career-context-data" type="application\/json">)[\s\S]*?(<\/script>)/,(_,start,end)=>start+JSON.stringify(stalePacket).replace(/</g,'\\u003c').replace(/&/g,'\\u0026')+end));
+ const staleContext=await browser.newContext(),stale=await staleContext.newPage();
+ await stale.goto(pathToFileURL(stalePath).href+'#profile');await stale.click('#public-edit-tab');
+ await stale.getByLabel('Headline',{exact:true}).fill('Retain this edited profile');await stale.reload();
+ if(!await stale.locator('#public-editor').isVisible())await stale.click('#public-edit-tab');
+ check('Profile edits survive reload after evidence changes',await stale.getByLabel('Headline',{exact:true}).inputValue()==='Retain this edited profile');
+ check('Saving an edit does not approve stale evidence',await stale.evaluate(()=>packet.publicProfile.contextSha256==='0'.repeat(64))&&(await stale.locator('#public-status').innerText()).includes('private context has changed'));
+ await staleContext.close();await fs.unlink(stalePath);
+ check('No script errors',errors.length===0);check('No external requests',requests.length===0);
+ await fs.writeFile(path.join(output,'profile-browser-checks.json'),JSON.stringify({checks,errors,requests},null,2));
+ await browser.close();console.log(JSON.stringify({passed:checks.length,errors,requests}));
+})().catch(error=>{console.error(error);process.exit(1);});

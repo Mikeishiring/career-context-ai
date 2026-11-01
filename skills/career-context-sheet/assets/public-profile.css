@@ -1,0 +1,27 @@
+.public-profile-shell{max-width:1100px;margin:auto;padding:40px 0 64px!important;--path-green:#35523e}
+.has-script .public-toolbar{display:flex;align-items:center;gap:24px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.public-toolbar h2{font-size:22px;letter-spacing:-.035em;font-weight:500;margin-right:auto}
+.public-switch{display:inline-flex;padding:3px;background:var(--wash);border-radius:8px}
+.public-switch button{border:0;background:transparent;border-radius:5px;padding:7px 17px;font-size:13px;min-height:36px}
+.public-switch button[aria-pressed=true]{background:var(--paper);box-shadow:0 1px 3px #20231f1a}
+.has-script .public-context{display:flex;gap:24px;align-items:baseline;justify-content:space-between;margin-top:14px;font-size:12px;color:var(--muted)}
+.public-context>p{max-width:65ch}.public-context details{max-width:55ch}.public-context summary{white-space:nowrap}.public-context details[open]{flex:1}.public-context details p{margin-top:10px;line-height:1.6}
+.public-status{font-size:12px;color:var(--muted);min-height:20px;margin-top:8px!important}
+.profile-page{color:#20231f;font-family:Arial,Helvetica,sans-serif;line-height:1.6;overflow-wrap:anywhere}
+.profile-page *{box-sizing:border-box}.profile-page p,.profile-page h1,.profile-page h2{margin:0}
+.public-intro{display:grid;grid-template-columns:180px minmax(0,1fr);gap:56px;padding:60px 0 64px}
+.public-name{font-size:16px;font-weight:600;letter-spacing:-.025em;padding-top:10px}
+.profile-page h1{font-weight:500;font-size:clamp(38px,4.4vw,64px);letter-spacing:-.055em;line-height:1.08;max-width:20ch;text-wrap:balance}
+.public-overview{font-size:20px;line-height:1.6;max-width:58ch;white-space:pre-wrap;margin-top:30px!important}
+.public-overview:empty{display:none}.public-example{display:grid;grid-template-columns:180px minmax(0,1fr);gap:56px;border-top:1px solid #dcded7;padding:28px 0 32px}
+.public-example h2{font-size:16px;font-weight:600;letter-spacing:-.02em;line-height:1.5}
+.public-example p{font-size:16px;line-height:1.7;max-width:66ch;white-space:pre-wrap}.public-example .public-synthetic,.public-synthetic{font-size:12px;color:#62675e;margin-bottom:10px!important}
+.has-script .public-footer{display:flex;gap:24px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:20px;font-size:13px}
+#public-editor{max-width:760px;padding:30px 0 48px}.public-field{display:grid;gap:8px;margin-bottom:20px;font-size:13px;font-weight:600}
+.public-field input,.public-field textarea{width:100%;padding:12px;border:1px solid #b4b9ae;border-radius:8px;background:var(--paper);font-size:15px;font-weight:400;line-height:1.6}.public-field textarea{resize:vertical;min-height:110px}
+.public-example-editor{border:0;border-top:1px solid var(--line);padding:24px 0 12px;margin:12px 0}.public-example-editor legend{padding-right:12px;font-size:13px;font-weight:600}
+.public-example-options{display:flex;justify-content:space-between;align-items:center;gap:24px;font-size:13px}.public-example-options label{display:flex;align-items:center;gap:9px}.public-example-options input{width:18px;height:18px;accent-color:#35523e}
+#public-empty{padding:20px 0 40px;font-size:15px}.public-export{background:#fcfcfa;margin:0;padding:0 48px}.public-export main{max-width:1040px;margin:auto}
+@media(max-width:760px){.public-intro{grid-template-columns:1fr;gap:24px;padding:36px 0 40px}.public-name{padding:0}.public-example{grid-template-columns:1fr;gap:12px;padding:24px 0}.profile-page h1{font-size:44px;max-width:22ch}.public-overview{font-size:18px;margin-top:24px!important}.has-script .public-context{display:block}.public-context details{margin-top:8px}.has-script .public-toolbar{gap:12px;flex-wrap:wrap}.public-toolbar h2{width:calc(100% - 160px)}.public-toolbar>.path-primary{width:100%}.public-export{padding:0 24px}.has-script .public-footer{gap:12px;align-items:start}.public-profile-shell{padding-top:28px!important}}
+@media(max-width:380px){.profile-page h1{font-size:36px}.public-toolbar h2{font-size:20px}.public-switch button{padding:6px 12px}.public-overview{font-size:17px}}
+@media print{.public-profile-shell{display:none!important}.public-export .profile-page{display:block}.public-export{padding:0}.public-example{break-inside:avoid}}

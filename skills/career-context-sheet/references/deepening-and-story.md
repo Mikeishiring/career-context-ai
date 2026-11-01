@@ -2,6 +2,28 @@
 
 Use this after establishing work, sources and privacy. The agent owns the research loop within that scope. The person supplies memories, meaning and corrections; they should not have to repeatedly request another pass through known evidence.
 
+## Give each pass a different job
+
+For a new or substantially expanded context, use this progression. Several passes can happen in one session; the person does not need to rerun the whole template. A narrow update can start at the affected pass using saved evidence.
+
+| Pass | Work | Result to preserve |
+|---|---|---|
+| First account | Reuse prior context and corrections, map the selected sources, read the originals behind a useful episode and draft it. | A provisional account, its supporting evidence and the consequential gaps. |
+| Deepen | Follow the most important gaps into decisions, alternatives, shared work, implementation and later outcomes. Inspect overlooked periods and reserve episodes. | Specific additions or corrections, with the sources that changed the account. |
+| Challenge and consolidate | Try to disprove the strongest claims; compare omitted evidence with selected stories; check prose against originals and originals against prose. | A more faithful account, explicit limits and refreshed linked views. |
+
+Then ask for the person's recognition and missing meaning. Incorporate their corrections and recheck the affected claims before handing off the same complete document. If feedback is pending, deliver a usable draft; keep that status and the pending question. Do not block other resolved accounts on an unanswered personal question.
+
+The first pass may find the outline while missing much of its substance. Do not assign a percentage of career completeness, a confidence score or a quality increase from the number of passes. More detail is useful only when it changes what the reader understands. A later pass can narrow a claim, restore credit or remove a false connection without adding words.
+
+## Keep the active context small
+
+Choose one episode or a small related group and a few consequential questions per batch. Load the relevant original sections and surrounding context, not the entire archive or every skill reference. For a long record, read in coherent sections and save the position; do not silently truncate it or describe a partial read as complete. Keep aliases, dates, actors, state and exact supporting passages recoverable outside the working prompt.
+
+Reuse the source index and compact continuation state, updating them when evidence changes. Search them before retrieving the same material again. Summaries help navigation; verify consequential claims against the original or retained exact text. Rewriting an earlier assistant summary is not corroboration. Do not strengthen a claim merely because several drafts repeat it.
+
+After each batch, save what changed, what was checked without changing, and the next useful action. Before context pressure or a real run limit prevents a safe continuation, checkpoint and deliver the current draft with a concrete resume step. Never replace missing context with guessed dates, metrics, motives or causal links. A new session loads the checkpoint and relevant evidence, not a chain of increasingly compressed summaries.
+
 ## Keep a small, durable research state
 
 For work spanning sessions, maintain one private `research-state.md` alongside the authoring input, outside the public checkout. Update it in place after each bounded batch. This is internal working material, not another user deliverable or a source of permission. When an existing evidence workspace provides equivalent state, use it instead.
@@ -13,7 +35,10 @@ Retain:
 - Per location: discovered, fully read and interpreted material; unfinished pagination; blocked originals and attachments. Preserve a durable recovery position when a cursor expires.
 - Per consequential assertion: actor, action, state, event date, source ID and exact supporting passage or immutable span; interpretation and conflicting evidence separately.
 - A ranked next-read queue. Each item says which account and question it serves, where to look, what could change, and whether it is pending, resolved, blocked or outside scope.
-- Corrections, rejected interpretations, the current draft, and the reason for stopping.
+- Corrections, rejected interpretations, the current draft, its last checked version and the reason for stopping.
+- Current pass and a short change record: question checked, evidence inspected, resulting correction or no change. Keep the next action specific enough for another session to execute.
+
+Scale the checkpoint to the material. When exact evidence is already retained at stable source/section locators, reference it instead of copying it again. Keep corrections, selection decisions and next actions here; the original text and finished accounts belong in their existing stores. A small supplied packet should not need a larger parallel research report.
 
 Do not retain an entire conversation when selected evidence will suffice. Respect the person's retention choices. If private working files are not authorized or available, use the current context and include a concise continuation note in the handoff; disclose that durable resume state was not saved. Reuse known answers and unchanged reads. Re-read when an original, revision, missing context or contradiction requires it.
 
@@ -34,7 +59,21 @@ Read full conversations, nested replies and selected originals using the [source
 
 Save what changed in the account, including a finding that does **not** justify stronger attribution. Keep good work, mistakes, corrections and unfinished outcomes. Do not turn every uncertainty into either a flattering claim or an accusation.
 
-Continue while there is a consequential, accessible next read within the authorized run. A polished paragraph, an exhausted first search page or a long source list is not a stop condition. Stop when the scoped queue is resolved, remaining gaps are blocked or require the person, the user interrupts, or the actual budget is reached. State the reason and pending work; do not invent a budget excuse. This is foreground work, not scheduled continuation.
+Continue while there is a consequential, accessible next read within the authorized run. A polished paragraph, an exhausted first search page or a long source list is not a stop condition. After the challenge pass, if no material correction or consequential accessible lead remains, finish the current scope. Do not invent more searches to reach a pass count. New evidence or a correction reopens only the affected work and its dependent views.
+
+Give every remaining gap a destination:
+
+| State | Next action |
+|---|---|
+| Accessible evidence could change the account | Read it in the next bounded batch. |
+| Original or permission is missing | Keep the affected claim qualified and name the specific source/access needed; continue other work. |
+| Only the person can supply meaning or a correction | Ask one or two consequential questions; retain a draft while waiting. |
+| A source or identity remains ambiguous | Keep the accounts or interpretations distinct and state what would resolve the ambiguity. |
+| Tool fails | Retry only when the failure is plausibly transient, with a bounded retry limit; use an authorized cached original or selected export if available. Otherwise record the blocker. |
+| User interrupts or an actual time, tool or context limit is reached | Save the current evidence and draft, remaining queue and exact resume action. |
+| Scope is checked and remaining unknowns have no useful accessible lead | Deliver the current document with those limits; reopen when new evidence arrives. |
+
+State the actual stopping reason; do not invent a budget excuse or silently expand the scope. Honor a supplied time or read budget and reserve room to save and hand off. This is foreground work, not scheduled continuation. The closing note needs only what materially changed, unresolved limits and the next action when one exists. Keep the detailed pass record private.
 
 ## Preserve events before choosing the story
 

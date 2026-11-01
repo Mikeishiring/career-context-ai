@@ -28,13 +28,21 @@ Give the agent selected notes and ask:
 
 > Use the career-context-sheet skill to make one private HTML file from this material. Preserve my decisions, shared credit and uncertainty. Reuse what I have already told you; ask only about missing scope or facts that change the account.
 
-The opening establishes the work, permitted source locations and privacy boundaries once. Keep inputs, working notes and outputs outside the public checkout. The agent investigates consequential questions, drafts specific episodes, challenges the account and asks what the records miss about your experience.
+The opening establishes the work, permitted source locations and privacy boundaries once. Keep inputs, working notes and outputs outside the public checkout. Expect a first account, a focused deepening pass and a challenge/consolidation pass. The agent should continue through these in the same session where possible, then ask what the records miss about your experience. The first draft is useful, but it is not a complete account of your career.
 
 The [longer starting prompt](../prompts/START-HERE.md) is available for broader research. Existing material and corrections should carry forward, including your wording when it is selected as an exact account. Review the result before changing its state from draft to reviewed.
+
+If a session ends early, give the next agent the existing HTML and saved private research state:
+
+> Resume my career context from the saved draft and next-read queue. Reuse checked evidence and my corrections. Follow the highest-value unresolved question, challenge the affected claims, and update the same complete document. Tell me what changed and what remains blocked.
+
+Without saved research state, the agent can resume from the HTML's selected evidence and questions, but should say which earlier research it cannot recover. Missing access should leave a specific next step, not prevent a draft from the material already available. [Flow and stopping rules](FROM-EVIDENCE-TO-STORY.md).
 
 ## Read, reuse and update
 
 Open the HTML in a browser. Work, Career timeline and Interview prep share one file and its evidence. Search for work or choose a skill to narrow the accounts. The **Skills & tools** index opens the related work with its contribution, assistance and limits.
+
+For the six-step review path, ask the agent to render with `--guided`. **Your voice** accepts a writing `SKILL.md`, pasted instructions or a sample; copy the brief to your preferred assistant, then paste the version you want to keep. Your original wording stays available. **Profile** is the final tab for a separate public draft. Use **Export public HTML** for that draft alone; check for confidential details before sharing. General accounts of real work should not be labelled synthetic. That label is for newly made demonstrations with no confidential data.
 
 The export panel shows the current copy scope. Expand it to choose all accounts, visible results or one account, and whether to include source excerpts. **Preview text** shows exactly what **Copy for an agent** copies. If clipboard access fails, the text is selected for manual copying. **Save full HTML** always downloads the complete portable file with filters reset; **Download full JSON** exports the complete packet while selected image bytes remain in the HTML.
 

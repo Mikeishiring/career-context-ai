@@ -6,9 +6,13 @@ Career Context AI helps a person preserve the context behind their work and carr
 
 Start with selected material, establish missing scope, investigate consequential questions, draft connected work accounts, challenge them, ask for the person's corrections and create one portable HTML sheet. A useful first result can cover one project. A larger archive must not become an intake requirement.
 
+For new context, the first account, focused deepening and challenge/consolidation have distinct purposes. The agent continues between them without repeated user prompts, saves a compact checkpoint and stops when no consequential accessible lead remains or the run is genuinely blocked or limited. Later passes reuse checked evidence; narrow corrections do not restart the whole process. Pass counts and source counts are not completeness scores.
+
 Keep the recognizable parts of the person: voice, personal meaning, decisions, shared contributions, concurrent work, setbacks, corrections and unfinished outcomes. Support the person's own organization and presentation preferences. Simplification removes repeated steps and implementation detail; it must not flatten those accounts into generic achievement bullets.
 
 The supplied visual template is the starting point. Meaningful content is available offline and without JavaScript. Sources, optional detail and exports stay accessible on keyboard and small screens.
+
+The optional guided path keeps six small review activities visible: gather, review, deepen, connect, write and practise. Review starts from retained first wording and collects bullet feedback; completion is not factual approval. Writing uses the person's own style guide or sample through a bounded copy-and-paste brief. Its candidate stays separate from career evidence. The final Profile tab is an explicitly authored public projection with its own allowlisted HTML export. It never exports the private packet, style guide, notes or images, and never treats relabelled confidential data as synthetic.
 
 ## Responsibilities
 

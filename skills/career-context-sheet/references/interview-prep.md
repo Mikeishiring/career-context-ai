@@ -18,7 +18,7 @@ Draft these six parts:
 
 1. **Strongest evidence:** a throughline and one to three reasons to lead with particular accounts.
 2. **Core stories:** what each selected account demonstrates; the renderer carries its original contribution, shared work, outcome and limits.
-3. **Introduction:** a short opening in the person's voice that invites supported follow-up questions. For a new introduction, first offer the alternatives in [introduction choices](introductions.md). Reuse an already chosen opening; preserve the current draft while a comparison is undecided.
+3. **Introduction:** a short opening in the person's voice that invites supported follow-up questions. For ordinary context capture, draft one provisional opening; do not start an introduction comparison. When the person requests an introduction or interview preparation with a new opening, first offer the alternatives in [introduction choices](introductions.md). Reuse an already chosen opening and retain existing alternatives; preserve the current draft while a requested comparison is undecided.
 4. **Decode, select, deliver:** likely questions, what they test, the relevant story and a drafted answer.
 5. **Chapters:** the actual sequence, including decisions, feedback, repairs and later use where supported. Make a longer story easy to pause or expand.
 6. **Real pace:** recorded periods and milestones. Say when dates are not recorded; do not invent a faster cycle to fit a company.

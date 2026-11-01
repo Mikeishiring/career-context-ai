@@ -24,7 +24,11 @@ The skill works independently of a job-search service. Keep things you have done
 
 > Use this skill to build my career context. Reuse what you know about my work and goals, discover the sources available here, and guide me through any missing access. Collect relevant evidence and visual examples within scope. Adapt the organization to my work, preserve shared credit and uncertainty, and create a private local database with one HTML entry point. Use my reference material when I ask for a resume or interview preparation.
 
-Start with one useful account. The agent should pursue consequential questions and challenge its first draft; you should not need to keep asking it to go deeper. For [GitHub and social profiles](skills/career-context-sheet/references/github-and-social.md), it inventories authorized locations, checks selected code and history, follows original threads and records what remains unread. Older projects and unfinished experiments can belong in the context even when the resume stays concise.
+Start with one useful account. Expect a provisional draft, focused deepening, then a challenge and consolidation pass. The agent runs these within the session where possible; you should not need to keep asking it to go deeper. It saves evidence and the next step so interrupted work can resume. [See the complete flow](docs/FROM-EVIDENCE-TO-STORY.md).
+
+Ask for the guided path to review the original draft, fill gaps, find the thread, refine your voice and practise. Add your preferred writing `SKILL.md` or a sample. The final **Profile** tab holds a separate public draft; **Export public HTML** includes only that profile. Full HTML and JSON remain private working files.
+
+For [GitHub and social profiles](skills/career-context-sheet/references/github-and-social.md), it inventories authorized locations, checks selected code and history, follows original threads and records what remains unread. Older projects and unfinished experiments can belong in the context even when the resume stays concise.
 
 [Get started with Claude, Codex or another agent](docs/GETTING-STARTED.md).
 
