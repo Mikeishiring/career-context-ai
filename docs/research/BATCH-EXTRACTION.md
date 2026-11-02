@@ -2,11 +2,11 @@
 
 Large source collections can lose meaning before a narrative is drafted: a model may dismiss a collaborator's work or compress a long original into a generic note. The optional `research-extract` command separates section extraction from episode selection. It processes four sections per model call, then saves accepted output into the journal used by the research server.
 
-Run the local plan first; choose a model-call limit when ready. The [local-context guide](LOCAL-CONTEXT.md) explains source consent, storage, interruption and resume. Model processing uses the authenticated Codex service; keeping the archive locally does not mean inference runs locally.
+Run the local plan first; choose a model-call limit when ready. The [local-context guide](../LOCAL-CONTEXT.md) explains source consent, storage, interruption and resume. Model processing uses the authenticated Codex service; keeping the archive locally does not mean inference runs locally.
 
 ## Fictional integration trial
 
-The trial used the fixed [story-depth corpus](../ai-search-mvp/fixtures/story-depth.corpus.json) and its [scope](../ai-search-mvp/fixtures/story-depth.scope.json), plus an empty page and a short social aside. The private-message record was excluded. No desired story list or earlier narrative was supplied.
+The trial used the fixed [story-depth corpus](../../ai-search-mvp/fixtures/story-depth.corpus.json) and its [scope](../../ai-search-mvp/fixtures/story-depth.scope.json), plus an empty page and a short social aside. The private-message record was excluded. No desired story list or earlier narrative was supplied.
 
 | Stage | Observed result |
 |---|---|

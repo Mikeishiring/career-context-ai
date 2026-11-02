@@ -57,10 +57,10 @@ Use the worked account as a transparent regression case, not a blind benchmark. 
 | Questions and continuity | The next question resolves a real gap; existing answers and reads are reused. |
 | Boundaries | No excluded-source reads, publication or private-source material in the public project. |
 
-The [multi-source comparison](MULTISOURCE.md) measures record retrieval and calls. It does not grade the narrative above. Deterministic tests can validate references and state handling; fair attribution and a recognizable personal story still require source review and the person's feedback.
+The [multi-source comparison](research/MULTISOURCE.md) measures record retrieval and calls. It does not grade the narrative above. Deterministic tests can validate references and state handling; fair attribution and a recognizable personal story still require source review and the person's feedback.
 
 ## What is available now
 
 The public skill now instructs an agent to run this loop, keep private continuation state and use the person's feedback. The HTML renderer preserves the resulting accounts, sources, shared credit and uncertainty. The optional research experiments demonstrate narrower components and retain their failures.
 
-The [integrated fictional demo](RESEARCH-TO-SHEET.md) now connects the evidence journal, continuation queue, checked draft and sheet plan to HTML generation. Opening the example performs no research. There is no live connector bundle or production autonomous story engine; semantic review and testing retained meaning remain necessary even when the mechanical build passes.
+The [integrated fictional demo](research/RESEARCH-TO-SHEET.md) now connects the evidence journal, continuation queue, checked draft and sheet plan to HTML generation. Opening the example performs no research. There is no live connector bundle or production autonomous story engine; semantic review and testing retained meaning remain necessary even when the mechanical build passes.

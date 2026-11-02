@@ -2,6 +2,20 @@
 
 Career Context AI helps a person preserve the context behind their work and carry it into a new agent conversation. The reusable product is a skill, a stable context format, a local SQLite archive and deterministic HTML renderers for context, resumes and interview preparation. The full repository also maintains optional research tools and their test evidence.
 
+## Guiding principles
+
+1. Collect context before choosing a story. Retain selected source material separately from interpretation, including unfinished work and contrary evidence. Broad collection stays within the person's authorized scope; unread material remains a gap.
+2. Adapt to the person. Purpose, work and voice determine the organization and writing. A resume or interview draft is a view of the archive, not a replacement for it.
+3. Keep the archive under the person's control. The core tools store it locally, with no hosted account or archive upload service. AI hosts and source connectors have their own data boundaries; local storage alone does not make model processing local.
+
+## Integration boundary
+
+Career Context AI owns the collection and archive workflow. The intended role of Web3 Careers, or another service, is to use a person-selected export for search, coaching or another purpose. A service should not require the whole private database to provide that help.
+
+The supported handoff today is selected context supplied to an agent. There is no native Web3 Careers import, synchronization or automatic onboarding dependency established here. The reviewed Web3 Careers implementation uses a separate cloud experience store and a different format; its account access controls do not remove administrator access. That store must not be described as this local archive.
+
+A future integration must keep the full archive local, make the selected fields and destination visible, and require the person's approval before sending them. It must preserve source references, shared credit and uncertainty. The receiving service owns what it does with the selection and must state its storage and access rules.
+
 ## The experience
 
 Start with selected material, establish missing scope, investigate consequential questions, draft connected work accounts, challenge them, ask for the person's corrections and create one portable HTML sheet. A useful first result can cover one project. A larger archive must not become an intake requirement.

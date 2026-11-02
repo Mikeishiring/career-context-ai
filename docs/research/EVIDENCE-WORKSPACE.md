@@ -17,4 +17,4 @@ For real material, create a different workspace without `--synthetic`. Follow [S
 
 `add-claim` checks the exact quotation. It does not establish fair attribution or verify meaning. Each claim currently cites one record. There is no approval UI, automatic synthesis or source-account connection.
 
-Keep this workspace and its dashboard outside the public checkout. The HTML embeds imported text. [Privacy guide](PRIVACY.md).
+Keep this workspace and its dashboard outside the public checkout. The HTML embeds imported text. [Privacy guide](../PRIVACY.md).

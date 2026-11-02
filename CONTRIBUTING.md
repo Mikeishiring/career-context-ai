@@ -70,8 +70,8 @@ The Product checks workflow runs toolkit and research tests, offline MCP checks,
 
 Before sharing a release, review the diff and embedded data, refresh the publication manifest, run the checks above, and exercise the rendered sheet. Run a fresh host trial after changing research instructions; preserve the first result and judge attribution, decisions, counterevidence and corrections rather than source count alone.
 
-Notebook changes also rebuild `CAREER-NOTEBOOK.html` through `tools/build_demo.py`. The optional renderer, template and notebook reference are named explicitly in the standalone bundle. Test both a sparse account and the fictional quarterly companion; inspect source access, native-dialog menu, image readers and the responsibility follow-up.
+Notebook changes also rebuild `examples/CAREER-NOTEBOOK.html` through `tools/build_demo.py`. The optional renderer, template and notebook reference are named explicitly in the standalone bundle. Test both a sparse account and the fictional quarterly companion; inspect source access, native-dialog menu, image readers and the responsibility follow-up.
 
 Run `node tests/check_notebook.cjs` for the shipped notebook route, menu and source handlers. The Python suite also runs it when Node.js is installed and checks that the notebook rebuild is identical. Node.js 18+ is a development check only; the exported notebook needs a browser, not Node.js.
 
-For GitHub/social discovery changes, repeat the [offline source-discovery trial](docs/SOURCE-DISCOVERY-TRIAL.md) from its raw fictional exports. This tests research choices separately from renderer and bundle contracts.
+For GitHub/social discovery changes, repeat the [offline source-discovery trial](docs/research/SOURCE-DISCOVERY-TRIAL.md) from its raw fictional exports. This tests research choices separately from renderer and bundle contracts.

@@ -64,4 +64,4 @@ The researching agent still supplies the interpretations and omission reasons. T
 
 The skill-only workflow carries these instructions but cannot enforce the server's gates. Live source connectors, automatic refresh and independent semantic review are separate unfinished capabilities. Older sealed journals remain reproducible as explicitly legacy runs; they are not retroactively presented as deep-reviewed.
 
-[Set up local context](LOCAL-CONTEXT.md) · [Run the fictional trial](RESEARCH-TO-SHEET.md) · [Inspect the original result and its omission](RESEARCH-STORY-RESULT.md)
+[Set up local context](../LOCAL-CONTEXT.md) · [Run the fictional trial](RESEARCH-TO-SHEET.md) · [Inspect the original result and its omission](RESEARCH-STORY-RESULT.md)

@@ -50,9 +50,9 @@ An empty notebook begins with writing. An existing account can be useful before 
 
 ## Evidence and date integrity
 
-The canonical format remains [career-context/v1](../skills/career-context-sheet/references/format.md). Every consequence worth keeping retains its supporting source references, shared credit and uncertainty. A process document is not evidence of independent use; a prototype is not a deployed tool.
+The canonical format remains [career-context/v1](../../skills/career-context-sheet/references/format.md). Every consequence worth keeping retains its supporting source references, shared credit and uncertainty. A process document is not evidence of independent use; a prototype is not a deployed tool.
 
-Quarterly entries use the explicit [companion contract](../skills/career-context-sheet/references/notebook.md). Work periods, source dates and file revision dates remain distinct. Do not fill a quarter merely to complete a timeline. Cross-quarter work retains its original account period.
+Quarterly entries use the explicit [companion contract](../../skills/career-context-sheet/references/notebook.md). Work periods, source dates and file revision dates remain distinct. Do not fill a quarter merely to complete a timeline. Cross-quarter work retains its original account period.
 
 ## Template and instance relationship
 

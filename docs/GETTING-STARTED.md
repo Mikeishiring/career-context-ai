@@ -1,99 +1,67 @@
-# Your first career-context sheet
+# Build your context archive
 
-Start with one piece of work: what was happening, what you did, who else contributed and what happened next. Rough notes are enough. Missing dates, metrics and outcomes can stay unknown.
+Keep personal inputs and outputs outside this public repository. Start with notes or records from one piece of work; missing dates and outcomes can stay unknown.
 
-## Use the complete skill
+## Give your agent the skill
 
-The `skills/career-context-sheet/` folder contains the instructions, research references, renderer and HTML template. Keep those files together.
+Use the complete `skills/career-context-sheet/` folder. It contains the instructions, references, renderers and templates. Your agent needs file access and Python 3.11 or later; no additional Python packages are required.
 
-From the downloaded project, create the standalone bundle:
+To package that folder for a host that accepts skill ZIPs:
 
 ```sh
 python tools/build_skill.py ../career-context-sheet.zip
 ```
 
-You need Python 3.11 or later. No packages are required. On macOS/Linux, use `python3` if needed; on Windows, `py -3` may be available.
+Follow your host's skill installation instructions, or give the agent the extracted folder and ask it to follow `SKILL.md`. On macOS/Linux, use `python3` if needed; on Windows, `py -3` may be available.
 
-| Host | Setup |
-|---|---|
-| Codex | Place the extracted `career-context-sheet` folder under `~/.agents/skills/` or a project's `.agents/skills/`, then invoke `$career-context-sheet`. [Official setup](https://learn.chatgpt.com/docs/build-skills). |
-| Claude | Upload the ZIP through **Customize > Skills**. Code execution and file creation must be enabled. [Official setup](https://support.claude.com/en/articles/12512180-use-skills-in-claude). |
-| Another agent | Give it the extracted folder and ask it to follow `SKILL.md`. It needs file access and Python to render the supplied template. A text-only model can help prepare the account, but cannot run the renderer. |
+> Use this skill to build my local context archive. Reuse what I've already told you. Collect from the sources I authorize, preserve original evidence, and distinguish it from interpretation. Keep my decisions, shared credit and uncertainty. Save a searchable database and one HTML file outside this repository.
 
-Host support is separate from output quality. The tests check the extracted renderer and portable file; they do not establish equivalent research quality across models.
+The agent should draft an account, investigate consequential gaps, then challenge and consolidate it. It should save the evidence and next step when interrupted. You supply corrections and personal meaning; the agent follows up on questions the records can answer. [Research flow and stopping rules](FROM-EVIDENCE-TO-STORY.md).
 
-## Make your first account
+## Keep the database
 
-Give the agent selected notes and ask:
-
-> Use the career-context-sheet skill to make one private HTML file from this material. Preserve my decisions, shared credit and uncertainty. Reuse what I have already told you; ask only about missing scope or facts that change the account.
-
-The opening establishes the work, permitted source locations and privacy boundaries once. Keep inputs, working notes and outputs outside the public checkout. Expect a first account, a focused deepening pass and a challenge/consolidation pass. The agent should continue through these in the same session where possible, then ask what the records miss about your experience. The first draft is useful, but it is not a complete account of your career.
-
-The [longer starting prompt](../prompts/START-HERE.md) is available for broader research. Existing material and corrections should carry forward, including your wording when it is selected as an exact account. Review the result before changing its state from draft to reviewed.
-
-If a session ends early, give the next agent the existing HTML and saved private research state:
-
-> Resume my career context from the saved draft and next-read queue. Reuse checked evidence and my corrections. Follow the highest-value unresolved question, challenge the affected claims, and update the same complete document. Tell me what changed and what remains blocked.
-
-Without saved research state, the agent can resume from the HTML's selected evidence and questions, but should say which earlier research it cannot recover. Missing access should leave a specific next step, not prevent a draft from the material already available. [Flow and stopping rules](FROM-EVIDENCE-TO-STORY.md).
-
-## Read, reuse and update
-
-Open the HTML in a browser. Work, Career timeline and Interview prep share one file and its evidence. Search for work or choose a skill to narrow the accounts. The **Skills & tools** index opens the related work with its contribution, assistance and limits.
-
-For the six-step review path, ask the agent to render with `--guided`. **Your voice** accepts a writing `SKILL.md`, pasted instructions or a sample; copy the brief to your preferred assistant, then paste the version you want to keep. Your original wording stays available. **Profile** is the final tab for a separate public draft. Use **Export public HTML** for that draft alone; check for confidential details before sharing. General accounts of real work should not be labelled synthetic. That label is for newly made demonstrations with no confidential data.
-
-The export panel shows the current copy scope. Expand it to choose all accounts, visible results or one account, and whether to include source excerpts. **Preview text** shows exactly what **Copy for an agent** copies. If clipboard access fails, the text is selected for manual copying. **Save full HTML** always downloads the complete portable file with filters reset; **Download full JSON** exports the complete packet while selected image bytes remain in the HTML.
-
-Attach the HTML to another agent with a separate request, such as: "Use this context to help me prepare for an interview." The file includes selected source excerpts as well as the visible account; review it before sharing.
-
-To update it, give the existing HTML and corrections to the skill. Keep account IDs, original excerpts, shared credit and uncertainty. Re-rendering the complete file preserves work, timeline, interview preparation, rehearsal notes and embedded images. Reconcile older notebooks before refreshing; do not replace a complete file with an earlier work-only packet.
-
-## Prepare for an interview
-
-Ask the agent to [prepare an interview](../skills/career-context-sheet/references/interview-prep.md) from your career context and any target you have supplied. It gathers authorized context, selects the strongest stories and drafts all six parts, including an introduction, answers, chapters and timelines. Review the result and practise; answer only the important gaps the available material cannot resolve.
-
-**Copy interview prep** carries the prepared draft, shared credit and limits into your model. Rehearsal notes save in the browser; use **Save full HTML** to keep a portable copy. Correct the career-context source and ask the agent to regenerate the preparation when facts change. Copy the HTML file itself to move it between devices.
-
-## Render without an agent
-
-From the full project:
-
-```sh
-python career_context.py demo ../career-context-demo.html
-python career_context.py render ../my-context/context.json ../my-context/career-context.html
-```
-
-Prepare personal JSON using [the format](../skills/career-context-sheet/references/format.md). Replace fictional content completely; omit `synthetic` or set it to `false`. That label does not anonymize data.
-
-From a standalone skill, run its renderer directly:
-
-```sh
-python scripts/render_context.py ../my-context/context.json ../my-context/career-context.html
-```
-
-Resolve that script from the extracted skill folder. Existing HTML is also valid input. Both entrypoints preserve an existing output unless you add `--force`; malformed input leaves the old file intact.
-
-## Keep a local database
-
-The agent can create the database and HTML together from the context it has prepared:
+Once the agent has prepared a context packet, it can build the archive:
 
 ```sh
 python skills/career-context-sheet/scripts/archive_context.py build ../my-input/context.json ../my-context
 python skills/career-context-sheet/scripts/archive_context.py search ../my-context/career.sqlite "project"
 ```
 
-Open `../my-context/CAREER-CONTEXT.html`. Keep `career.sqlite` private; it contains selected sources, images and historical revisions. Use `build --update` to retain corrections in the same database. The [archive guide](../skills/career-context-sheet/references/local-archive.md) explains recovery and retention.
+Open `../my-context/CAREER-CONTEXT.html`. Keep `career.sqlite` private: it retains selected sources, images and past revisions. Use `build --update` for later revisions. Removing something from the current view does not erase earlier revisions. [Archive updates and recovery](../skills/career-context-sheet/references/local-archive.md).
 
-## Create a resume
+## Read and correct it
 
-Give the agent your context plus any target and reference resume. Ask it to follow the [resume guide](../skills/career-context-sheet/references/resume.md) and produce the populated draft. It adapts section order and wording to your experience, preserves evidence links, and does not invent missing titles or dates. The HTML includes a private evidence review, print/PDF layout and plain-text download. Review the printed/text version before using it; those exports omit the underlying evidence.
+The HTML brings work accounts, a timeline and interview preparation into one file. Search for work or follow a skill to its supporting accounts. The optional guided path (`--guided`) supports review, deeper research, writing in your voice and practice.
 
-## Larger source collections
+Give the agent your corrections and the latest saved HTML when updating it. Preserve account IDs, original excerpts, shared credit and unknowns. Use **Save full HTML** to carry browser edits into the next session; unsaved changes are not available to another agent.
 
-The full repository also provides [local context setup](LOCAL-CONTEXT.md) and an optional research MCP server for selected exports. It adds saved source boundaries, research state and a depth review. These components are not needed to create or read a sheet and are not included in the standalone bundle.
+For interrupted research, also supply the saved private research state and ask it to resume from the next-read queue. Without that state, it can use the HTML's selected evidence but cannot recover every earlier research step.
 
-[Privacy and storage](PRIVACY.md) explains what is retained and what your chosen model receives.
+## Adapt and share a selection
 
-Copy all accounts or select one; private source excerpts are excluded from copied text unless selected. Attribution and limits remain. Full HTML and JSON always include all selected sources. Optional links lead to separately delivered local files.
+Supply your purpose, audience and a writing sample or style guide. The skill includes guides for [resumes](../skills/career-context-sheet/references/resume.md), [introductions](../skills/career-context-sheet/references/introductions.md), [interviews](../skills/career-context-sheet/references/interview-prep.md) and [role comparisons](../skills/career-context-sheet/references/role-comparison.md).
+
+- **Preview text** shows what **Copy for an agent** will copy. Choose all accounts, visible results or one account. Source excerpts are optional; attribution and limits remain.
+- **Save full HTML** and **Download full JSON** retain the complete context packet, including selected sources. Selected image bytes remain in the HTML. Treat these as private working files.
+- **Export public HTML** exports the separately authored Profile draft. Review that draft for confidential details before sharing. A label does not anonymize real work.
+
+The archive and rendering tools run locally. An AI host may receive the material you supply to it. [Privacy and storage](PRIVACY.md).
+
+## Render an existing packet
+
+From the full repository:
+
+```sh
+python career_context.py demo ../career-context-demo.html
+python career_context.py render ../my-context/context.json ../my-context/career-context.html
+```
+
+From the extracted skill folder:
+
+```sh
+python scripts/render_context.py ../my-context/context.json ../my-context/career-context.html
+```
+
+Existing HTML is also valid input. Both render commands preserve existing output unless you add `--force`; malformed input leaves the old file intact. Follow the [context format](../skills/career-context-sheet/references/format.md). Replace fictional content completely and omit `synthetic` or set it to `false` for real material.
+
+For larger selected exports, the optional [local research tools](LOCAL-CONTEXT.md) add scoped source access and resumable research. They are separate from the standalone skill.

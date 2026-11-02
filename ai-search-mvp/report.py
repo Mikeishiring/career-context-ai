@@ -29,6 +29,6 @@ def build(root: Path):
     template = (root / "report-template.html").read_text(encoding="utf-8")
     styles = (root / "report-style.css").read_text(encoding="utf-8")
     template = template.replace("__STYLES__", styles)
-    output = root.parent / "AI-SEARCH-MVP.html"
+    output = root / "AI-SEARCH-MVP.html"
     output.write_text(template.replace("__DATA__", payload), encoding="utf-8")
     return str(output)

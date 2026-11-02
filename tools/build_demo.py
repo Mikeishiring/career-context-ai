@@ -17,4 +17,4 @@ notebook_spec = importlib.util.spec_from_file_location('notebook_renderer', ROOT
 notebook = importlib.util.module_from_spec(notebook_spec)
 notebook_spec.loader.exec_module(notebook)
 notebook_source = ROOT / 'examples/career-context.json'
-notebook.render(notebook_source, ROOT / 'CAREER-NOTEBOOK.html', quarters=ROOT / 'examples/notebook-quarters.json')
+notebook.render(notebook_source, ROOT / 'examples/CAREER-NOTEBOOK.html', quarters=ROOT / 'examples/notebook-quarters.json')

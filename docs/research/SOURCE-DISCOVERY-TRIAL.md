@@ -1,6 +1,6 @@
 # Source-discovery trial
 
-28 October 2026. One independent agent used the updated standalone skill instructions and [raw fictional exports](../tests/fixtures/source-discovery.json), with no network, source execution or file edits. It received the request embedded in the fixture, without expected answers or the author's conclusions.
+28 October 2026. One independent agent used the updated standalone skill instructions and [raw fictional exports](../../tests/fixtures/source-discovery.json), with no network, source execution or file edits. It received the request embedded in the fixture, without expected answers or the author's conclusions.
 
 Its first response proposed the archived shift-swap project, a bounded CSV-export contribution, a handover-card mockup and short project-writing evidence. It retained the abandoned automatic assignment, collaborator-owned eligibility rules, two-shift pilot and stopped rollout. It distinguished notes describing the UI from the selected implementation fragment. It attributed the routing algorithm and benchmark to upstream authors and kept the unrolled-out cards out of the concise resume.
 
