@@ -1424,7 +1424,7 @@
     },
     {
       "path": "tests/test_complete_context.py",
-      "sha256": "8493cb41278fe0c6533b7669ab5cc47b3692ec6b165a967956ea8ac26e31aa50"
+      "sha256": "3e971cb28dc1fc1bb3016b942413319fd7e0c1bf11871aa4267d69c1c51f419a"
     },
     {
       "path": "tests/test_context_retrieval.py",
