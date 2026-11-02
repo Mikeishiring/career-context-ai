@@ -36,7 +36,7 @@
     },
     {
       "path": "ai-search-mvp/README.md",
-      "sha256": "9c0f972c4bb8159063d76fadd8f30f652bfbfa91491c5e0e5eda829523b0410e"
+      "sha256": "db25889821d82d30813994fa0b45cd9e8b0884ee16274a369866b9918c25c0ef"
     },
     {
       "path": "ai-search-mvp/RESEARCH-PROMPT.md",
@@ -464,7 +464,7 @@
     },
     {
       "path": "ai-search-mvp/report.py",
-      "sha256": "dd8c5aad6451c89854a299198b03a70c7cd89ca7e848cfda8da5358c71b4ad9b"
+      "sha256": "1a90efe1f5575e7b27b5c1f56cf4f266cfe0b8871f4ccb3d022abcb327415477"
     },
     {
       "path": "ai-search-mvp/retention_experiment.py",
@@ -936,7 +936,7 @@
     },
     {
       "path": "ai-search-mvp/tests/check_report.cjs",
-      "sha256": "a75087f79eb9e905855e40f97c070990658f94c90394d0785e578ccdddf034a2"
+      "sha256": "9ce54e8229f306f97f68423f9d71b7b8e1fe073665515bd9c70f02c1e538ddaa"
     },
     {
       "path": "ai-search-mvp/tests/test_attribution.py",
@@ -1044,7 +1044,7 @@
     },
     {
       "path": "docs/research/EVIDENCE-WORKSPACE.md",
-      "sha256": "fa80f51911a8b58469bd8d0cbaada5df0e5960021a173998ec57096ad4b93237"
+      "sha256": "08f20e066afa86b5feda5413b131745b57904206eaf0f0d8a0037ed5cadbebc1"
     },
     {
       "path": "docs/research/FIRST-USE-AUDIT.md",
