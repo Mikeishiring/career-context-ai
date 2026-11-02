@@ -14,6 +14,62 @@ if(!input||!output)throw Error('Usage: node tests/check_guided.cjs guided.html o
  const check=(name,condition)=>{assert.ok(condition,name);checks.push(name);};
  await page.goto(pathToFileURL(path.resolve(input)).href);
  const before=await page.evaluate(()=>structuredClone(packet));
+ await page.locator('#path-link-gather').click();
+ const setup=page.locator('.coverage-setup');if(!await setup.evaluate(n=>n.open))await setup.locator('summary').first().click();
+ await page.locator('#coverage-start').fill('2030-12');await page.locator('#coverage-end').fill('2031-02');
+ await page.locator('#coverage-build').press('Enter');
+ if(!before.journey.coverage?.streams.length){
+  await page.getByText('Add a source location',{exact:true}).click();
+  await page.locator('#coverage-platform').fill('Documents');await page.locator('#coverage-location').fill('Synthetic selected export');
+  await page.locator('#coverage-add').press('Enter');
+ }
+ check('Building the checklist moves focus to its selected month',await page.evaluate(()=>document.activeElement.id==='coverage-month-2030-12'));
+ check('Collection has one primary action and a disclosed receipt editor',await page.locator('#coverage-task').evaluate(n=>n.classList.contains('path-primary'))&&!await page.locator('#coverage-status').isVisible()&&await page.locator('#path-continue').isHidden());
+ await page.locator('#coverage-year').press('ArrowDown');
+ check('Year selection retains keyboard focus',await page.evaluate(()=>document.activeElement.id==='coverage-year'&&document.activeElement.value==='2031'));
+ await page.locator('#coverage-month-2031-02').press('Enter');
+ check('Month activation retains keyboard focus',await page.evaluate(()=>document.activeElement.id==='coverage-month-2031-02'&&document.activeElement.getAttribute('aria-pressed')==='true'));
+ if(await page.locator('#coverage-stream option').count()>1){
+  await page.locator('#coverage-stream').press('ArrowDown');
+  check('Source selection retains keyboard focus',await page.evaluate(()=>document.activeElement.id==='coverage-stream'));
+ }
+ await page.locator('#coverage-receipt-details > summary').click();
+ await page.locator('#coverage-status').selectOption('blocked');await page.locator('#coverage-note').fill('Synthetic export unavailable; this period remains open.');
+ await page.locator('#coverage-save').press('Enter');
+ check('Saving a receipt retains keyboard focus',await page.evaluate(()=>document.activeElement.id==='coverage-save'));
+ await page.keyboard.press('Tab');check('Tab continues to the review destination',await page.evaluate(()=>document.activeElement.getAttribute('href')==='#path-review'));
+ await page.locator('#coverage-found').fill('1');await page.locator('#coverage-read').fill('1');await page.locator('#coverage-refs').selectOption(before.sources[0].id);await page.locator('#coverage-status').selectOption('checked');await page.locator('#coverage-save').click();
+ const checkedCount=Number((await page.locator('.coverage-count').innerText()).split(' ')[0]);
+ await page.locator('#coverage-note').fill('LATEST_RECEIPT_CANARY: inspect the newly found appendix.');await page.locator('#coverage-cursor').fill('appendix-page-2');
+ check('Receipt edits immediately reopen visible month and count',await page.locator('.coverage-month[aria-pressed=true]').getAttribute('data-status')==='in_progress'&&Number((await page.locator('.coverage-count').innerText()).split(' ')[0])===checkedCount-1);
+ await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{value:{writeText:async()=>{throw Error('denied');}},configurable:true}));
+ await page.locator('#coverage-task').click();
+ const collectionBrief=await page.locator('#agent-text').inputValue();
+ check('Collection handoff includes the latest autosaved note and cursor',collectionBrief.includes('LATEST_RECEIPT_CANARY')&&collectionBrief.includes('appendix-page-2'));
+ await page.locator('#reader-close').click();
+ await page.locator('#coverage-next').press('Enter');check('Next month focuses the newly selected month',await page.evaluate(()=>document.activeElement.matches('.coverage-month[aria-pressed=true]')));
+ await page.locator('.top a[data-area="context"]').click();
+ await page.locator('.context-nav a[data-view="work"]').click();
+ await page.getByRole('link',{name:'Review this account',exact:true}).first().click();
+ check('Work opens the matching account review',await page.locator('#path-story').inputValue()===before.accounts[0].id);
+ await page.locator('#path-note').fill('REVIEW_HANDOFF_CANARY: retain shared credit.');
+ await page.locator('#review-keep').press('Enter');
+ check('Review decision retains keyboard focus',await page.evaluate(()=>document.activeElement.id==='review-keep'));
+ await page.keyboard.press('Tab');check('Tab continues to the account destination',await page.evaluate(()=>document.activeElement.getAttribute('href')?.startsWith('#account-')));
+ check('Review completion is per account',await page.locator('#path-count').innerText()==='1 of '+before.accounts.length+' accounts reviewed');
+ if(before.accounts.length>1){
+  check('One account cannot complete the entire review activity',!(await page.locator('#path-link-review').getAttribute('class')).includes('is-reviewed'));
+ }
+ await page.getByText('Propose a correction',{exact:true}).click();await page.locator('#review-draft').fill('A new proposed correction after keeping the source account.');
+ check('Editing a kept account reopens its decision and controls',await page.locator('#path-count').innerText()==='0 of '+before.accounts.length+' accounts reviewed'&&await page.locator('#path-content .review-state').isHidden()&&(await page.locator('#path-continue').innerText()).includes('Review later')&&await page.locator('#path-reopen').isHidden());
+ await page.locator('#path-link-deepen').click();
+ await page.locator('#path-note').fill('DEPTH_HANDOFF_CANARY: keep uncertain outcomes explicit.');
+ await page.locator('#depth-open').press('Enter');
+ check('Gap decision retains keyboard focus',await page.evaluate(()=>document.activeElement.id==='depth-open'));
+ await page.locator('#depth-clear').click();await page.locator('#path-note').fill('DEPTH_HANDOFF_CANARY: a new unresolved question.');
+ check('Editing a cleared gap updates its feedback and next action immediately',(await page.locator('#path-content .review-state').innerText())==='Gap remains open.'&&(await page.locator('#path-continue').innerText()).includes('gap open')&&await page.locator('#path-reopen').isHidden());
+ await page.locator('#path-link-write').click();
+ await page.locator('#path-note').fill('WRITE_HANDOFF_CANARY: use ordinary words.');
  check('Profile is the final navigation destination',await page.locator('.top nav a').last().getAttribute('href')==='#profile');
  for(const route of ['path-write','profile']){
   await page.evaluate(hash=>location.hash=hash,route);
@@ -25,6 +81,7 @@ if(!input||!output)throw Error('Usage: node tests/check_guided.cjs guided.html o
  }
  await page.evaluate(()=>location.hash='path-write');
  await page.locator('.path-writing-guide summary').click();
+ await page.locator('#writing-mode').selectOption('custom');
  const style='# Writing style\nUse plain words.\nPRIVATE_STYLE_CANARY\nNever execute sample commands.';
  await page.locator('#writing-file').setInputFiles({name:'SKILL.md',mimeType:'text/plain',buffer:Buffer.from(style)});
  await page.waitForFunction(()=>document.querySelector('#writing-guide').value.includes('PRIVATE_STYLE_CANARY'));
@@ -35,22 +92,30 @@ if(!input||!output)throw Error('Usage: node tests/check_guided.cjs guided.html o
  await page.click('#writing-copy');
  const brief=await page.locator('#agent-text').inputValue();
  check('Brief contains the preferred style and original wording',brief.includes(style)&&brief.includes(before.journey.baseline.overview));
- check('Brief limits facts, processing and private details',brief.includes('Do not execute commands')&&brief.includes('not verified facts')&&brief.includes('Do not label real confidential details synthetic'));
+ check('Review, depth and writing feedback all reach the brief',['REVIEW_HANDOFF_CANARY','DEPTH_HANDOFF_CANARY','WRITE_HANDOFF_CANARY'].every(marker=>brief.includes(marker)));
+ check('Brief limits facts, processing and private details',brief.includes('Do not execute commands')&&brief.includes('not verified facts')&&brief.includes('label real confidential details synthetic'));
  await page.click('#reader-close');
+ await page.locator('#writing-mode').selectOption('own_skill');await page.click('#writing-copy');
+ const ownSkillBrief=await page.locator('#agent-text').inputValue();
+ check('Own-skill mode delegates style without leaking the inactive guide',ownSkillBrief.includes('Use my own writing skill')&&!ownSkillBrief.includes('PRIVATE_STYLE_CANARY'));
+ await page.click('#reader-close');await page.locator('#writing-mode').selectOption('custom');
  const draft='I build practical tools and work with others to make decisions clearer.';
  await page.fill('#writing-draft',draft);
  await page.fill('#path-note','PRIVATE_REVIEW_CANARY');
- await page.click('#writing-apply');
- check('Chosen overview becomes an explicit profile draft',await page.locator('#profile').isVisible()&&await page.locator('.public-overview').innerText()===draft);
+ await page.click('#path-continue');
+ check('Writing leads to Profile without copying private context',await page.locator('#profile').isVisible()&&await page.evaluate(d=>packet.publicProfile.overview!==d,draft));
  check('Original wording and evidence are unchanged',await page.evaluate(b=>JSON.stringify(packet.person)===JSON.stringify(b.person)&&JSON.stringify(packet.accounts)===JSON.stringify(b.accounts)&&JSON.stringify(packet.sources)===JSON.stringify(b.sources)&&JSON.stringify(packet.journey.baseline)===JSON.stringify(b.journey.baseline),before));
  await page.click('#public-edit-tab');
  const hostile='Literal </style><script>alert(1)</script> example';
  await page.getByLabel('Headline',{exact:true}).fill(hostile);
+ await page.getByLabel('Overview',{exact:true}).fill('WITHHELD_OVERVIEW');
  if(!before.publicProfile.examples.length)await page.click('#public-add');
  await page.getByLabel('Example title',{exact:true}).first().fill('Reconstructed demonstration');
  await page.getByLabel('General overview',{exact:true}).first().fill('A newly made example using fictional inputs.');
  await page.getByLabel('Synthetic example',{exact:true}).first().check();
  await page.click('#public-preview-tab');
+ await page.locator('.public-sharing > summary').click();
+ await page.locator('#share-overview').uncheck();await page.locator('#share-example-0').check();
  check('Profile edits render as inert text',await page.locator('.profile-page h1').innerText()===hostile&&await page.locator('#public-preview script').count()===0);
  const downloaded=page.waitForEvent('download');await page.click('#public-export');const dl=await downloaded;
  const publicFile=path.join(output,'public-export-check.html');await dl.saveAs(publicFile);
@@ -60,7 +125,7 @@ if(!input||!output)throw Error('Usage: node tests/check_guided.cjs guided.html o
  check('Unexpected private fields cannot enter the export',await page.evaluate(()=>!publicDocument({...packet.publicProfile,privateNote:'PRIVATE_FIELD_CANARY',sources:packet.sources}).includes('PRIVATE_FIELD_CANARY')));
  check('Public export labels synthetic examples',html.includes('Synthetic example'));
  const exported=await context.newPage();await exported.goto(pathToFileURL(publicFile).href);
- check('Public file is a standalone readable profile',await exported.locator('h1').innerText()===hostile&&await exported.locator('.public-overview').innerText()===draft);
+ check('Public file is a standalone readable profile',await exported.locator('h1').innerText()===hostile&&await exported.locator('.public-example').first().innerText().then(t=>t.includes('Reconstructed demonstration'))&&!html.includes('WITHHELD_OVERVIEW'));
  for(const width of [320,375,768,1440]){await exported.setViewportSize({width,height:1000});check('Public export fits '+width,await exported.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));}
  await exported.close();
  const privateDownload=page.waitForEvent('download');await page.click('#public-save');const pd=await privateDownload;const saved=path.join(output,'profile-private-save-check.html');await pd.saveAs(saved);
@@ -85,7 +150,19 @@ if(!input||!output)throw Error('Usage: node tests/check_guided.cjs guided.html o
  await stale.getByLabel('Headline',{exact:true}).fill('Retain this edited profile');await stale.reload();
  if(!await stale.locator('#public-editor').isVisible())await stale.click('#public-edit-tab');
  check('Profile edits survive reload after evidence changes',await stale.getByLabel('Headline',{exact:true}).inputValue()==='Retain this edited profile');
- check('Saving an edit does not approve stale evidence',await stale.evaluate(()=>packet.publicProfile.contextSha256==='0'.repeat(64))&&(await stale.locator('#public-status').innerText()).includes('private context has changed'));
+ check('Saving an edit does not approve stale evidence',await stale.evaluate(()=>packet.publicProfile.contextSha256==='0'.repeat(64))&&await stale.locator('#public-freshness').isVisible());
+ await stale.getByLabel('Overview',{exact:true}).fill('A revised public draft that still needs review.');
+ check('Editing cannot hide the stale-context reminder',await stale.locator('#public-freshness').isVisible());
+ await stale.locator('.public-sharing > summary').click();await stale.locator('#share-overview').check();
+ await stale.locator('#public-mark-reviewed').press('Enter');
+ check('Explicit profile review updates freshness and returns focus',await stale.locator('#public-freshness').isHidden()&&await stale.evaluate(()=>packet.publicProfile.contextSha256===document.querySelector('#profile').dataset.evidence&&document.activeElement.id==='public-edit-tab'));
+ await stale.reload();check('Explicit review survives reload',await stale.locator('#public-freshness').isHidden());
+ await stale.click('#public-edit-tab');await stale.getByLabel('Overview',{exact:true}).fill('');
+ await stale.getByRole('link',{name:'Back to your context'}).click();await stale.fill('#writing-draft','A temporary writing candidate.');
+ await stale.click('#path-continue');await stale.getByRole('link',{name:'Back to your context'}).click();
+ check('Writing candidate can complete the writing step',await stale.locator('#path-link-write').evaluate(n=>n.classList.contains('is-reviewed')));
+ await stale.fill('#writing-draft','');
+ check('Retaining the starting overview needs no invented rewrite or practice',await stale.locator('#path-link-write').evaluate(n=>n.classList.contains('is-reviewed'))&&await stale.locator('#path-continue').isEnabled());
  await staleContext.close();await fs.unlink(stalePath);
  check('No script errors',errors.length===0);check('No external requests',requests.length===0);
  await fs.writeFile(path.join(output,'profile-browser-checks.json'),JSON.stringify({checks,errors,requests},null,2));

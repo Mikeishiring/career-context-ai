@@ -133,7 +133,7 @@ class CompleteContextTests(unittest.TestCase):
 
     def test_public_complete_example_is_reproducible(self):
         self.assertEqual(self.packet, json.loads((ROOT / 'examples/complete-context.json').read_text()))
-        output = self.root / 'demo.html'; renderer.render(self.source(), output)
+        output = self.root / 'demo.html'; renderer.render(self.source(), output, guided=True)
         self.assertEqual(output.read_bytes(), (ROOT / 'CAREER-CONTEXT.html').read_bytes())
 
 

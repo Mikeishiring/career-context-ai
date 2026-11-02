@@ -3,6 +3,8 @@ import copy
 import importlib.util
 import json
 from pathlib import Path
+import shutil
+import subprocess
 import tempfile
 import unittest
 
@@ -14,6 +16,12 @@ spec.loader.exec_module(renderer)
 
 
 class GuidedPathTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which('node'), 'Node.js is an optional development check')
+    def test_browser_draft_restoration_before_evidence_migration(self):
+        result = subprocess.run([shutil.which('node'), str(ROOT / 'tests/check_path_restore.cjs')],
+                                capture_output=True, text=True, encoding='utf-8', timeout=30)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
@@ -128,6 +136,24 @@ class GuidedPathTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 renderer.validate(packet)
 
+    def test_public_timeline_is_authored_bounded_and_escaped(self):
+        self.assertEqual(self.packet['publicProfile']['timeline'], [])
+        hostile = '<img src=x onerror=alert(1)>'
+        self.packet['publicProfile']['timeline'] = [{'period': '2030', 'title': hostile, 'summary': 'Public wording only.'}]
+        recovered = renderer.load_packet(self.render())
+        self.assertEqual(recovered['publicProfile']['timeline'], self.packet['publicProfile']['timeline'])
+        preview = renderer.public_profile.preview(recovered['publicProfile'])
+        self.assertNotIn(hostile, preview)
+        self.assertIn('&lt;img', preview)
+        self.assertNotIn(self.packet['timeline'][0]['focus'], preview)
+        for change in [{'period': 'x' * 61}, {'summary': 'x' * 1501}, {'sourceRefs': ['private-id']}]:
+            data = copy.deepcopy(self.packet)
+            data['publicProfile']['timeline'][0].update(change)
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                renderer.validate(data)
+        self.packet['publicProfile']['timeline'] *= 31
+        with self.assertRaises(ValueError): renderer.validate(self.packet)
+
     def test_profile_cannot_disappear_on_update(self):
         previous = copy.deepcopy(self.packet)
         self.packet.pop('publicProfile')
@@ -138,7 +164,7 @@ class GuidedPathTests(unittest.TestCase):
         self.packet.pop('journey')
         markup = self.render().read_text(encoding='utf-8')
         self.assertNotIn('href="#path-write"', markup)
-        self.assertIn('href="#work">Review your work', markup)
+        self.assertIn('href="#work">Back to your context', markup)
         self.assertIn('id="public-editor"', markup)
 
 

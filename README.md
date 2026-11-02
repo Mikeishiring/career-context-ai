@@ -30,6 +30,8 @@ The archive is the reusable part. Resumes, profiles and interview preparation ar
 
 Export a reviewed selection for another agent or tool. The optional local MCP connection exposes only that snapshot, with no archive writes or automatic uploads. [Selected context and local MCP](skills/career-context-sheet/references/selected-context.md).
 
+**Build context** guides collection and review. **My context** connects Timeline to Work; Practice is optional. **Profile** controls which overview, progression periods, examples and visual evidence enter a selected public download. Full HTML and JSON remain private working files.
+
 The experiments test parts of the research process on fictional cases. They do not establish complete career coverage or better results than other tools.
 
 [Guides](docs/README.md) · [Contributing](CONTRIBUTING.md) · [Research experiments](ai-search-mvp/README.md) · [MIT license](LICENSE)

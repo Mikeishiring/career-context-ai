@@ -12,6 +12,13 @@ _spec = importlib.util.spec_from_file_location('context_renderer', Path(__file__
 renderer = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(renderer)
 APPLICATION_ID = 1128481073
+COVERAGE_DDL = '''
+CREATE TABLE IF NOT EXISTS coverage_plans (revision TEXT PRIMARY KEY REFERENCES revisions(id),
+    start_month TEXT, end_month TEXT, streams TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS coverage_checks (revision TEXT REFERENCES revisions(id), stream_id TEXT,
+    month TEXT, status TEXT, found INTEGER, records_read INTEGER, note TEXT, cursor TEXT,
+    source_refs TEXT, PRIMARY KEY(revision,stream_id,month));
+'''
 DDL = '''
 CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 CREATE TABLE revisions (id TEXT PRIMARY KEY, updated_at TEXT NOT NULL, packet TEXT NOT NULL, html BLOB NOT NULL);
@@ -110,6 +117,10 @@ def build(source, workspace, *, update=False, allow_view_removal=False):
     replaced = False
     try:
         db.execute('BEGIN IMMEDIATE')
+        # Additive tables keep old archives readable and all earlier revisions intact.
+        for statement in COVERAGE_DDL.split(';'):
+            if statement.strip():
+                db.execute(statement)
         meta = dict(db.execute('SELECT key,value FROM metadata'))
         if meta.get('person') and meta['person'] != packet['person']['name']:
             raise ValueError('This archive belongs to a different person; use a separate workspace')
@@ -136,6 +147,13 @@ def build(source, workspace, *, update=False, allow_view_removal=False):
             db.executemany('INSERT INTO collection VALUES (?,?,?,?,?,?,?,?)',
                            [(revision, i, *[item[k] for k in ['platform', 'location', 'access', 'status', 'scope', 'nextStep']])
                             for i, item in enumerate(clean.get('collection', []))])
+            coverage = clean.get('journey', {}).get('coverage')
+            if coverage:
+                db.execute('INSERT INTO coverage_plans VALUES (?,?,?,?)',
+                           (revision, coverage['startMonth'], coverage['endMonth'], json.dumps(coverage['streams'], ensure_ascii=True)))
+                db.executemany('INSERT INTO coverage_checks VALUES (?,?,?,?,?,?,?,?,?)',
+                               [(revision, c['streamId'], c['month'], c['status'], c['found'], c['read'],
+                                 c['note'], c['cursor'], json.dumps(c['sourceRefs'])) for c in coverage['checks']])
         db.executemany('INSERT OR REPLACE INTO metadata VALUES (?,?)',
                        [('current', revision), ('person', packet['person']['name'])])
         atomic_write(sheet, raw)

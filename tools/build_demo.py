@@ -10,7 +10,9 @@ spec.loader.exec_module(cli)
 source = ROOT / 'examples/complete-context.json'
 if json.loads(source.read_text(encoding='utf-8')).get('synthetic') is not True:
     raise SystemExit('Public example must explicitly contain synthetic data.')
-result = cli.renderer().render(source, ROOT / 'CAREER-CONTEXT.html')
+# This fixed fictional demo is rebuilt from scratch, including default review state.
+# Never use this reset mode to update a personal archive.
+result = cli.renderer().render(source, ROOT / 'CAREER-CONTEXT.html', guided=True, allow_view_removal=True)
 print(json.dumps({key: result[key] for key in ('accounts', 'sources', 'bytes', 'sha256')}))
 
 notebook_spec = importlib.util.spec_from_file_location('notebook_renderer', ROOT / 'skills/career-context-sheet/scripts/render_notebook.py')

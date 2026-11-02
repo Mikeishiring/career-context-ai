@@ -47,6 +47,8 @@ Check coverage against responsibilities and periods, not source counts. Look for
 
 ## Collect visuals deliberately
 
+Follow [visual evidence selection](visual-evidence.md), including video sampling, candidate comparison, attribution and the public/private boundary. Inspect a relevant recording rather than treating its thumbnail as sufficient.
+
 Look in referenced attachments, design files, decks, repositories, published work and supplied portfolios within scope. Inspect the actual artifact, its date/version and authorship. Choose a few that make the account easier to understand. Preserve permission limits, redact sensitive details before embedding, and exclude names or contact data the intended audience should not see.
 
 Use an authorized PNG/JPEG/WebP/GIF under the input folder, with a meaningful title and a caption explaining any necessary scope or limitation. Images must remain understandable on mobile; a dense full dashboard shrunk to a thumbnail is not useful evidence. Prefer a focused crop or a faithful diagram when authorized and label reconstructions explicitly. Do not fabricate screenshots or use generated decoration as proof. Do not hotlink private images. If no suitable visual is available, retain a concise account and record the missing artifact as a next step only when it matters.

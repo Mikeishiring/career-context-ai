@@ -7,7 +7,7 @@ python scripts/archive_context.py build context.json my-context
 python scripts/archive_context.py search my-context/career.sqlite "handoff"
 ```
 
-`my-context/CAREER-CONTEXT.html` is the reading entry point for Work, Career timeline and Interview prep. `career.sqlite` stores normalized accounts, sources, account/source links, selected image bytes, source coverage and complete revisions, including timeline, preparation and saved rehearsal notes. Search returns up to 50 matching current accounts/sources. It uses literal substring matching, not semantic ranking. Images and tags survive updates; raw unselected exports are not copied.
+`my-context/CAREER-CONTEXT.html` is the reading entry point for Build context, My context and Profile, with optional Practice. `career.sqlite` stores normalized accounts, sources, account/source links, selected image bytes, source coverage and complete revisions, including timeline, preparation and saved rehearsal notes. Search returns up to 50 matching current accounts/sources. It uses literal substring matching, not semantic ranking. Images and tags survive updates; raw unselected exports are not copied.
 
 When facts change, update the selected context, preserve account/source IDs and correction evidence, and run:
 
