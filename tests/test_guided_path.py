@@ -3,6 +3,8 @@ import copy
 import importlib.util
 import json
 from pathlib import Path
+import shutil
+import subprocess
 import tempfile
 import unittest
 
@@ -14,6 +16,12 @@ spec.loader.exec_module(renderer)
 
 
 class GuidedPathTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which('node'), 'Node.js is an optional development check')
+    def test_browser_draft_restoration_before_evidence_migration(self):
+        result = subprocess.run([shutil.which('node'), str(ROOT / 'tests/check_path_restore.cjs')],
+                                capture_output=True, text=True, encoding='utf-8', timeout=30)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
