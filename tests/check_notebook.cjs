@@ -1,6 +1,6 @@
 // Exercise the shipped notebook's route/menu/source handlers without a browser.
 const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('node:assert/strict');
-const root=path.resolve(__dirname,'..'),html=fs.readFileSync(path.join(root,'CAREER-NOTEBOOK.html'),'utf8');
+const root=path.resolve(__dirname,'..'),html=fs.readFileSync(path.join(root,'examples','CAREER-NOTEBOOK.html'),'utf8');
 const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];new vm.Script(script);
 const draft=JSON.parse(html.match(/<script[^>]*id="career-draft-data"[^>]*>([\s\S]*?)<\/script>/)[1]);
 const originalIntro=draft.profile.intro;

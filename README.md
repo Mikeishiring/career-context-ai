@@ -1,71 +1,37 @@
 # Career Context AI
 
-**Keep the context behind your work.**
+Build your own local database of the work you've done: the records, decisions, shared contributions and unfinished attempts behind a resume.
 
-Turn selected notes, documents, conversations, GitHub projects and social posts into one readable file: what you did, why it mattered, who else contributed and what happened next. Give that file to an agent for a resume, interview or career question without rebuilding your story each time.
+This is an early project: an agent skill with Python tools for keeping a searchable archive and a readable HTML file. Your chosen agent gathers and interprets the material. You review it, keep it and decide how to use it.
 
-![A fictional career-context sheet with readable work accounts and controls for copying context to an agent](docs/career-context-preview.png)
+## Three principles
 
-Use work documents only with an approved model and sources you are allowed to share.
+1. **Collect context first.** Keep the source material before deciding what it means or which story to tell. Gather broadly within the sources you authorize; record what remains unread. You can organize and reinterpret it later.
+2. **Make it fit you.** Adapt the structure, emphasis and writing to your work, purpose and voice. One archive can support different resumes, introductions, interviews or questions.
+3. **Keep it under your control.** Store the archive on your own machine. The project has no hosted account or upload service for your archive. Choose which tools can read it and what, if anything, you share.
 
-## Try the sheet
+Local storage does not make an AI session local: material you give an agent may reach its host or model provider. The files are unencrypted. Use work documents only with an approved model and sources you are allowed to share. [Storage and sharing](docs/PRIVACY.md).
 
-[Download the project](https://github.com/Mikeishiring/career-context-ai/archive/refs/heads/main.zip), extract it and open **[CAREER-CONTEXT.html](CAREER-CONTEXT.html)** in a browser. The example is fictional and works offline.
+![Fictional career context with work accounts and source evidence](docs/career-context-preview.png)
 
-Find work by its title, activity or tool. **Skills & tools** links each capability to the accounts behind it. Open an account's evidence, then use **Preview text** to inspect an export of all accounts, visible results or one account. Shared credit, assistance and limits travel with the text. GitHub displays HTML as source; use the downloaded file.
+## Start here
 
-**Timeline** connects supported periods to related Work. Optional **Practice** reuses those accounts when you want interview preparation. They are views of this same file. [Bring an older notebook into it](skills/career-context-sheet/references/notebook.md).
+[Download the project](https://github.com/Mikeishiring/career-context-ai/archive/refs/heads/main.zip), extract it and open **[CAREER-CONTEXT.html](CAREER-CONTEXT.html)** to try the fictional example offline. GitHub shows HTML as source; open the downloaded file in a browser.
 
-## Make it yours
+To build your own archive, give an agent the complete [career-context-sheet folder](skills/career-context-sheet/) and ask:
 
-Give your agent the complete [career-context-sheet](skills/career-context-sheet/SKILL.md) folder and selected material. It includes source discovery, role-specific evidence guidance, a local SQLite archive, and HTML renderers for context, resumes and interview preparation.
+> Help me build a local archive of my work. Reuse the context I've already supplied, collect from sources I authorize, and keep evidence separate from interpretation. Preserve shared credit, uncertainty and my wording. Save a searchable database and one HTML file. We'll adapt it to a particular purpose when I need it.
 
-The skill works independently of a job-search service. Keep things you have done at the centre; the optional **Skills & tools** index links practices and tools to those accounts, retaining AI assistance and limits. Later searches can draw on that evidence without treating a tool you used through AI as a language you can program in independently.
+The local tools need Python 3.11+ and no additional packages. Start with the material you have; the skill does not connect accounts by itself. [Setup and first archive](docs/GETTING-STARTED.md).
 
-> Use this skill to build my career context. Reuse what you know about my work and goals, discover the sources available here, and guide me through any missing access. Collect relevant evidence and visual examples within scope. Adapt the organization to my work, preserve shared credit and uncertainty, and create a private local database with one HTML entry point. Use my reference material when I ask for a resume or interview preparation.
+## Use it elsewhere
 
-Start with one useful account. Expect a provisional draft, focused deepening, then a challenge and consolidation pass. The agent runs these within the session where possible; you should not need to keep asking it to go deeper. It saves evidence and the next step so interrupted work can resume. [See the complete flow](docs/FROM-EVIDENCE-TO-STORY.md).
+The archive is the reusable part. Resumes, profiles and interview preparation are selected views of it. A coach or job-search service can use a reviewed selection without needing your whole database.
 
-Fresh complete documents open Build context to plan collection by location and month, review accounts, resolve meaningful gaps, connect experiences and retain your voice. Practice is optional. The checklist retains read counts, evidence and continuation points, including blocked or excluded periods. Review corrections travel into the writing brief; add your preferred writing `SKILL.md` or a sample. The final **Profile** tab holds a separate public draft; **Export public HTML** includes only its selected overview, examples and time periods. Unselected drafts remain in the private file. Full HTML and JSON remain private working files.
+Export a reviewed selection for another agent or tool. The optional local MCP connection exposes only that snapshot, with no archive writes or automatic uploads. [Selected context and local MCP](skills/career-context-sheet/references/selected-context.md).
 
-For [GitHub and social profiles](skills/career-context-sheet/references/github-and-social.md), it inventories authorized locations, checks selected code and history, follows original threads and records what remains unread. Older projects and unfinished experiments can belong in the context even when the resume stays concise.
+**Build context** guides collection and review. **My context** connects Timeline to Work; Practice is optional. **Profile** controls which overview, progression periods, examples and visual evidence enter a selected public download. Full HTML and JSON remain private working files.
 
-[Get started with Claude, Codex or another agent](docs/GETTING-STARTED.md).
+The experiments test parts of the research process on fictional cases. They do not establish complete career coverage or better results than other tools.
 
-Ask the agent to [prepare an interview](skills/career-context-sheet/references/interview-prep.md). It updates Practice in the same document with an introduction, answers, story chapters and recorded milestones. You review, practise and resolve genuine gaps.
-
-Supply a vacancy to [compare it with your context](skills/career-context-sheet/references/role-comparison.md). The agent checks the full job description, searches work accounts, timeline sources and authorized originals, and distinguishes direct experience, transferable work and unresolved evidence. Useful new evidence is carried back into the same career document, with timeline links and refreshed interview preparation. The bundled retrieval helper finds reading leads; the agent makes the assessment.
-
-## What you keep
-
-- **Your work in context:** personal decisions, shared work, outcomes and unfinished questions.
-- **Inspectable evidence:** selected excerpts remain distinct from summaries and interpretation.
-- **One portable HTML file:** readable accounts, plain agent text, structured context and selected images travel together.
-- **A local SQLite archive:** searchable accounts and sources, selected image bytes, collection coverage and recoverable revisions.
-- **Role-appropriate drafts:** [resumes](skills/career-context-sheet/references/resume.md) with print/PDF and text export, plus interview preparation grounded in the same context.
-
-The scripts use Python 3.11+ with no packages or network calls. The agent you choose does the research and writing. Live source connectors are supplied by your host; installing this project does not connect accounts. Collection covers selected accessible sources, not every platform or all career history. The database is private and unencrypted.
-
-## For developers
-
-The [product contract](docs/PRODUCT.md) defines the release criteria. The core product is the skill and portable sheet. Build the standalone skill bundle without the research harness:
-
-```sh
-python tools/build_skill.py ../career-context-sheet.zip
-```
-
-The optional local research server adds scoped export access, turning-point review and saved-draft recovery. A bounded supervisor can resume interrupted workers; see the [research flow](docs/RESEARCH-TO-SHEET.md). Experiments remain available in the repository so their results and failures can be inspected.
-
-| Need | Guide |
-|---|---|
-| Create, update or share a sheet | [Getting started](docs/GETTING-STARTED.md) |
-| Select local exports and use the research server | [Local context](docs/LOCAL-CONTEXT.md) |
-| Understand storage and sharing | [Privacy](docs/PRIVACY.md) |
-| Inspect research methods and results | [Research guide](ai-search-mvp/README.md) · [Event retention](docs/EVENT-RETENTION.md) · [Batch extraction](docs/BATCH-EXTRACTION.md) · [Deep-review result](docs/DEEP-RESEARCH-RESULT.md) |
-| Build, test or contribute | [Contributing](CONTRIBUTING.md) |
-
-The research server currently uses selected snapshots. Live connectors, automatic refresh and reliable semantic review remain under development.
-
-[MIT licensed](LICENSE).
-
-Copy all accounts or select one; private source excerpts are excluded from copied text unless selected. Attribution and limits remain. Full HTML and JSON always include all selected sources. Optional links lead to separately delivered local files.
+[Guides](docs/README.md) · [Contributing](CONTRIBUTING.md) · [Research experiments](ai-search-mvp/README.md) · [MIT license](LICENSE)

@@ -33,15 +33,15 @@ Do not paste literal angle-bracket placeholders. The process uses stdin/stdout f
 
 Restart/reconnect the server through your host and confirm the six tools are visible. Ask it to call `source_inventory` with `{"case":"training"}`. Every tool needs `case`; accepted values are `training`, `challenge`, `search_only` and `semantic`.
 
-Only after that succeeds, provide [the synthetic research prompt](../ai-search-mvp/RESEARCH-PROMPT.md) and select the case. `research_run` writes a local synthetic ledger; source operations do not mutate online systems. The model host may send synthetic passages to its inference provider. Model usage and charges belong to that host, not this server.
+Only after that succeeds, provide [the synthetic research prompt](../../ai-search-mvp/RESEARCH-PROMPT.md) and select the case. `research_run` writes a local synthetic ledger; source operations do not mutate online systems. The model host may send synthetic passages to its inference provider. Model usage and charges belong to that host, not this server.
 
 ## Turn selected context into a portable sheet
 
-The companion [career-context skill](../skills/career-context-sheet/SKILL.md) guides the output: one readable HTML sheet with embedded structured context for the person's agents. Use selected accounts and sources, preserve contribution and shared credit, distinguish summaries from original excerpts, and carry unknowns into the exported text. Do not turn a request to capture context into unsolicited career advice.
+The companion [career-context skill](../../skills/career-context-sheet/SKILL.md) guides the output: one readable HTML sheet with embedded structured context for the person's agents. Use selected accounts and sources, preserve contribution and shared credit, distinguish summaries from original excerpts, and carry unknowns into the exported text. Do not turn a request to capture context into unsolicited career advice.
 
 The skill can work with pasted accounts, local files or selected context returned by an authorized connector. This bundled MCP still serves fictional fixtures only. Installing the skill does not add real-source access, expose personal workspaces or save a hosted profile. Any connector's selected-source and confirmation boundaries still apply.
 
-Try the fictional sheet using the [getting-started guide](GETTING-STARTED.md). Keep a real person's packet and generated HTML outside this public template.
+Try the fictional sheet using the [getting-started guide](../GETTING-STARTED.md). Keep a real person's packet and generated HTML outside this public template.
 
 ## Important gaps
 
@@ -50,4 +50,4 @@ Try the fictional sheet using the [getting-started guide](GETTING-STARTED.md). K
 - Personal workspaces have no MCP exposure or automated reviewer. Use the local importer and claim command, or deliberately supply selected records to your chosen host; this repository does not silently bridge them.
 - A green handshake proves transport, not model understanding, source access or privacy configuration. If tools are absent, stop and diagnose the host connection rather than claiming research happened.
 
-For real source connectors, use [Sources](SOURCES.md) and the proposed contract in [SPEC.md](../SPEC.md). Credentials belong outside prompts, source records and generated HTML.
+For real source connectors, use [Sources](SOURCES.md) and the proposed contract in [SPEC.md](SPEC.md). Credentials belong outside prompts, source records and generated HTML.

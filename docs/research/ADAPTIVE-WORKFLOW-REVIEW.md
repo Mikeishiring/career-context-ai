@@ -8,10 +8,10 @@ The previous release preserved work accounts, but did not complete the requested
 
 | Finding | Repair | Evidence |
 |---|---|---|
-| No standalone database | SQLite stores selected accounts, sources, links, images, coverage and revisions; search and recovery work without the repository | Extracted-skill journeys in [adaptive tests](../tests/test_adaptive_workflow.py) |
-| Resume creation was only a promise | A reference-aware projection and renderer produce a populated private resume with source review, print/PDF and text export; stale context is rejected | Adaptive tests and [resume browser checks](../tests/check_resume.cjs) |
-| No explicit role adaptation | Discovery guidance covers hiring, engineering, operations, growth, marketing, BD and hybrid work; free-text profile and themes travel with the context | [Adaptation guide](../skills/career-context-sheet/references/adaptation-and-discovery.md), six independent raw-note agent trials |
-| Visuals were difficult to find or read | Relevant images appear with the account; an enlargement dialog supports small-screen inspection | [Sheet browser checks](../tests/check_sheet.cjs), a fictional diagram with disclosed reconstruction |
+| No standalone database | SQLite stores selected accounts, sources, links, images, coverage and revisions; search and recovery work without the repository | Extracted-skill journeys in [adaptive tests](../../tests/test_adaptive_workflow.py) |
+| Resume creation was only a promise | A reference-aware projection and renderer produce a populated private resume with source review, print/PDF and text export; stale context is rejected | Adaptive tests and [resume browser checks](../../tests/check_resume.cjs) |
+| No explicit role adaptation | Discovery guidance covers hiring, engineering, operations, growth, marketing, BD and hybrid work; free-text profile and themes travel with the context | [Adaptation guide](../../skills/career-context-sheet/references/adaptation-and-discovery.md), six independent raw-note agent trials |
+| Visuals were difficult to find or read | Relevant images appear with the account; an enlargement dialog supports small-screen inspection | [Sheet browser checks](../../tests/check_sheet.cjs), a fictional diagram with disclosed reconstruction |
 | Image paths escaped the selected folder; embedded hashes were ignored | Relative contained paths, saved-checksum verification and aggregate output-size limits | Adversarial image tests and round-trip tests |
 | Failed first database setup blocked recovery | Failed initialization closes and removes only its newly created incomplete database; a new build can retry | Injected schema-write failure regression |
 | Mobile profile labels overflowed; print lost fictional labels | Wrapping and print-specific state labels | Independent 320px and print-media checks |
@@ -33,7 +33,7 @@ The review was independent and read-only. Confirmed findings were reproduced and
 
 The host agent discovers and reads authorized connectors or selected files. The skill does not connect accounts, import every vendor's raw export, refresh automatically or guarantee “all context.” The collection map records actual scope and missing access. These trials used supplied fictional notes; live connector ingestion, original visual retrieval, large real career histories and cross-model equivalence remain untested.
 
-Drafted resume sentences still need a semantic comparison with their sources. Reference checks establish structure and freshness, not factual truth. SQLite is unencrypted and retains old revisions; the HTML contains selected private evidence. See [privacy](PRIVACY.md) and [archive retention](../skills/career-context-sheet/references/local-archive.md).
+Drafted resume sentences still need a semantic comparison with their sources. Reference checks establish structure and freshness, not factual truth. SQLite is unencrypted and retains old revisions; the HTML contains selected private evidence. See [privacy](../PRIVACY.md) and [archive retention](../../skills/career-context-sheet/references/local-archive.md).
 
 ## 27 October revision
 

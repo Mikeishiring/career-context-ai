@@ -61,11 +61,11 @@ The integrated flow allows 450 charged source calls and 1,600 total requests. Th
 
 The corpus and scope are fixed and hash-checked. Relabelling a session as synthetic or changing its subject cannot put personal material into this launcher. Excluded sources and post-horizon records are not readable. Instructions in a source do not change scope. The evaluator's rubric is not available through the MCP.
 
-The public fixture and any published result are fictional. Never copy your private journal or source archive into this repository. To create a sheet from real selected material, use [local setup](LOCAL-CONTEXT.md) and the [agent skill](../skills/career-context-sheet/SKILL.md). The policy controls which local captures a chosen AI host may receive. The demo launcher does not connect real accounts or automatically send personal exports to a model.
+The public fixture and any published result are fictional. Never copy your private journal or source archive into this repository. To create a sheet from real selected material, use [local setup](../LOCAL-CONTEXT.md) and the [agent skill](../../skills/career-context-sheet/SKILL.md). The policy controls which local captures a chosen AI host may receive. The demo launcher does not connect real accounts or automatically send personal exports to a model.
 
 ## What the test can establish
 
-The [case](../ai-search-mvp/fixtures/sheet.corpus.json) includes two chat locations, documents, selected email/calendar records and code reviews. Its public [rubric](../ai-search-mvp/fixtures/sheet.gold.json) checks decisions, shared credit, nested corrections, later use, action state and personal meaning. The implementation assistant authored both; the model researcher sees neither the rubric nor the prior conversation.
+The [case](../../ai-search-mvp/fixtures/sheet.corpus.json) includes two chat locations, documents, selected email/calendar records and code reviews. Its public [rubric](../../ai-search-mvp/fixtures/sheet.gold.json) checks decisions, shared credit, nested corrections, later use, action state and personal meaning. The implementation assistant authored both; the model researcher sees neither the rubric nor the prior conversation.
 
 Passing the build proves that checked claim sentences and selected excerpts reached the sheet. It cannot prove that the model retained every important meaning or interpreted every source fairly. Assess the first account against the rubric, including limitations and misses; do not turn exact citations or a completed queue into a semantic-success claim.
 

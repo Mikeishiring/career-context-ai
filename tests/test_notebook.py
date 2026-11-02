@@ -264,7 +264,7 @@ class NotebookReleaseTests(unittest.TestCase):
             output = Path(directory) / "notebook.html"
             notebook.render(ROOT / "examples/career-context.json", output,
                             quarters=ROOT / "examples/notebook-quarters.json")
-            self.assertEqual(output.read_bytes(), (ROOT / "CAREER-NOTEBOOK.html").read_bytes())
+            self.assertEqual(output.read_bytes(), (ROOT / "examples/CAREER-NOTEBOOK.html").read_bytes())
 
     @unittest.skipUnless(shutil.which("node"), "Node.js is an optional development check")
     def test_shipped_route_menu_and_source_handlers(self):

@@ -67,7 +67,7 @@ For an already configured workspace, the bounded research supervisor can run the
 python career_context.py research-run ../my-career-context ../my-career-context/CAREER-CONTEXT.html --force --max-attempts 3 --timeout 3600
 ```
 
-This sends admitted source text to the authenticated Codex service only when the saved policy permits model processing. The command rechecks that policy before each attempt and before building. It resumes saved research automatically after a stopped worker, within the original limits, and reviews turning points across selected and reserve events. No new source permission is inferred. See [recovery limits](RESEARCH-TO-SHEET.md#automatic-recovery-and-turning-points). Re-running this same command resumes its saved state; it does not reset the attempt budget.
+This sends admitted source text to the authenticated Codex service only when the saved policy permits model processing. The command rechecks that policy before each attempt and before building. It resumes saved research automatically after a stopped worker, within the original limits, and reviews turning points across selected and reserve events. No new source permission is inferred. See [recovery limits](research/RESEARCH-TO-SHEET.md#automatic-recovery-and-turning-points). Re-running this same command resumes its saved state; it does not reset the attempt budget.
 
 The demo launcher accepts only its fixed fictional sources. For larger selected exports, an optional Codex extraction step processes small batches before the host chooses stories:
 
@@ -86,6 +86,6 @@ Extraction is an intermediate step, not a finished biography. Continue with the 
 
 ## Depth is a checklist, not a collection count
 
-The local checklist distinguishes captured records from records read in research. The [deep research flow](DEEP-RESEARCH-FLOW.md) requires question-led research, a challenge after the first plan and a ten-lens review for each account. It stores findings, counterpoints, remaining questions and attribution coverage alongside the journal. New evidence, notes or a changed plan make the review stale. A completed agent review still leaves person review pending; a high read count does not establish semantic completeness.
+The local checklist distinguishes captured records from records read in research. The [deep research flow](research/DEEP-RESEARCH-FLOW.md) requires question-led research, a challenge after the first plan and a ten-lens review for each account. It stores findings, counterpoints, remaining questions and attribution coverage alongside the journal. New evidence, notes or a changed plan make the review stale. A completed agent review still leaves person review pending; a high read count does not establish semantic completeness.
 
 This version uses stable snapshots. Identical imports can be repeated before research; conflicting revisions and imports after research begins are refused. The saved run resumes against unchanged captures. For a changed scope or source revision, create a new scoped workspace and retain the previous context as a reference. Automatic synchronization and policy editing with selective deletion are not implemented.

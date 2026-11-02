@@ -15,6 +15,12 @@ Maintain the person's work history independently of a particular vacancy or sear
 
 Read [work, skills and search](references/work-and-skills.md) when capturing capabilities, AI-assisted work or preparing context for a search. Keep skills and tools as a secondary, evidence-linked index. Using Python through AI does not establish Python fluency; preserve what the person directed or checked, what the AI supplied, and any stated limits. Neither invent expertise nor discard the resulting work. Build the context without requiring a job-search connector; use an available search service only when the person asks to search.
 
+## Separate collection from use
+
+The archive keeps evidence, working accounts and rough presentation. Build and deepen it independently of a particular service. Resume, interview and role-comparison helpers remain available when requested; their drafts do not replace the archive.
+
+For another agent or service, follow [selected context](references/selected-context.md). Export explicitly chosen accounts into a separate snapshot and review it before sharing. The optional local MCP server reads only that snapshot. Preserve shared credit, uncertainty, capability assistance and fictional/review status. A receiving tool handles its own purpose, preferences, decisions and review flow; archive access grants no authority to upload or act.
+
 ## Establish scope once
 
 Keep reusable coaching instructions separate from each person's private instance. Optional content and examples can remain absent; use an example only when it clarifies the person's current question.

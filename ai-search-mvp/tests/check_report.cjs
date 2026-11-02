@@ -1,6 +1,6 @@
 // Logic checks only. A mock document is not a rendered browser inspection.
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),path=require('node:path');
-const html=fs.readFileSync(path.join(__dirname,'..','..','AI-SEARCH-MVP.html'),'utf8');
+const html=fs.readFileSync(path.join(__dirname,'..','AI-SEARCH-MVP.html'),'utf8');
 const payload=html.match(/<script id="data" type="application\/json">([\s\S]*?)<\/script>/)[1];
 const script=html.match(/<script>\s*([\s\S]*?)<\/script>/)[1];
 new vm.Script(script);

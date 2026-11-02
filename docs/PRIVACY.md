@@ -1,4 +1,8 @@
-# Keep evidence separate
+# Storage and sharing
+
+The core archive and rendering tools write local files. This project has no hosted account or upload service for your archive, so using those tools does not give the maintainer access to it. An AI host, cloud backup or another service can receive material you choose to provide. Local files are unencrypted.
+
+## Keep evidence separate
 
 ```text
 work/

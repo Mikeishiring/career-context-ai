@@ -1,6 +1,6 @@
 # Bring selected sources into your workspace
 
-The template has no live connectors. Signing into Slack or installing an MCP in an AI host does not connect this Python program. Use the manual path below, or implement the adapter contracts in [SPEC.md](../SPEC.md).
+The template has no live connectors. Signing into Slack or installing an MCP in an AI host does not connect this Python program. Use the manual path below, or implement the adapter contracts in [SPEC.md](SPEC.md).
 
 Start with one project and a date window. Record which locations you may access. Include earlier proposals, complete reply chains and later follow-ups. An exported page or search result does not establish that every relevant thread was read.
 

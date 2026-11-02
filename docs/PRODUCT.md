@@ -2,6 +2,22 @@
 
 Career Context AI helps a person preserve the context behind their work and carry it into a new agent conversation. The reusable product is a skill, a stable context format, a local SQLite archive and deterministic HTML renderers for context, resumes and interview preparation. The full repository also maintains optional research tools and their test evidence.
 
+## Guiding principles
+
+1. Collect context before choosing a story. Retain selected source material separately from interpretation, including unfinished work and contrary evidence. Broad collection stays within the person's authorized scope; unread material remains a gap.
+2. Adapt to the person. Purpose, work and voice determine the organization and writing. A resume or interview draft is a view of the archive, not a replacement for it.
+3. Keep the archive under the person's control. The core tools store it locally, with no hosted account or archive upload service. AI hosts and source connectors have their own data boundaries; local storage alone does not make model processing local.
+
+## Collection and use
+
+The archive owns source collection, retained evidence, working accounts and rough presentation. A receiving tool owns the purpose-specific use: a search, coaching conversation, resume, comparison or other output. Existing resume and interview helpers remain optional ways to use the archive.
+
+A person-selected `career-context-selection/v1` snapshot is the handoff. It preserves attribution, uncertainty and capability assistance while excluding source bodies, images, broad personal summaries and private working state. A local read-only MCP server can expose that snapshot to the person's agent. It accepts no paths through tool calls and does not refresh a running session from the archive.
+
+A receiving tool must distinguish working accounts from original sources and current preferences. It must not treat review status as independent verification or turn fictional examples into personal evidence. Its existing review and action controls still apply. Reading a selection does not authorize remote retention or any external action.
+
+The full archive stays local. Selected prose may still be sensitive, and the chosen AI host may process it remotely. Each receiving service owns its data policy. See the [handoff contract](../skills/career-context-sheet/references/selected-context.md).
+
 ## The experience
 
 Start with selected material, establish missing scope, investigate consequential questions, draft connected work accounts, challenge them, ask for the person's corrections and create one portable HTML sheet. A useful first result can cover one project. A larger archive must not become an intake requirement.
