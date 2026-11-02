@@ -1,6 +1,6 @@
 # Bring an older notebook into the complete document
 
-The default output is one `CAREER-CONTEXT.html` with Work, Career timeline and Interview prep. Do not create a second notebook to add those views. The older notebook renderer remains for explicitly requested legacy reproduction.
+The default output is one `CAREER-CONTEXT.html` with Build context, My context and Profile, with optional Practice. Do not create a second notebook to add those views. The older notebook renderer remains for explicitly requested legacy reproduction.
 
 ## Reconcile saved material
 

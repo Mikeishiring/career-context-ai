@@ -21,22 +21,23 @@ async function main(){
   assert.ok(data.timeline.length&&data.interview.stories.length);
   result.accounts=data.accounts.length;result.periods=data.timeline.length;result.stories=data.interview.stories.length;
   const first=data.timeline[0],last=data.timeline.at(-1),story=data.interview.stories[0];
-  assert.equal(await page.locator('#work').isVisible(),true);
+  const view=async name=>{if(['work','timeline','skills'].includes(name))await page.locator('[data-area="context"]').click();await page.locator('[data-view="'+name+'"]').first().click();};
+  assert.equal(await page.locator('#timeline').isVisible(),true);
   await page.locator('[data-view="timeline"]').click();
-  assert.equal(await page.locator('.quarter-reading:visible').count(),1);
+  assert.ok(await page.locator('.quarter-reading:visible').count()>=1);
   assert.equal(await page.locator('#quarter-'+first.id).isVisible(),true);
-  await page.locator('.period-index a[href="#quarter-'+last.id+'"]').click();
+  await page.locator('.timeline-options > summary').click();
+  await page.locator('#timeline-from').selectOption(last.id);
   await page.reload();assert.equal(await page.locator('#quarter-'+last.id).isVisible(),true);
-  await page.goBack();assert.equal(await page.locator('#timeline').isVisible(),true);
+  assert.equal(await page.locator('#timeline').isVisible(),true);
   await page.locator('[data-view="interview"]').click();
   assert.equal(await page.locator('#interview').isVisible(),true);
-  await page.locator('#prep-story-select').selectOption(story.id);
+  await page.locator('#prep-story-'+story.id+' > summary').click();
   assert.equal(await page.locator('#prep-story-'+story.id).isVisible(),true);
   await page.locator('#prep-story-'+story.id+' .related-work a').click();
   assert.equal(await page.locator('#account-'+story.id).isVisible(),true);
   await page.goBack();assert.equal(await page.locator('#prep-story-'+story.id).isVisible(),true);
   const note=page.locator('[data-rehearsal="'+story.id+'"]');
-  await note.locator('..').locator('..').evaluate(el=>el.open=true);
   await note.fill('Portable rehearsal check: keep shared credit.');
   await page.reload();assert.equal(await note.inputValue(),'Portable rehearsal check: keep shared credit.');
   await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw Error('denied');}}}));
@@ -50,17 +51,17 @@ async function main(){
   result.checks.push('cross-view routes, refresh, back, rehearsal persistence and clipboard fallback');
   for(const width of [1440,768,375,320]){
    await page.setViewportSize({width,height:1000});
-   for(const view of ['work','timeline','interview']){
-    await page.locator('[data-view="'+view+'"]').click();
-    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,view+' overflow '+width);
-    if(width===1440||width===375)await page.screenshot({path:path.join(output,'complete-'+view+'-'+width+'.png')});
+   for(const section of ['work','timeline','interview']){
+    await view(section);
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,section+' overflow '+width);
+    if(width===1440||width===375)await page.screenshot({path:path.join(output,'complete-'+section+'-'+width+'.png')});
    }
    await page.goto(url+'#quarter-'+last.id);
    const periodGeometry=await page.evaluate(()=>{
     const top=document.querySelector('.top').getBoundingClientRect();
     const article=document.querySelector('.quarter-reading:not([hidden])').getBoundingClientRect();
     const rail=document.querySelector('.period-index').getBoundingClientRect();
-    const active=document.querySelector('.period-index [aria-current="true"]').getBoundingClientRect();
+    const active=document.querySelector('.period-index a.in-range').getBoundingClientRect();
     return {uncovered:article.top>=top.bottom,visible:active.left>=rail.left-1&&active.right<=rail.right+1&&active.top>=rail.top-1&&active.bottom<=rail.bottom+1};
    });
    assert.ok(periodGeometry.uncovered,'Sticky header covers period at '+width);
@@ -70,7 +71,7 @@ async function main(){
    result.widths.push(width);
   }
   await page.setViewportSize({width:1440,height:1000});
-  await page.locator('[data-view="work"]').click();
+  await view('work');
   await page.locator('#view-context').click();
   const allText=await page.locator('#agent-text').inputValue();
   assert.ok(allText.includes('## Career timeline')&&allText.includes('## Interview prep'));

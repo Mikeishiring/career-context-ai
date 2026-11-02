@@ -28,6 +28,19 @@ Separate these questions in the account:
 
 A test file proves a test was written, not that it passed. A merge proves integration, not deployment. A live demo proves an observed state, not adoption. Treat README claims about fairness, security or performance as claims to inspect; do not repeat them as established outcomes. Keep a valuable prototype even when impact is unmeasured.
 
+## Minimum review for each relevant project
+
+Use this checklist for small projects as well as polished repositories. Scale depth to what could change the career account; do not impose a minimum star count, commit count or project size.
+
+- Inventory: canonical repository, owner, visibility, fork/upstream, selected revision and relevance. Keep older, archived or unfinished leads with a disposition.
+- Purpose and state: read the tree and one relevant implementation path. Separate working code, prototypes, plans and claims.
+- Checks and history: inspect a relevant test plus a meaningful commit, PR or decision. If neither exists, record the gap; do not fabricate a test result or execute code just to inspect it.
+- Contribution: identify the person's work, collaborators, upstream code and AI assistance. Ask for missing attribution.
+- Use and limits: retain observed release, use or feedback and explicit unknowns. Avoid treating deployment as adoption.
+- Receipt: save stable locators, scope read, retained source IDs and the next useful read. Keep enumeration and content-review status separate.
+
+Stop the first pass here unless a consequential question needs another bounded read. A later pass should resolve a named gap or contrary evidence, not rewrite the account for polish alone.
+
 ## X/Twitter, LinkedIn and other published work
 
 Within the authorized account and period, inspect the person's original posts, replies in their own threads, articles, linked projects and relevant media. Search project names and earlier aliases, but also sample or enumerate the selected timeline so unnamed work can surface. Record inaccessible posts, missing replies, date gaps and pagination. Use an authorized export when the host cannot read a platform; continue with reachable sources and name the useful missing access.

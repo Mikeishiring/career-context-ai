@@ -1,4 +1,4 @@
 interface:
   display_name: "Career Context"
-  short_description: "Work, timeline and interview prep in one private document"
-  default_prompt: "Use $career-context-sheet to build one private document with my work evidence, linked skills and AI-assisted tools, career timeline and interview preparation, preserving existing stories and corrections."
+  short_description: "Build career understanding and choose what to share"
+  default_prompt: "Use $career-context-sheet to connect my stated North Star, supported progression and strongest relevant visual evidence, without assuming a role or industry or filling gaps with invented claims. Build private context first; keep Practice optional and let Profile control what I share."

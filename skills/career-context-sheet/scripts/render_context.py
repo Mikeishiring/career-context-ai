@@ -47,7 +47,7 @@ def validate(data):
     keys(data, ['schema', 'updatedAt', 'reviewStatus', 'person', 'accounts', 'sources', 'synthetic', 'profile', 'collection', 'presentation', 'timeline', 'interview', 'rehearsal', 'journey', 'publicProfile'], 'Sheet')
     if 'presentation' in data:
         presentation = data['presentation']
-        keys(presentation, ['headline', 'files'], 'Presentation')
+        keys(presentation, ['headline', 'files', 'briefs', 'timelineSelection', 'timelineReading', 'workGroups'], 'Presentation')
         check_text(presentation.get('headline', ''), 'Headline', 160)
         files = presentation.get('files', [])
         if not isinstance(files, list) or len(files) > 10: raise ValueError('Invalid related files')
@@ -90,6 +90,36 @@ def validate(data):
         if any(not isinstance(i, str) or not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9_-]{0,99}', i) for i in ids) or len(set(ids)) != len(ids):
             raise ValueError(f'{field} need unique safe IDs')
     source_ids = {s['id'] for s in data['sources']}; used = set(); artifact_ids = set()
+    selection = data.get('presentation', {}).get('timelineSelection')
+    if selection is not None:
+        keys(selection, ['contextSha256', 'updatedAt', 'fromId', 'toId', 'purpose'], 'Timeline selection')
+        if not isinstance(selection.get('contextSha256'), str) or not re.fullmatch('[a-f0-9]{64}', selection['contextSha256']):
+            raise ValueError('Timeline selection needs an evidence fingerprint')
+        if type(selection.get('updatedAt')) is not int or not 0 <= selection['updatedAt'] <= 9007199254740991:
+            raise ValueError('Timeline selection needs a safe update time')
+        period_ids = [p.get('id') for p in data.get('timeline', [])]
+        if selection.get('fromId') not in period_ids or selection.get('toId') not in period_ids:
+            raise ValueError('Timeline selection must reference saved periods')
+        if period_ids.index(selection['fromId']) > period_ids.index(selection['toId']):
+            raise ValueError('Timeline selection must run forward')
+        if selection.get('purpose') not in ['patterns', 'cv', 'interview', 'profile']:
+            raise ValueError('Unknown timeline purpose')
+    sections.validate_timeline_reading(data, check_text, keys)
+    sections.validate_work_groups(data, check_text, keys)
+    briefs = data.get('presentation', {}).get('briefs')
+    if briefs is not None:
+        keys(briefs, ['contextSha256', 'accounts'], 'Work briefs')
+        if not isinstance(briefs.get('contextSha256'), str) or not re.fullmatch('[a-f0-9]{64}', briefs['contextSha256']):
+            raise ValueError('Work briefs need their evidence fingerprint')
+        entries = briefs.get('accounts')
+        if not isinstance(entries, dict) or set(entries) - {a['id'] for a in data['accounts']}:
+            raise ValueError('Work briefs must reference saved accounts')
+        for lines in entries.values():
+            if not isinstance(lines, list) or not 1 <= len(lines) <= 4:
+                raise ValueError('Each work brief needs one to four bullets')
+            for line in lines:
+                check_text(line, 'Work brief bullet', 600)
+                if not line.strip(): raise ValueError('Work brief bullets must not be blank')
     for source in data['sources']:
         keys(source, ['id', 'label', 'kind', 'content', 'scope', 'date', 'locator'], 'Source')
         if source['kind'] not in KINDS: raise ValueError('Invalid source kind')
@@ -139,6 +169,10 @@ def validate(data):
         _interview_renderer.validate_projection(data, data['interview'], sections.evidence_fingerprint(data))
     sections.validate_rehearsal(data, check_text, keys)
     guided_path.validate(data, check_text, keys)
+    if data.get('journey', {}).get('coverage'):
+        used.update(guided_path.validate_coverage(data['journey']['coverage'], source_ids, check_text, keys))
+    for review in data.get('journey', {}).get('reviews', {}).values():
+        used.update(review['sourceRefs'])
     public_profile.validate(data, check_text, keys)
     if used != source_ids: raise ValueError('Remove unreferenced source records from the packet')
     # HTML loading temporarily attaches image bytes. They live outside the
@@ -222,18 +256,18 @@ def capability_index(accounts):
     for account in accounts:
         for capability in account.get('capabilities', []):
             key = (capability['name'].casefold(), capability['kind'])
-            group = groups.setdefault(key, {'name': capability['name'], 'kind': capability['kind'], 'accounts': {}})
-            group['accounts'][account['id']] = account['title']
-    if not groups:
-        return ''
-    entries = []
-    for group in groups.values():
-        links = ''.join(f'<a href="#account-{aid}" data-show-capabilities="{aid}">{html.escape(title)}'
-                        '<span aria-hidden="true">↗</span></a>' for aid, title in group['accounts'].items())
-        entries.append(f'<li><div><strong>{html.escape(group["name"])}</strong>'
-                       f'<span class="kind">{group["kind"].capitalize()}</span></div><div>{links}</div></li>')
-    return ('<details class="capability-index" id="skills"><summary>Skills &amp; tools'
-            '<span class="disclosure-mark" aria-hidden="true">+</span></summary><ul>' + ''.join(entries) + '</ul></details>')
+            group = groups.setdefault(key, {'name': capability['name'], 'kind': capability['kind'], 'uses': []})
+            group['uses'].append((account, capability))
+    if not groups: return ''
+    sections = []
+    for kind, label in [('practice', 'Skills & practices'), ('tool', 'Tools')]:
+        entries = []
+        for group in sorted(groups.values(), key=lambda g: g['name'].casefold()):
+            if group['kind'] != kind: continue
+            uses = ''.join('<div class="skill-use"><a href="#account-' + html.escape(a['id']) + '" data-show-capabilities="' + html.escape(a['id']) + '">' + html.escape(a['title']) + ' ↗</a><p>' + html.escape(c['application']) + '</p><p class="assistance">' + html.escape(c['assistance']) + '</p>' + ('<ul>' + ''.join('<li>' + html.escape(x) + '</li>' for x in c['limits']) + '</ul>' if c['limits'] else '') + '</div>' for a,c in group['uses'])
+            entries.append('<details class="skill-entry"><summary><strong>' + html.escape(group['name']) + '</strong><span>' + str(len(group['uses'])) + ' work account' + ('s' if len(group['uses']) != 1 else '') + '</span><span aria-hidden="true">+</span></summary>' + uses + '</details>')
+        if entries: sections.append('<section class="skill-group"><h3>' + label + '</h3><div>' + ''.join(entries) + '</div></section>')
+    return '<section id="skills" class="document-view skills-view" aria-labelledby="skills-title"><div class="section-heading"><h2 id="skills-title">Skills &amp; tools</h2><span>' + str(len(groups)) + ' recorded</span></div>' + ''.join(sections) + '</section>'
 
 
 def account_capabilities(account):
@@ -254,6 +288,9 @@ def account_capabilities(account):
 
 def preserve_views(previous, incoming):
     missing = [key for key in ['timeline', 'interview', 'journey', 'publicProfile'] if previous.get(key) and not incoming.get(key)]
+    for key in ['coverage', 'reviews']:
+        if previous.get('journey', {}).get(key) and not incoming.get('journey', {}).get(key):
+            missing.append('journey.' + key)
     if missing:
         raise ValueError('Update would remove ' + ', '.join(missing) + '. Retain the complete packet; use --allow-remove-views only for intentional removal.')
 
@@ -276,6 +313,8 @@ def render(source, destination, *, overwrite=True, allow_view_removal=False, gui
     def paragraphs(text): return ''.join(f'<p>{esc(p)}</p>' for p in text.split('\n\n') if p.strip())
     def bullets(items): return '<ul>' + ''.join(f'<li>{esc(i)}</li>' for i in items) + '</ul>' if items else ''
     accounts = []
+    briefs = packet.get('presentation', {}).get('briefs', {})
+    brief_accounts = briefs.get('accounts', {}) if briefs.get('contextSha256') == sections.evidence_fingerprint(packet) else {}
     for ordinal, account in enumerate(packet['accounts'], 1):
         pictures = []
         for artifact in account.get('artifacts', []):
@@ -288,12 +327,35 @@ def render(source, destination, *, overwrite=True, allow_view_removal=False, gui
         questions = '<h4>Still to clarify</h4>' + bullets(account['questions']) if account['questions'] else ''
         refs = ' · '.join(f'<a href="#source-{esc(ref)}">{esc(next(s["label"] for s in packet["sources"] if s["id"]==ref))}</a>' for ref in account['sourceRefs'])
         limits = '<div class="limit" aria-label="Limits">' + bullets(account['limits']) + '</div>' if account['limits'] else ''
-        accounts.append(f'''<article class="account" id="account-{account['id']}"><div class="account-ordinal" aria-hidden="true">{ordinal:02d}</div><div class="account-main"><div class="account-heading"><span class="period">{esc(account['period']) or 'Period not recorded'}</span><h3>{esc(account['title'])}</h3></div><div class="account-summary">{paragraphs(account['summary'])}</div>{''.join(pictures)}{limits}{account_capabilities(account)}<details class="context-details"><summary>Context &amp; evidence <span class="arrow" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="m7 4 6 6-6 6"/></svg></span></summary>{details}{questions}<p class="references">Sources: {refs}</p></details></div></article>''')
+        review_link = f'<div class="account-review js-only" data-account-review="{account["id"]}"><a href="#path-review--{account["id"]}">Review this account</a></div>' if 'journey' in packet else ''
+        practice_label = 'Practise this story' if account['id'] in {s['id'] for s in packet.get('interview', {}).get('stories', [])} else 'Prepare this story'
+        review_link += f'<a class="account-practice" href="#prep-story-{account["id"]}">{practice_label} · optional →</a>'
+        review_link = '<div class="account-actions">' + review_link + '</div>'
+        brief = brief_accounts.get(account['id'])
+        summary = '<div class="account-brief">' + bullets(brief) + '</div>' if brief else '<div class="account-summary">' + paragraphs(account['summary']) + '</div>'
+        retained = '<div class="retained-account"><h4>Original account</h4>' + paragraphs(account['summary']) + '</div>' if brief else ''
+        evidence_label = 'Full account &amp; evidence' if brief else 'Context &amp; evidence'
+        accounts.append(f'''<article class="account{' has-brief' if brief else ''}" id="account-{account['id']}"><div class="account-ordinal" aria-hidden="true">{ordinal:02d}</div><div class="account-main"><div class="account-heading"><span class="period">{esc(account['period']) or 'Period not recorded'}</span><h3>{esc(account['title'])}</h3></div>{summary}{review_link}{'' if brief else ''.join(pictures) + limits}{account_capabilities(account)}<details class="context-details"><summary>{evidence_label} <span class="arrow" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="m7 4 6 6-6 6"/></svg></span></summary>{retained}{details}{(''.join(pictures) + limits) if brief else ''}{questions}<p class="references">Sources: {refs}</p></details></div></article>''')
+    account_html = dict(zip((a['id'] for a in packet['accounts']), accounts))
+    account_index = {a['id']: f'<a href="#account-{a["id"]}"><span aria-hidden="true">{i:02d}</span>{esc(a["title"])}</a>' for i, a in enumerate(packet['accounts'], 1)}
+    grouped_accounts, grouped_index = [], []
+    for group in sections.work_groups(packet):
+        label, ids = esc(group['title']), group['accountIds']
+        scope = esc(' '.join(ids))
+        content = ''.join(account_html[key] for key in ids)
+        if group['kind'] == 'background':
+            grouped_accounts.append(f'<details class="work-group work-background" data-work-group="{scope}"><summary>{label}</summary>{content}</details>')
+        else:
+            grouped_accounts.append(f'<section class="work-group" aria-label="{label}" data-work-group="{scope}"><p class="work-group-label">{label}</p>{content}</section>')
+        grouped_index.append(f'<div class="work-index-group" data-work-group="{scope}"><p>{label}</p>{"".join(account_index[key] for key in ids)}</div>')
     sources = []
     for s in packet['sources']:
         location = f'<p class="source-meta">{esc(s["locator"])}</p>' if s.get('locator') else ''
         source_date = f'<p class="source-meta">Source date: {esc(s["date"])}</p>' if s.get('date') else ''
-        sources.append(f'<details class="source" id="source-{s["id"]}"><summary><span>{esc(s["label"])}</span><small>{esc(s["kind"].replace("_", " "))}</small><span class="arrow" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="m7 4 6 6-6 6"/></svg></span></summary><div class="source-content">{source_date}{paragraphs(s["content"])}<p class="scope">{esc(s["scope"])}</p>{location}</div></details>')
+        related = ''.join(f'<a href="#account-{esc(a["id"])}">{esc(a["title"])}</a>' for a in packet['accounts'] if s['id'] in a['sourceRefs'])
+        related += ''.join(f'<a href="#quarter-{esc(p["id"])}">{esc(p["period"])}</a>' for p in packet.get('timeline', []) if s['id'] in p['sourceRefs'])
+        related = f'<nav class="source-used-by" aria-label="Used in">{related}</nav>' if related else ''
+        sources.append(f'<details class="source" id="source-{s["id"]}"><summary><span>{esc(s["label"])}</span><small>{esc(s["kind"].replace("_", " "))}</small><span class="arrow" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="m7 4 6 6-6 6"/></svg></span></summary><div class="source-content">{source_date}{paragraphs(s["content"])}<p class="scope">{esc(s["scope"])}</p>{location}</div>{related}</details>')
     profile = packet.get('profile', {})
     profile_html = ''.join('<div><dt>' + label + '</dt><dd>' + esc(' · '.join(profile[field])) + '</dd></div>'
                            for field, label in [('disciplines', 'Work'), ('targetRoles', 'Exploring'), ('emphasis', 'Focus')] if profile.get(field))
@@ -301,35 +363,38 @@ def render(source, destination, *, overwrite=True, allow_view_removal=False, gui
                                       for field in ['platform', 'location', 'status', 'scope', 'nextStep']) + '</tr>' for location in packet.get('collection', []))
     values = {
         'PATH': guided_path.render(packet, sections.evidence_fingerprint(packet)),
-        'PATHNAV': '<a href="#path" data-view="path">Your path</a>' if 'journey' in packet else '',
-        'HOME': '#path' if 'journey' in packet else '#work',
+        'PATHNAV': '<a href="#path" data-view="path">Build context</a>' if 'journey' in packet else '',
+        'HOME': '#path' if 'journey' in packet else '#timeline' if packet.get('timeline') else '#work',
+        'CONTEXTHOME': '#timeline' if packet.get('timeline') else '#work',
         'PATHCSS': (SKILL / 'assets/path.css').read_text(encoding='utf-8') if 'journey' in packet or 'publicProfile' in packet else '',
-        'PATHSCRIPT': (SKILL / 'assets/path.js').read_text(encoding='utf-8') if 'journey' in packet else '',
+        'PATHSCRIPT': '\n'.join((SKILL / ('assets/' + name)).read_text(encoding='utf-8') for name in ['coverage.js', 'path.js']) if 'journey' in packet else '',
         'PUBLIC': public_profile.render(packet, sections.evidence_fingerprint(packet)),
         'PUBLICNAV': '<a href="#profile" data-view="profile">Profile</a>' if 'publicProfile' in packet else '',
         'PUBLICCSS': (SKILL / 'assets/public-profile.css').read_text(encoding='utf-8') if 'publicProfile' in packet else '',
         'PUBLICSCRIPT': (SKILL / 'assets/public-profile.js').read_text(encoding='utf-8') if 'publicProfile' in packet else '',
-        'SECTIONSCSS': (SKILL / 'assets/sections.css').read_text(encoding='utf-8'),
-        'SECTIONSSCRIPT': (SKILL / 'assets/sections.js').read_text(encoding='utf-8'),
+        'SECTIONSCSS': (SKILL / 'assets/sections.css').read_text(encoding='utf-8') + '\n' + (SKILL / 'assets/explore.css').read_text(encoding='utf-8'),
+        'SECTIONSSCRIPT': (SKILL / 'assets/sections.js').read_text(encoding='utf-8') + '\n' + (SKILL / 'assets/explore.js').read_text(encoding='utf-8'),
         'TIMELINE': sections.timeline_html(packet),
         'INTERVIEW': sections.interview_html(packet),
         'TIMELINECOUNT': f'{len(packet.get("timeline", []))} periods' if packet.get('timeline') else '',
+        'EVIDENCE': sections.evidence_fingerprint(packet),
         'PREPSTATE': 'Draft for practice' if packet.get('interview') else '',
         'HEADLINE': esc(packet.get('presentation', {}).get('headline') or 'Work, in context.'),
         'FILES': '<nav class="related-files" aria-label="Local files">' + ''.join(f'<a href="{esc(item["path"])}">{esc(item["label"])}</a>' for item in packet.get('presentation', {}).get('files', [])) + '</nav>',
         'OPTIONS': ''.join(f'<option value="{a["id"]}">{esc(a["title"])}</option>' for a in packet['accounts']),
         'PROFILE': '<dl class="profile">' + profile_html + '</dl>' if profile_html else '',
         'CAPABILITIES': capability_index(packet['accounts']),
-        'SKILLSLINK': '<a href="#skills">Skills</a>' if any(a.get('capabilities') for a in packet['accounts']) else '',
+        'SKILLSLINK': '<a href="#skills" data-view="skills">Skills</a>' if any(a.get('capabilities') for a in packet['accounts']) else '',
         'SKILLOPTIONS': ''.join(f'<option value="{esc(name, quote=True)}">{esc(name)}</option>' for name in sorted({c['name'] for a in packet['accounts'] for c in a.get('capabilities', [])}, key=str.casefold)),
+        'SKILLFILTERHIDDEN': '' if any(a.get('capabilities') for a in packet['accounts']) else ' hidden',
         'COVERAGE': '<details class="coverage"><summary>Source coverage</summary><div class="table-scroll"><table><thead><tr><th>Platform</th><th>Location</th><th>State</th><th>Read scope</th><th>Next step</th></tr></thead><tbody>' + coverage + '</tbody></table></div></details>' if coverage else '',
         'TITLE': esc(packet['person']['name'] + ' — Career context'), 'NAME': esc(packet['person']['name']),
         'OVERVIEW': paragraphs(packet['person']['overview']), 'BACKGROUND': ('<section class="background" aria-labelledby="background-title"><h2 id="background-title">Broader background</h2>' + bullets(packet['person']['background']) + '</section>') if packet['person'].get('background') else '',
         'DATE': esc(packet['updatedAt']), 'STATUS': 'Draft for review' if packet['reviewStatus']=='draft' else 'Reviewed by the person',
         'COUNT': f'{len(packet["accounts"])} work account' + ('' if len(packet['accounts']) == 1 else 's'),
         'DEMO': '<p class="demo-notice">Synthetic demo data. These work accounts are fictional.</p>' if packet.get('synthetic') else '',
-        'ACCOUNTS': ''.join(accounts) or '<p class="empty">No work accounts recorded yet. Start with one project: what happened, what you did and what remains uncertain.</p>',
-        'INDEX': ''.join(f'<a href="#account-{a["id"]}"><span aria-hidden="true">{i:02d}</span>{esc(a["title"])}</a>' for i, a in enumerate(packet['accounts'], 1)),
+        'ACCOUNTS': ''.join(grouped_accounts or accounts) or '<p class="empty">No work accounts recorded yet. Start with one piece of work: what happened, what you did and what remains uncertain.</p>',
+        'INDEX': ''.join(grouped_index) if grouped_index else ''.join(account_index.values()),
         'SOURCES': ''.join(sources) or '<p>No sources included yet.</p>',
         'DATA': json.dumps(packet, ensure_ascii=True).replace('<', '\\u003c').replace('&', '\\u0026'),
     }

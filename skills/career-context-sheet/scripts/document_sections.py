@@ -77,43 +77,125 @@ def references(packet, ids):
         f'<a href="#source-{esc(key)}">{esc(names[key])}</a>' for key in ids) + '</div>'
 
 
+def period_year(period):
+    match = re.search(r'\b(?:19|20)\d{2}\b', period['period'])
+    return match.group() if match else 'Other periods'
+
+
+def timeline_reading(packet):
+    reading = packet.get('presentation', {}).get('timelineReading', {})
+    return reading if reading.get('contextSha256') == evidence_fingerprint(packet) else {}
+
+
+def work_groups(packet):
+    projection = packet.get('presentation', {}).get('workGroups', {})
+    return projection.get('groups', []) if projection.get('contextSha256') == evidence_fingerprint(packet) else []
+
+
+def validate_work_groups(packet, check_text, keys):
+    projection = packet.get('presentation', {}).get('workGroups')
+    if projection is None: return
+    keys(projection, ['contextSha256', 'groups'], 'Work groups')
+    if not isinstance(projection.get('contextSha256'), str) or not re.fullmatch('[a-f0-9]{64}', projection['contextSha256']):
+        raise ValueError('Work groups need an evidence fingerprint')
+    groups = projection.get('groups')
+    if not isinstance(groups, list) or not 1 <= len(groups) <= 20:
+        raise ValueError('Work groups need one to twenty groups')
+    seen = set()
+    for group in groups:
+        keys(group, ['title', 'kind', 'accountIds'], 'Work group')
+        check_text(group.get('title'), 'Work group title', 80)
+        if not group['title'].strip() or group.get('kind') not in ['work', 'background']:
+            raise ValueError('Work groups need a title and work or background kind')
+        ids = group.get('accountIds')
+        if not isinstance(ids, list) or not 1 <= len(ids) <= 300 or any(not isinstance(i, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,99}', i) for i in ids):
+            raise ValueError('Work groups need bounded account IDs')
+        if len(set(ids)) != len(ids) or set(ids) & seen:
+            raise ValueError('Each account belongs to one work group')
+        seen.update(ids)
+    if projection['contextSha256'] == evidence_fingerprint(packet) and seen != {a['id'] for a in packet['accounts']}:
+        raise ValueError('Work groups must include every saved account exactly once')
+
+
+def validate_timeline_reading(packet, check_text, keys):
+    reading = packet.get('presentation', {}).get('timelineReading')
+    if reading is None: return
+    keys(reading, ['contextSha256', 'periods', 'years'], 'Timeline reading')
+    if not isinstance(reading.get('contextSha256'), str) or not re.fullmatch('[a-f0-9]{64}', reading['contextSha256']):
+        raise ValueError('Timeline reading needs an evidence fingerprint')
+    periods = packet.get('timeline', [])
+    accounts = {a['id'] for a in packet['accounts']}
+    fresh = reading['contextSha256'] == evidence_fingerprint(packet)
+    for group, allowed in [('periods', {p['id'] for p in periods}), ('years', {period_year(p) for p in periods})]:
+        entries = reading.get(group)
+        if not isinstance(entries, dict) or len(entries) > 240 or any(not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_ -]{0,99}', key) for key in entries) or (fresh and set(entries) - allowed):
+            raise ValueError('Timeline reading must reference saved ' + group)
+        for entry in entries.values():
+            keys(entry, ['title', 'bullets', 'accountIds'] if group == 'periods' else ['title', 'bullets'], 'Timeline reading entry')
+            check_text(entry.get('title'), 'Timeline reading title', 160)
+            if not entry['title'].strip(): raise ValueError('Timeline reading title must not be blank')
+            lines = entry.get('bullets')
+            if not isinstance(lines, list) or not 1 <= len(lines) <= 3:
+                raise ValueError('Timeline reading needs one to three bullets')
+            for line in lines:
+                check_text(line, 'Timeline reading bullet', 600)
+                if not line.strip(): raise ValueError('Timeline reading bullets must not be blank')
+            if group == 'periods':
+                ids = entry.get('accountIds')
+                if not isinstance(ids, list) or len(ids) > 300 or any(not isinstance(i, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,99}', i) for i in ids) or len(set(ids)) != len(ids) or (fresh and set(ids) - accounts):
+                    raise ValueError('Timeline reading links must resolve without duplicates')
+
+
 def timeline_html(packet):
     periods = packet.get('timeline', [])
     if not periods:
         return '<p class="empty">No dated career timeline recorded yet. Add supported periods from your work history.</p>'
     accounts = {a['id']: a for a in packet['accounts']}
     stories = {s['id'] for s in packet.get('interview', {}).get('stories', [])}
+    reading = timeline_reading(packet)
     index, body = [], []
+    current_year = None
     for ordinal, period in enumerate(periods):
         key = esc(period['id'])
-        index.append(f'<a href="#quarter-{key}"><span>{esc(period["period"])}</span>{esc(period["title"])}</a>')
+        year = period_year(period)
+        brief = reading.get('periods', {}).get(period['id'])
+        title = brief['title'] if brief else period['title']
+        account_ids = list(dict.fromkeys(period['accountIds'] + (brief['accountIds'] if brief else [])))
+        if year != current_year:
+            if current_year is not None: index.append('</div></div>')
+            index.append(f'<div class="timeline-year" data-year="{esc(year)}"><button type="button" class="timeline-year-label js-only" data-year="{esc(year)}" aria-pressed="false">{esc(year)}</button><span class="no-script">{esc(year)}</span><div class="timeline-periods">')
+            current_year = year
+        short = period['period'].replace(year, '', 1).strip() or year
+        index.append(f'<a href="#quarter-{key}" data-period-index="{ordinal}" aria-label="{esc(period["period"] + ": " + title)}" title="{esc(title)}"><span>{esc(short)}</span></a>')
         work = ''.join(f'<a href="#account-{esc(aid)}">{esc(accounts[aid]["title"])} <span aria-hidden="true">↗</span></a>'
-                       for aid in period['accountIds'])
-        practice = ''.join(f'<a href="#prep-story-{esc(aid)}">Practise this story <span aria-hidden="true">→</span></a>'
-                           for aid in period['accountIds'] if aid in stories)
+                       for aid in account_ids)
+        practice = ''.join(f'<a href="#prep-story-{esc(aid)}">Practise: {esc(accounts[aid]["title"])} <span aria-hidden="true">→</span></a>'
+                           for aid in account_ids if aid in stories)
         next_links = ''.join(f'<a href="#quarter-{esc(periods[i]["id"])}">{label} {esc(periods[i]["period"])}</a>'
                              for i, label in [(ordinal - 1, '←'), (ordinal + 1, '→')] if 0 <= i < len(periods))
         readings = ''.join(f'<section><h4>{label}</h4>{paragraphs(period[field])}</section>'
                            for field, label in [('tension', 'Pressure & limits'), ('approach', 'Change in approach')]
                            if period[field])
-        body.append(f'''<article class="quarter-reading" id="quarter-{key}" tabindex="-1">
-<span class="period">{esc(period['period'])}</span><h3>{esc(period['title'])}</h3>
-<div class="quarter-focus">{paragraphs(period['focus'])}</div>
-<details class="section-detail" open><summary>The work</summary>{bullets(period['actions'])}</details>
-<div class="quarter-interpretation">{readings}</div>
+        original = f'<div class="quarter-focus">{paragraphs(period["focus"])}</div><h4>The work</h4>{bullets(period["actions"])}<div class="quarter-interpretation">{readings}</div>'
+        content = (f'<div class="period-brief">{bullets(brief["bullets"])}</div><details class="section-detail"><summary>Full period record</summary><h4>{esc(period["title"])}</h4>{original}</details>' if brief else original)
+        body.append(f'''<details class="quarter-reading" id="quarter-{key}"><summary><span class="period">{esc(period['period'])}</span><strong>{esc(title)}</strong><span aria-hidden="true">+</span></summary><div class="quarter-body">
+{content}
 <details class="section-detail"><summary>Sources &amp; open questions</summary>{bullets(period['questions'])}{references(packet, period['sourceRefs'])}</details>
-<div class="related-work">{work}{practice}</div><nav class="period-next" aria-label="Adjacent career periods">{next_links}</nav></article>''')
-    return ('<div class="timeline-layout"><nav class="period-index" aria-label="Career periods">' + ''.join(index) +
-            '</nav><div class="timeline-readings">' + ''.join(body) + '</div></div>')
+<div class="related-work">{work}{practice}</div><nav class="period-next" aria-label="Adjacent career periods">{next_links}</nav></div></details>''')
+    index.append('</div></div>')
+    overviews = ''.join(f'<section class="year-overview" data-overview-year="{esc(year)}"><h3>{esc(entry["title"])}</h3>{bullets(entry["bullets"])}</section>' for year, entry in reading.get('years', {}).items())
+    options = ''.join(f'<option value="{esc(p["id"])}">{esc(p["period"])}</option>' for p in periods)
+    return ('<div class="timeline-layout"><nav class="period-index" aria-label="Select career years and periods">'
+            + ''.join(index) + '</nav><div class="timeline-selection js-only"><div class="timeline-range-summary"><strong id="timeline-range-label"></strong><span id="timeline-range-count"></span><a id="timeline-work" href="#work">View work →</a><a id="timeline-sources" href="#sources">Sources ↗</a></div><div class="timeline-brief-controls"><label><span class="sr-only">Use selected context for</span><select id="timeline-purpose"><option value="patterns">Patterns</option><option value="cv">CV bullets</option><option value="interview">Interview</option><option value="profile">Profile</option></select></label><button type="button" id="timeline-copy" class="primary">Copy prompt</button><details class="timeline-options"><summary>Adjust dates &amp; sources</summary><div class="timeline-dates"><label>From<select id="timeline-from">' + options + '</select></label><label>To<select id="timeline-to">' + options + '</select></label></div><label class="timeline-excerpts"><input type="checkbox" id="timeline-excerpts">Include source excerpts</label></details></div><p class="status" id="timeline-status" role="status"></p></div><div class="timeline-readings">' + overviews + ''.join(body) + '</div></div>')
+
 
 
 def interview_html(packet):
     prep = packet.get('interview')
-    if prep is None:
-        return '<p class="empty">Interview preparation has not been drafted yet. Use the work accounts to prepare an opening and supported answers.</p>'
+    if prep is None and not packet['accounts']:
+        return '<p class="empty">No practice stories yet. Start with a work account and the question it could answer.</p>'
+    prep = prep or {'stories': [], 'questions': [], 'opening': [], 'throughline': '', 'priorityGap': None}
     accounts = {a['id']: a for a in packet['accounts']}
-    options = ''.join(f'<option value="{esc(s["id"])}">{esc(accounts[s["id"]]["title"])}</option>' for s in prep['stories'])
-    signals = ''.join(f'<li><a href="#prep-story-{esc(s["storyId"])}">{esc(s["title"])}</a><p>{esc(s.get("summary",s["reason"]))}</p></li>' for s in prep['signals'])
     intro_options = ''.join(f'<details class="section-detail"><summary>{esc(o["title"])}</summary>{paragraphs(o["text"])}</details>' for o in prep.get('introOptions', []))
     opening = ''.join(paragraphs(p) for p in prep['opening'])
     body = []
@@ -121,30 +203,28 @@ def interview_html(packet):
         account, key = accounts[story['id']], esc(story['id'])
         chapters = ''.join(f'<li><h4>{esc(c["title"])}</h4>{paragraphs(c["text"])}</li>' for c in story['chapters'])
         pace = ''.join(f'<li><span class="period">{esc(m["when"])}</span>{paragraphs(m["text"])}</li>' for m in story['timeline'])
-        questions = ''.join(f'''<details class="section-detail answer" open><summary>{esc(q['question'])}</summary>
-<p class="question-tests">{esc(q['tests'])}</p>{paragraphs(q['answer'])}
-<details class="answer-reason"><summary>Why this example</summary>{paragraphs(q['reason'])}</details></details>'''
-                            for q in prep['questions'] if q['storyId'] == story['id'])
+        questions = ''.join(f'<details class="section-detail answer"><summary>{esc(q["question"])}</summary><p class="question-tests">{esc(q["tests"])}</p>{paragraphs(q["answer"])}<details class="answer-reason"><summary>Why this example</summary>{paragraphs(q["reason"])}</details></details>' for q in prep['questions'] if q['storyId'] == story['id'])
         note = packet.get('rehearsal', {}).get('notes', {}).get(story['id'], story.get('practice', ''))
-        body.append(f'''<article class="prep-story" id="prep-story-{key}" tabindex="-1">
-<span class="period">{esc(account['period'])}</span><h3>{esc(account['title'])}</h3>
-<p class="story-takeaway">{esc(story['takeaway'])}</p>{questions}
-<details class="section-detail"><summary>Story chapters</summary><ol class="story-chapters">{chapters}</ol></details>
-<details class="section-detail"><summary>Sequence &amp; pace</summary><ol class="story-pace">{pace}</ol></details>
-<div class="prep-credit"><h4>Shared work &amp; limits</h4>{paragraphs(account['sharedCredit'])}{bullets(account['limits'])}</div>
-<details class="section-detail"><summary>What to sharpen</summary>{paragraphs(story.get('practice', ''))}{bullets(account['questions'])}
-<label class="rehearsal-editor js-only" for="rehearsal-{key}">Private rehearsal note<textarea id="rehearsal-{key}" data-rehearsal="{key}" maxlength="15000" rows="4">{esc(note)}</textarea></label></details>
+        body.append(f'''<details class="prep-story" id="prep-story-{key}"><summary><span class="period">{esc(account['period'])}</span><span class="story-label"><strong>{esc(account['title'])}</strong><span>{esc(story['takeaway'])}</span></span><span class="story-expand" aria-hidden="true">+</span></summary><div class="story-workspace">
+<div class="practice-guide"><h3>Practise this story</h3><ol><li><strong>Set the scene.</strong> Name the problem and your responsibility.</li><li><strong>Explain a decision.</strong> What did you choose, and why?</li><li><strong>Give the result.</strong> Keep shared credit and unknowns clear.</li></ol><button type="button" class="path-primary js-only" data-practise-story="{key}">Copy practice prompt</button><p class="status" role="status" data-practice-status="{key}"></p></div>
+<div class="practice-detail"><p class="question-tests">{esc(story['tests'])}</p>{questions}
+<details class="section-detail"><summary>Story &amp; sequence</summary><ol class="story-chapters">{chapters}</ol><ol class="story-pace">{pace}</ol></details>
+<details class="section-detail"><summary>Shared work &amp; limits</summary>{paragraphs(account['sharedCredit'])}{bullets(account['limits'])}</details>
+<details class="section-detail"><summary>What to sharpen</summary>{paragraphs(story.get('practice', ''))}{bullets(account['questions'])}</details>
+<label class="rehearsal-editor js-only" for="rehearsal-{key}">Your answer &amp; practice notes<textarea id="rehearsal-{key}" data-rehearsal="{key}" maxlength="15000" rows="5">{esc(note)}</textarea></label>
 <div class="no-script" data-rehearsal-display="{key}">{paragraphs(note)}</div>
-<div class="related-work"><a href="#account-{key}">Work account &amp; sources <span aria-hidden="true">↗</span></a></div></article>''')
-    target = '<p class="period">' + esc(prep['target']) + '</p>' if prep['target'] else ''
+<div class="related-work"><a href="#account-{key}">Work account &amp; sources ↗</a></div></div></div></details>''')
     gap = prep['priorityGap']
-    gap_html = (f'<details class="section-detail"><summary>One question to resolve</summary><h4>{esc(gap["question"])}</h4>{paragraphs(gap["why"])}</details>') if gap else ''
-    return f'''<div class="prep-layout"><aside class="prep-index"><h3>Start with</h3><ol>{signals}</ol>
-<details class="section-detail"><summary>Why these stories</summary>{paragraphs(prep['throughline'])}</details>
-<details class="section-detail"><summary>Practice guide</summary><ol><li>Start with the opening. Choose the story that answers the actual question.</li><li>Explain the situation, your decision and your part. Keep shared work explicit.</li><li>Give the result and its limits, then pause. Use the chapters when asked for detail.</li><li>Record anything you could not explain. Keep unverified details as questions.</li></ol></details>
-<button class="text-button js-only" id="copy-prep" type="button">Copy interview prep <span aria-hidden="true">↗</span></button>
-<p id="prep-status" class="status" role="status"></p></aside><div class="prep-reading">
-{target}<details class="opening section-detail" open><summary>Tell me about yourself</summary><div class="opening-text">{opening}</div>
-{('<details class="section-detail"><summary>Alternative openings</summary>'+intro_options+'</details>') if intro_options else ''}</details>
-<label class="story-picker js-only" for="prep-story-select">Practise a story<select id="prep-story-select">{options}</select></label>
-{''.join(body)}{gap_html}</div></div>'''
+    gap_html = f'<details class="section-detail"><summary>One question to resolve</summary><h4>{esc(gap["question"])}</h4>{paragraphs(gap["why"])}</details>' if gap else ''
+    prepared = {s['id'] for s in prep['stories']}
+    missing = []
+    for account in packet['accounts']:
+        if account['id'] in prepared: continue
+        key = esc(account['id'])
+        missing.append(f'''<details class="prep-story prep-needed" id="prep-story-{key}"><summary><span class="period">{esc(account['period'])}</span><span class="story-label"><strong>{esc(account['title'])}</strong></span><span class="story-expand" aria-hidden="true">+</span></summary><div class="story-workspace">
+<div class="practice-guide"><h3>Prepare this story</h3><p>Copy this account to your assistant to draft an answer, then practise one question at a time.</p><button type="button" class="path-primary js-only" data-prepare-story="{key}">Copy preparation prompt</button><p class="status" role="status" data-practice-status="{key}"></p></div>
+<div class="practice-detail">{paragraphs(account['summary'])}<details class="section-detail"><summary>Shared work &amp; limits</summary>{paragraphs(account['sharedCredit'])}{bullets(account['limits'])}</details><div class="related-work"><a href="#account-{key}">Back to work account →</a></div></div></div></details>''')
+    pending = ('<details class="practice-unprepared section-detail"><summary>Prepare another story · ' + str(len(missing)) + '</summary>' + ''.join(missing) + '</details>') if missing and body else ''.join(missing)
+    intro = f'<div class="practice-introduction"><details class="opening section-detail"><summary>Introduce yourself</summary><div class="opening-text">{opening}</div>{intro_options}</details><details class="section-detail"><summary>How these stories fit together</summary>{paragraphs(prep["throughline"])}</details></div>' if packet.get('interview') else ''
+    copy_all = '<button class="text-button js-only" id="copy-prep" type="button">Copy all preparation ↗</button>' if packet.get('interview') else ''
+    return f'{intro}<div class="practice-stories">{"".join(body)}</div>{pending}{gap_html}<div class="practice-footer">{copy_all}<p id="prep-status" class="status" role="status"></p></div>'

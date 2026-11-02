@@ -32,6 +32,8 @@ The opening establishes the work, permitted source locations and privacy boundar
 
 The [longer starting prompt](../prompts/START-HERE.md) is available for broader research. Existing material and corrections should carry forward, including your wording when it is selected as an exact account. Review the result before changing its state from draft to reviewed.
 
+The first complete run should connect your stated purpose, meaningful changes and specific work examples, then select the visual evidence that helps explain them. Goals remain distinct from results; an older image cannot prove newer capabilities. Unknown purpose or direction and missing visuals can stay open. No role, industry, promotion or digital work sample is required. A public draft is created only when requested, and its selected content should make sense on its own.
+
 If a session ends early, give the next agent the existing HTML and saved private research state:
 
 > Resume my career context from the saved draft and next-read queue. Reuse checked evidence and my corrections. Follow the highest-value unresolved question, challenge the affected claims, and update the same complete document. Tell me what changed and what remains blocked.
@@ -40,11 +42,15 @@ Without saved research state, the agent can resume from the HTML's selected evid
 
 ## Read, reuse and update
 
-Open the HTML in a browser. Work, Career timeline and Interview prep share one file and its evidence. Search for work or choose a skill to narrow the accounts. The **Skills & tools** index opens the related work with its contribution, assistance and limits.
+Open the HTML in a browser. Build context is the main flow. My context contains Timeline, Work and optional Skills; Profile controls what you share. Select a year or period, open related Work, then review the account or investigate a meaningful gap. Practice remains an optional use in the footer. Search for work or choose a skill to narrow the accounts. The **Skills & tools** index opens the related work with its contribution, assistance and limits.
 
-For the six-step review path, ask the agent to render with `--guided`. **Your voice** accepts a writing `SKILL.md`, pasted instructions or a sample; copy the brief to your preferred assistant, then paste the version you want to keep. Your original wording stays available. **Profile** is the final tab for a separate public draft. Use **Export public HTML** for that draft alone; check for confidential details before sharing. General accounts of real work should not be labelled synthetic. That label is for newly made demonstrations with no confidential data.
+A fresh complete document uses `--guided` by default. Open Build context for the five-step path. **Collect context** maps source locations against months. Set dates and locations, including work email when useful, then give the copied collection task and saved HTML to your coach. The coach reads authorized records in batches and saves receipts and checkpoints. Existing excerpts do not mark a whole month checked; blocked periods remain visible.
 
-The export panel shows the current copy scope. Expand it to choose all accounts, visible results or one account, and whether to include source excerpts. **Preview text** shows exactly what **Copy for an agent** copies. If clipboard access fails, the text is selected for manual copying. **Save full HTML** always downloads the complete portable file with filters reset; **Download full JSON** exports the complete packet while selected image bytes remain in the HTML.
+**Review this account** opens the matching work account. Keep the original, choose a supported revision for the next update, or leave a correction awaiting evidence. Progress counts accounts reviewed. **Your voice** includes review and deepening annotations and accepts a writing `SKILL.md`, pasted instructions or a sample. Copy the brief to your preferred assistant and paste the result; narrow large briefs to one account. Original wording stays available.
+
+**Profile** is the final tab for a separate public draft. Use **Export public HTML** for that draft alone; check for confidential details before sharing. General accounts of real work should not be labelled synthetic. That label is for newly made demonstrations with no confidential data.
+
+Copying defaults to the visible work. Entering from Timeline or changing a Work filter resets that scope. The export panel shows the current copy scope. Expand it to choose all accounts, visible results or one account, and whether to include source excerpts. **Preview text** shows exactly what **Copy work** copies. If clipboard access fails, the text is selected for manual copying. **Save full HTML** always downloads the complete portable file with filters reset; **Download full JSON** exports the complete packet while selected image bytes remain in the HTML.
 
 Attach the HTML to another agent with a separate request, such as: "Use this context to help me prepare for an interview." The file includes selected source excerpts as well as the visible account; review it before sharing.
 
@@ -54,7 +60,7 @@ To update it, give the existing HTML and corrections to the skill. Keep account 
 
 Ask the agent to [prepare an interview](../skills/career-context-sheet/references/interview-prep.md) from your career context and any target you have supplied. It gathers authorized context, selects the strongest stories and drafts all six parts, including an introduction, answers, chapters and timelines. Review the result and practise; answer only the important gaps the available material cannot resolve.
 
-**Copy interview prep** carries the prepared draft, shared credit and limits into your model. Rehearsal notes save in the browser; use **Save full HTML** to keep a portable copy. Correct the career-context source and ask the agent to regenerate the preparation when facts change. Copy the HTML file itself to move it between devices.
+**Copy practice prompt** carries one prepared story into your assistant. **Copy preparation prompt** starts from an account that has no prepared story yet. **Copy all preparation** carries the complete prepared draft. Shared credit and limits remain attached. Rehearsal notes save in the browser; use **Save full HTML** to keep a portable copy. Correct the career-context source and ask the agent to regenerate the preparation when facts change. Copy the HTML file itself to move it between devices.
 
 ## Render without an agent
 
@@ -62,7 +68,7 @@ From the full project:
 
 ```sh
 python career_context.py demo ../career-context-demo.html
-python career_context.py render ../my-context/context.json ../my-context/career-context.html
+python career_context.py render ../my-context/context.json ../my-context/career-context.html --guided
 ```
 
 Prepare personal JSON using [the format](../skills/career-context-sheet/references/format.md). Replace fictional content completely; omit `synthetic` or set it to `false`. That label does not anonymize data.
@@ -70,7 +76,7 @@ Prepare personal JSON using [the format](../skills/career-context-sheet/referenc
 From a standalone skill, run its renderer directly:
 
 ```sh
-python scripts/render_context.py ../my-context/context.json ../my-context/career-context.html
+python scripts/render_context.py ../my-context/context.json ../my-context/career-context.html --guided
 ```
 
 Resolve that script from the extracted skill folder. Existing HTML is also valid input. Both entrypoints preserve an existing output unless you add `--force`; malformed input leaves the old file intact.
@@ -80,7 +86,7 @@ Resolve that script from the extracted skill folder. Existing HTML is also valid
 The agent can create the database and HTML together from the context it has prepared:
 
 ```sh
-python skills/career-context-sheet/scripts/archive_context.py build ../my-input/context.json ../my-context
+python skills/career-context-sheet/scripts/archive_context.py build ../my-context/career-context.html ../my-context
 python skills/career-context-sheet/scripts/archive_context.py search ../my-context/career.sqlite "project"
 ```
 
@@ -97,3 +103,7 @@ The full repository also provides [local context setup](LOCAL-CONTEXT.md) and an
 [Privacy and storage](PRIVACY.md) explains what is retained and what your chosen model receives.
 
 Copy all accounts or select one; private source excerpts are excluded from copied text unless selected. Attribution and limits remain. Full HTML and JSON always include all selected sources. Optional links lead to separately delivered local files.
+
+In Profile, use **Choose what to share** to include or withhold your overview, North Star, direction, work examples, deeper context, progression periods and work samples. **Download selected profile** exports that selection. Included details remain in the file when collapsed; this creates a local file, not revocable access. Unselected drafts survive full private saves; opening Profile does not copy your private context overview. Newly added components start unselected.
+
+In **Edit → Work samples**, add screenshots or HTTPS video links. New media starts unselected. Add a useful image description and any needed caption or credit, then select it in **Choose what to share**. Selected screenshots are embedded in the download; video links open the external site when clicked. Unselected media stays in your private working file.

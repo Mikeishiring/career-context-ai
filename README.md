@@ -14,7 +14,7 @@ Use work documents only with an approved model and sources you are allowed to sh
 
 Find work by its title, activity or tool. **Skills & tools** links each capability to the accounts behind it. Open an account's evidence, then use **Preview text** to inspect an export of all accounts, visible results or one account. Shared credit, assistance and limits travel with the text. GitHub displays HTML as source; use the downloaded file.
 
-**Career timeline** connects supported periods to the work. **Interview prep** includes an opening, lead stories, drafted answers, chapters and rehearsal notes. They are views of this same file. [Bring an older notebook into it](skills/career-context-sheet/references/notebook.md).
+**Timeline** connects supported periods to related Work. Optional **Practice** reuses those accounts when you want interview preparation. They are views of this same file. [Bring an older notebook into it](skills/career-context-sheet/references/notebook.md).
 
 ## Make it yours
 
@@ -26,13 +26,13 @@ The skill works independently of a job-search service. Keep things you have done
 
 Start with one useful account. Expect a provisional draft, focused deepening, then a challenge and consolidation pass. The agent runs these within the session where possible; you should not need to keep asking it to go deeper. It saves evidence and the next step so interrupted work can resume. [See the complete flow](docs/FROM-EVIDENCE-TO-STORY.md).
 
-Ask for the guided path to review the original draft, fill gaps, find the thread, refine your voice and practise. Add your preferred writing `SKILL.md` or a sample. The final **Profile** tab holds a separate public draft; **Export public HTML** includes only that profile. Full HTML and JSON remain private working files.
+Fresh complete documents open Build context to plan collection by location and month, review accounts, resolve meaningful gaps, connect experiences and retain your voice. Practice is optional. The checklist retains read counts, evidence and continuation points, including blocked or excluded periods. Review corrections travel into the writing brief; add your preferred writing `SKILL.md` or a sample. The final **Profile** tab holds a separate public draft; **Export public HTML** includes only its selected overview, examples and time periods. Unselected drafts remain in the private file. Full HTML and JSON remain private working files.
 
 For [GitHub and social profiles](skills/career-context-sheet/references/github-and-social.md), it inventories authorized locations, checks selected code and history, follows original threads and records what remains unread. Older projects and unfinished experiments can belong in the context even when the resume stays concise.
 
 [Get started with Claude, Codex or another agent](docs/GETTING-STARTED.md).
 
-Ask the agent to [prepare an interview](skills/career-context-sheet/references/interview-prep.md). It updates Interview prep in the same document with an introduction, answers, story chapters and recorded milestones. You review, practise and resolve genuine gaps.
+Ask the agent to [prepare an interview](skills/career-context-sheet/references/interview-prep.md). It updates Practice in the same document with an introduction, answers, story chapters and recorded milestones. You review, practise and resolve genuine gaps.
 
 Supply a vacancy to [compare it with your context](skills/career-context-sheet/references/role-comparison.md). The agent checks the full job description, searches work accounts, timeline sources and authorized originals, and distinguishes direct experience, transferable work and unresolved evidence. Useful new evidence is carried back into the same career document, with timeline links and refreshed interview preparation. The bundled retrieval helper finds reading leads; the agent makes the assessment.
 

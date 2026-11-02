@@ -1,0 +1,27 @@
+// Pure collection-state tests: no browser, network, model or personal records.
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),path=require('node:path');
+const box={};vm.createContext(box);vm.runInContext(fs.readFileSync(path.join(__dirname,'../skills/career-context-sheet/assets/coverage.js'),'utf8'),box);
+const packet={sources:[{id:'s1'}],collection:[{platform:'Email',location:'Selected export',scope:'Work records',status:'read'}]};
+const plan=box.coverageInitial(packet);assert.equal(plan.checks.length,0);assert.equal(box.coverageComplete(plan),false);
+const legacy={sources:[],collection:[{platform:'p'.repeat(200),location:'l'.repeat(400),scope:'s'.repeat(2100)+' Exclude private mail.'}]};
+assert.equal(box.coverageInitial(legacy).streams[0].scope,legacy.collection[0].scope);
+assert.equal(box.coverageError(box.coverageInitial(legacy),legacy),'');
+Object.assign(plan,{startMonth:'2025-12',endMonth:'2026-01'});assert.equal(box.coverageMonths(plan).join(','),'2025-12,2026-01');
+const receipt={streamId:'source-1',month:'2025-12',status:'in_progress',note:'Batch one',sourceRefs:['s1'],cursor:'next',found:20,read:10};plan.checks=[receipt];
+assert.equal(box.coverageError(plan,packet),'');assert.equal(box.coverageComplete(plan),false);
+receipt.status='checked';assert.ok(box.coverageError(plan,packet));
+Object.assign(receipt,{cursor:'',read:20});assert.equal(box.coverageError(plan,packet),'');assert.equal(box.coverageComplete(plan),false);
+plan.checks.push({...receipt,month:'2026-01',status:'blocked',note:'No access',sourceRefs:[],found:0,read:0});assert.equal(box.coverageComplete(plan),false);
+plan.checks[1].status='excluded';assert.equal(box.coverageError(plan,packet),'');assert.equal(box.coverageComplete(plan),true);
+plan.checks[1].note='';assert.ok(box.coverageError(plan,packet));
+plan.checks[1]={...receipt,month:'2026-01',status:'empty',note:'Zero matching work records; all pages exhausted.',sourceRefs:[],found:0,read:0};assert.equal(box.coverageError(plan,packet),'');
+plan.checks[1].cursor='more';assert.ok(box.coverageError(plan,packet));
+plan.checks[1].cursor='';plan.startMonth='2026-01';assert.ok(box.coverageError(plan,packet));
+console.log('Collection state: 15 assertions passed.');
+vm.runInContext('const document={getElementById:()=>null};'+fs.readFileSync(path.join(__dirname,'../skills/career-context-sheet/assets/path.js'),'utf8'),box);
+assert.equal(box.parsePathHash('#path-review--project--one').accountId,'project--one');
+assert.equal(box.parsePathHash('#path-deepen--project_name').step,'deepen');
+assert.equal(box.parsePathHash('#path-write').accountId,'');
+assert.equal(box.parsePathHash('#path-review--not/an/id'),null);
+assert.equal(box.parsePathHash('#unknown'),null);
+console.log('Review route parsing: 5 assertions passed.');

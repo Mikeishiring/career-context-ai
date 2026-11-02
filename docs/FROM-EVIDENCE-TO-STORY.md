@@ -13,9 +13,11 @@ Reuse context → scope sources → first account → deepen → challenge → p
 | Deepen | Pursue the questions most likely to change the story; check earlier origins, later outcomes and overlooked work. | Specific additions and corrections, not merely more text. |
 | Challenge | Check actor, action, state and chronology; revisit omitted evidence and contrary accounts. | Supported claims and material limits in the prose. |
 | Person review | Ask about missing meaning and misrepresentation. Recheck affected claims after corrections. | The person's feedback; pending feedback keeps draft status. |
-| Reuse | Save Work, Career timeline and Interview prep in one HTML with a private archive. Derive a resume or role comparison when requested. | Stable accounts and sources; new evidence updates the same document. |
+| Reuse | Save Timeline and Work in one private HTML with its archive. Profile controls selected sharing; Practice, resumes and role comparisons are optional uses. | Stable accounts and sources; new evidence updates the same document. |
 
 The agent owns the passes; the person should not have to say "go deeper" between them. For new context, plan for several passes within the session where possible. A narrow correction reopens only affected work. The first draft is a foundation, not a measured percentage of a complete career history.
+
+The first complete reading connects stated purpose, supported progression and examples, with the strongest relevant visual evidence. Compare useful visual candidates within scope and identify the claim each actually supports; retain historical-version and outcome limits. Unknown purpose, parallel work and absent visuals remain valid. A requested public draft is reviewed using only its selected content, so withholding a component does not leave an unexplained caption or claim. The [progression guide](../skills/career-context-sheet/references/progression-and-direction.md) defines these decisions without prescribing a role or industry.
 
 Keep each batch to a small set of questions and relevant originals. Save evidence, corrections, what changed and the next useful action before the working context becomes crowded. A saved assistant summary is a navigation aid, not independent evidence. The [agent guide](../skills/career-context-sheet/references/deepening-and-story.md) defines the operational loop and recovery state; it is included in the standalone bundle.
 

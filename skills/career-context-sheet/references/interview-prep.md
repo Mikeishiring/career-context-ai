@@ -1,6 +1,6 @@
 # Prepare an interview
 
-Prepare the draft inside the complete career document. Gather relevant material through the host's already-authorized sources, reuse their career context and stated target, and fill all six parts before asking for missing information. The person reviews and practises; do not hand them a blank worksheet or a separate default version.
+Use this workflow only when interview preparation is requested. It is an optional use of career context, never a required onboarding step. Prepare the draft inside the complete career document. Gather relevant material through the host's already-authorized sources, reuse their career context and stated target, and fill all six parts before asking for missing information. The person reviews and practises; do not hand them a blank worksheet or a separate default version.
 
 Select the strongest supported accounts, keeping one to three as the lead stories. Preserve the person's voice, decisions, shared credit, corrections, later outcomes and useful personal context. Do not turn a team action into a personal one, an unfinished idea into delivery, or continued use into a measured benefit. A target role is optional; use null when none was supplied.
 
@@ -96,6 +96,6 @@ Check every drafted factual clause against the referenced accounts and sources, 
 
 Open the result at desktop and mobile widths. All six parts should already be useful. Sources, copy fallback, keyboard navigation, printing and reading without JavaScript should work. The browser does not connect to accounts or refresh itself.
 
-Use Copy interview prep to continue practice or request a revision. Gather available context before asking a question. A factual correction belongs in the career-context source first, then regenerate preparation from its new fingerprint. Private rehearsal notes are a separate working layer in this same packet; they do not silently change career facts. Save full HTML to carry browser edits between devices.
+Use Copy practice prompt for one prepared story, or Copy all preparation for the full draft. Work accounts without prepared stories open Prepare this story; its account-only handoff asks the preferred assistant to draft a short answer and practise one question at a time. No target role or industry is assumed, and the browser does not generate or save a new story. Gather available context before asking a question. A factual correction belongs in the career-context source first, then regenerate preparation from its new fingerprint. Private rehearsal notes are a separate working layer in this same packet; they do not silently change career facts. Save full HTML to carry browser edits between devices.
 
 `render_interview.py` remains a compatibility export for an explicitly requested separate brief. Its older projections use the inspected input file's byte hash. Do not mix that hash with the canonical evidence fingerprint used by the complete document.

@@ -2,6 +2,22 @@
 
 Start with the agreed work, dates, source locations and exclusions. The portable sheet is the output; it is not a source connector. Use available authorized connectors or selected local exports. Never imply that installing this skill connects an account.
 
+## Plan source coverage by month
+
+For a broad career-history collection, maintain `journey.coverage` as a source-location × calendar-month ledger. Start from existing location labels, then agree the date range, relevant accounts/folders/channels, exclusions and retention scope. Email is an optional source, alongside chat, documents, calendars, code and public writing. Do not require every platform or an exhaustive archive before producing a useful first account. Existing records and their dates do not prove a month was exhaustively checked.
+
+For each source-month:
+
+1. Record the query/filter and source timezone. Enumerate in bounded batches; count discovered records separately from originals actually read. Retain stable IDs and deduplicate copies and cross-posts.
+2. Inspect originals and relevant thread context, replies, revisions and attachments. Email collection stays within the approved mailbox/folders and dates; omit irrelevant personal correspondence. Distinguish event time, message time and later capture time.
+3. Save selected evidence and meaningful episodes in the same private archive. A coverage receipt may reference a source before it has been selected into an account. Do not load the full mailbox or archive into a single model prompt.
+4. Save a compact receipt after each batch: `streamId`, `month`, `status`, `note`, `sourceRefs`, `cursor`, `found`, `read`. The note records filters, timezone, inspected scope, limitations and next action. Keep the cursor until pagination ends. Checkpoints are reusable; do not reread completed batches solely to inflate depth.
+5. Use `checked` only after the selected scope is read, pagination is exhausted, and a receipt and source references exist. Use `empty` for an exhausted zero-record search with its exact scope recorded; `blocked` for access failures, `excluded` for an explicit exclusion, and `in_progress` for partial reads or a budget stop. A blocked month remains unfinished. No result is not evidence of no work in that month.
+
+Continue across the pending queue within the current authorization and budget. Rotate source locations when that prevents one busy platform consuming the whole run. Stop when the requested scope has been checked or explicitly excluded, or a real access/budget limit is reached; retain remaining work and the next exact action. This is coverage of selected records, not certification of a complete life story.
+
+The onboarding UI can create the checklist, record receipts and copy a bounded collection task. It does not connect accounts or call a model. The coach performs authorized reads, updates the packet and saves an archive revision. Browser edits must first be included in a saved HTML so a later update does not overwrite them. Keep exact platform receipts private; the reusable skill carries only this method.
+
 ## Read beyond the first matching message
 
 1. Inventory each selected location and its actual read capabilities. Record whether it can enumerate records, search only, read replies, follow pagination, or retrieve attachments. An accessible service does not imply access to every channel or folder.
