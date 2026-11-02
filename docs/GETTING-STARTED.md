@@ -45,6 +45,8 @@ Supply your purpose, audience and a writing sample or style guide. The skill inc
 - **Save full HTML** and **Download full JSON** retain the complete context packet, including selected sources. Selected image bytes remain in the HTML. Treat these as private working files.
 - **Export public HTML** exports the separately authored Profile draft. Review that draft for confidential details before sharing. A label does not anonymize real work.
 
+For a structured handoff, [export selected accounts or connect the local MCP server](../skills/career-context-sheet/references/selected-context.md). This keeps the archive separate from the tool using it.
+
 The archive and rendering tools run locally. An AI host may receive the material you supply to it. [Privacy and storage](PRIVACY.md).
 
 ## Render an existing packet

@@ -8,13 +8,15 @@ Career Context AI helps a person preserve the context behind their work and carr
 2. Adapt to the person. Purpose, work and voice determine the organization and writing. A resume or interview draft is a view of the archive, not a replacement for it.
 3. Keep the archive under the person's control. The core tools store it locally, with no hosted account or archive upload service. AI hosts and source connectors have their own data boundaries; local storage alone does not make model processing local.
 
-## Integration boundary
+## Collection and use
 
-Career Context AI owns the collection and archive workflow. The intended role of Web3 Careers, or another service, is to use a person-selected export for search, coaching or another purpose. A service should not require the whole private database to provide that help.
+The archive owns source collection, retained evidence, working accounts and rough presentation. A receiving tool owns the purpose-specific use: a search, coaching conversation, resume, comparison or other output. Existing resume and interview helpers remain optional ways to use the archive.
 
-The supported handoff today is selected context supplied to an agent. There is no native Web3 Careers import, synchronization or automatic onboarding dependency established here. The reviewed Web3 Careers implementation uses a separate cloud experience store and a different format; its account access controls do not remove administrator access. That store must not be described as this local archive.
+A person-selected `career-context-selection/v1` snapshot is the handoff. It preserves attribution, uncertainty and capability assistance while excluding source bodies, images, broad personal summaries and private working state. A local read-only MCP server can expose that snapshot to the person's agent. It accepts no paths through tool calls and does not refresh a running session from the archive.
 
-A future integration must keep the full archive local, make the selected fields and destination visible, and require the person's approval before sending them. It must preserve source references, shared credit and uncertainty. The receiving service owns what it does with the selection and must state its storage and access rules.
+A receiving tool must distinguish working accounts from original sources and current preferences. It must not treat review status as independent verification or turn fictional examples into personal evidence. Its existing review and action controls still apply. Reading a selection does not authorize remote retention or any external action.
+
+The full archive stays local. Selected prose may still be sensitive, and the chosen AI host may process it remotely. Each receiving service owns its data policy. See the [handoff contract](../skills/career-context-sheet/references/selected-context.md).
 
 ## The experience
 

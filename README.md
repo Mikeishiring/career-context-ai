@@ -28,7 +28,7 @@ The local tools need Python 3.11+ and no additional packages. Start with the mat
 
 The archive is the reusable part. Resumes, profiles and interview preparation are selected views of it. A coach or job-search service can use a reviewed selection without needing your whole database.
 
-That is the intended split with Web3 Careers: Career Context AI keeps the archive; the service handles the job search. The current handoff is selected context given to an agent. A native onboarding integration is not established. [Integration boundary](docs/PRODUCT.md#integration-boundary).
+Export a reviewed selection for another agent or tool. The optional local MCP connection exposes only that snapshot, with no archive writes or automatic uploads. [Selected context and local MCP](skills/career-context-sheet/references/selected-context.md).
 
 The experiments test parts of the research process on fictional cases. They do not establish complete career coverage or better results than other tools.
 
