@@ -47,6 +47,7 @@ class GuidedPathTests(unittest.TestCase):
         self.packet['journey']['completed'] = ['review']
         output = self.render()
         recovered = renderer.load_packet(output)
+        self.assertEqual(recovered['journey'].pop('reviewBasis'), renderer.memory.review_basis(self.packet))
         self.assertEqual(recovered, self.packet)
         self.assertEqual(recovered['accounts'], before['accounts'])
         self.assertEqual(recovered['reviewStatus'], 'draft')
@@ -110,7 +111,9 @@ class GuidedPathTests(unittest.TestCase):
         archive.build(source, workspace)
         recovered = self.folder / 'recovered.html'
         archive.export(workspace / 'career.sqlite', recovered)
-        self.assertEqual(renderer.load_packet(recovered)['journey'], self.packet['journey'])
+        saved = renderer.load_packet(recovered)['journey']
+        self.assertEqual(saved.pop('reviewBasis'), renderer.memory.review_basis(self.packet))
+        self.assertEqual(saved, self.packet['journey'])
 
     def test_writing_candidates_and_style_are_private_and_portable(self):
         self.packet['journey']['current'] = 'write'
@@ -125,6 +128,7 @@ class GuidedPathTests(unittest.TestCase):
     def test_public_projection_never_auto_copies_private_overview(self):
         self.packet.pop('publicProfile')
         result = renderer.load_packet(self.render())
+        self.assertEqual(result['publicProfile']['name'], '')
         self.assertEqual(result['publicProfile']['overview'], '')
         self.assertEqual(result['publicProfile']['examples'], [])
 
@@ -139,7 +143,7 @@ class GuidedPathTests(unittest.TestCase):
     def test_public_timeline_is_authored_bounded_and_escaped(self):
         self.assertEqual(self.packet['publicProfile']['timeline'], [])
         hostile = '<img src=x onerror=alert(1)>'
-        self.packet['publicProfile']['timeline'] = [{'period': '2030', 'title': hostile, 'summary': 'Public wording only.'}]
+        self.packet['publicProfile']['timeline'] = [{'period': '2030', 'title': hostile, 'summary': 'Public wording only.', 'included': True}]
         recovered = renderer.load_packet(self.render())
         self.assertEqual(recovered['publicProfile']['timeline'], self.packet['publicProfile']['timeline'])
         preview = renderer.public_profile.preview(recovered['publicProfile'])

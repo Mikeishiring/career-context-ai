@@ -1,4 +1,6 @@
 __pycache__/
+.venv-semantic/
+.semantic-model/
 *.pyc
 *.sqlite*
 .env

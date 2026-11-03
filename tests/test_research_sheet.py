@@ -111,6 +111,21 @@ class ResearchSheetTests(unittest.TestCase):
         self.assertFalse(result['allowed'])
         self.assertEqual(result['status'], 'plan_sheet')
 
+    def test_compiler_retains_assertions_action_states_and_stable_rejections(self):
+        self.prepare()
+        raw = copy.deepcopy(self.raw)
+        raw['rejected_conclusions'] = [
+            {'statement': 'The form was widely adopted.', 'reason': 'Use is not established.', 'record_ids': ['chat:one']},
+            {'statement': 'I owned the policy.', 'reason': 'Another contributor owns the policy.', 'record_ids': ['chat:one']}]
+        first, validation = bridge.compile_sheet(raw, self.plan, [self.record], self.server.events, self.scope, self.corpus['snapshot'], draft=True)
+        self.assertTrue(validation['valid'], validation['errors'])
+        self.assertEqual(first['memory']['claims'][0]['attributions'][0]['state'], 'completed')
+        raw['rejected_conclusions'].reverse()
+        second, validation = bridge.compile_sheet(raw, self.plan, [self.record], self.server.events, self.scope, self.corpus['snapshot'], draft=True)
+        self.assertTrue(validation['valid'], validation['errors'])
+        self.assertEqual({c['id'] for c in first['memory']['claims']}, {c['id'] for c in second['memory']['claims']})
+        bridge.RENDERER.preserve_views(first, second)
+
     def test_sheet_cannot_drop_a_checked_claim_or_cite_an_unread_span(self):
         self.prepare()
         plan = copy.deepcopy(self.plan)

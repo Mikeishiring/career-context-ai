@@ -73,3 +73,36 @@ class ProfileMediaTests(unittest.TestCase):
             with self.subTest(change=change),self.assertRaises(ValueError):r.validate(data)
         self.p['media']*=3
         with self.assertRaises(ValueError):r.validate(self.packet)
+
+    def test_hidden_image_metadata_and_trailing_bytes_cannot_enter_projection(self):
+        clean = png((30, 80, 40))
+        raw = base64.b64decode(clean.split(',')[1])
+        secret = b'Comment\0PRIVATE_IMAGE_METADATA'
+        chunk = struct.pack('!I', len(secret)) + b'tEXt' + secret + struct.pack('!I', zlib.crc32(b'tEXt' + secret) & 0xffffffff)
+        variants = [raw[:-12] + chunk + raw[-12:], raw + b'PRIVATE_TRAILING_BYTES']
+        self.assertTrue(r.public_profile.image_shareable(clean))
+        for unsafe in variants:
+            item = self.p['media'][0]
+            item['dataUrl'] = 'data:image/png;base64,' + base64.b64encode(unsafe).decode()
+            before = copy.deepcopy(self.p)
+            r.validate(self.packet)  # The private original remains recoverable.
+            self.assertFalse(r.public_profile.image_shareable(item['dataUrl']))
+            self.assertNotIn(item['dataUrl'], r.public_profile.preview(self.p))
+            self.assertEqual(self.p, before)
+
+    def test_unknown_image_chunks_and_truncated_containers_fail_closed(self):
+        raw = base64.b64decode(png((1, 2, 3)).split(',')[1])
+        for unsafe in [raw[:33], raw[:-12], raw[:8] + b'\xff\xff\xff\xfftEXt', raw[:12] + b'iCCP' + raw[16:]]:
+            value = 'data:image/png;base64,' + base64.b64encode(unsafe).decode()
+            self.assertFalse(r.public_profile.image_shareable(value))
+
+    def test_signed_video_links_cannot_publish_access_tokens(self):
+        for suffix in ['?access_token=PRIVATE_TOKEN', '#token=PRIVATE_TOKEN', '?X-Amz-Signature=PRIVATE_SIGNATURE', '?%61pi_key=PRIVATE_KEY']:
+            url = 'https://example.org/video' + suffix
+            self.assertFalse(r.public_profile.safe_video_url(url))
+            self.p['media'][2]['url'] = url
+            before = copy.deepcopy(self.p)
+            r.validate(self.packet)
+            self.assertNotIn(url, r.public_profile.preview(self.p))
+            self.assertEqual(self.p, before)
+        self.assertTrue(r.public_profile.safe_video_url('https://example.org/video?t=12'))

@@ -10,7 +10,7 @@ import narrative_retention as retention
 import turning_points
 
 KINDS = {'channel', 'private_channel', 'dm', 'document', 'repository', 'email', 'calendar'}
-CHECKS = [*depth.LENSES, 'story_review']
+CHECKS = ['story_review']
 
 
 def validate_policy(policy):
@@ -208,8 +208,9 @@ def status(workspace):
     if audit:
         result['account_reviews'] = audit['arguments']['accounts']
         result['through_line'] = audit['arguments']['through_line']
-        result['checklist'] = {key: 'agent_reviewed; person_review_pending' for key in depth.LENSES} | {'story_review': 'needs_person_review'}
-        for key in depth.LENSES:
+        selected_questions = list(dict.fromkeys(l['lens'] for a in audit['arguments']['accounts'] for l in a['lenses']))
+        result['checklist'] = {'story_review': 'needs_person_review'}
+        for key in selected_questions:
             states = sorted({l['status'] for a in audit['arguments']['accounts'] for l in a['lenses'] if l['lens'] == key})
             result['checklist'][key] = ', '.join(states) + '; person_review_pending'
     write_json(workspace / 'checklist.json', result)
@@ -217,7 +218,7 @@ def status(workspace):
              '', 'Your selected captures, research notes and sheet live in this folder. No source account is connected.',
              '', '| Selected location | Captured | Read in research |', '|---|---:|---:|']
     lines += ['| ' + l['source'] + ' / ' + l['container'].replace('|', '\\|') + ' | ' + str(l['captured']) + ' | ' + str(l['read_in_research']) + ' |' for l in result['locations']]
-    lines += ['', result['coverage_limit'], '', '## Depth review', ''] + ['- [ ] ' + key.replace('_', ' ') + ': ' + result['checklist'][key] for key in CHECKS]
+    lines += ['', result['coverage_limit'], '', '## Depth review', ''] + ['- [ ] ' + key.replace('_', ' ') + ': ' + value for key, value in result['checklist'].items()]
     (workspace / 'README.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
     return result
 

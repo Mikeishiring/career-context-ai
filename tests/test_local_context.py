@@ -46,6 +46,15 @@ class LocalContextTests(unittest.TestCase):
         self.assertTrue(all(v == 'needs_review' for v in result['checklist'].values()))
         with self.assertRaises(ValueError): local.load(self.workspace, for_model=True)
 
+    def test_status_retains_agent_selected_questions_without_unused_lenses(self):
+        self.start()
+        audit = {'arguments': {'accounts': [{'account_id': 'desk', 'lenses': [
+            {'lens': 'What changed at the handoff?', 'status': 'limited'}]}], 'through_line': {}}}
+        with patch.object(local.depth, 'current_review', return_value=audit):
+            result = local.status(self.workspace)
+        self.assertEqual(set(result['checklist']), {'story_review', 'What changed at the handoff?'})
+        self.assertIn('What changed at the handoff?', (self.workspace / 'README.md').read_text(encoding='utf-8'))
+
     def test_denied_locations_dms_private_channels_and_dates_never_persist(self):
         records = [self.record]
         for i, change in enumerate([{'container': 'dm-01', 'kind': 'dm'},

@@ -1,0 +1,4 @@
+# Optional CPU-only runtime. Ordinary packet tools need only Python's standard library.
+numpy==2.3.5
+onnxruntime==1.23.2
+tokenizers==0.22.2

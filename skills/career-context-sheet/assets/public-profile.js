@@ -1,16 +1,71 @@
 // Export is constructed from this allowlist. Never clone the private document.
-function publicVideoUrl(value){
+function publicVideoUrl(value,allowAccessTokens=false){
  if(typeof value!=='string'||!value.startsWith('https://')||/[\s\\\x00-\x1f\x7f]/.test(value))return false;
- try{const u=new URL(value);return Boolean(u.hostname&&!u.username&&!u.password);}catch{return false;}
+ try{const u=new URL(value),privateKeys=new Set(['access_token','token','auth','authorization','api_key','apikey','signature','sig','x-amz-credential','x-amz-signature','x-goog-credential','x-goog-signature','key-pair-id']);return Boolean(u.hostname&&!u.username&&!u.password&&(allowAccessTokens||![...u.searchParams.keys(),...new URLSearchParams(u.hash.slice(1)).keys()].some(k=>privateKeys.has(k.toLowerCase()))));}catch{return false;}
 }
 function publicImageSize(value){
  if(typeof value!=='string'||value.length>2800000)return -1;
  const m=value.match(/^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/);if(!m||m[2].length%4)return -1;
  try{const raw=atob(m[2]),valid=m[1]==='png'?raw.startsWith('\x89PNG\r\n\x1a\n'):m[1]==='jpeg'?raw.startsWith('\xff\xd8\xff'):raw.startsWith('RIFF')&&raw.slice(8,12)==='WEBP';return valid&&raw.length<=2097152?raw.length:-1;}catch{return -1;}
 }
+// Match the Python public boundary. Keep private originals; re-import to re-encode.
+function publicImageShareable(value){
+ if(publicImageSize(value)<0)return false;
+ const raw=atob(value.slice(value.indexOf(',')+1)),byte=i=>raw.charCodeAt(i);
+ const uint=(i,little=false)=>little?byte(i)+byte(i+1)*256+byte(i+2)*65536+byte(i+3)*16777216:byte(i)*16777216+byte(i+1)*65536+byte(i+2)*256+byte(i+3);
+ if(raw.startsWith('\x89PNG')){
+  let pos=8,pixels=false,header=false;
+  const fixed={IHDR:13,IEND:0,sRGB:1,gAMA:4,cHRM:32,pHYs:9},allowed=new Set([...Object.keys(fixed),'PLTE','tRNS','IDAT']);
+  while(pos+12<=raw.length){
+   const size=uint(pos),kind=raw.slice(pos+4,pos+8),end=pos+size+12;
+   if(end>raw.length||!allowed.has(kind)||!header&&kind!=='IHDR'||kind in fixed&&size!==fixed[kind])return false;
+   if(kind==='IHDR'){if(header)return false;header=true;}
+   if(kind==='PLTE'&&(!size||size>768||size%3)||kind==='tRNS'&&size>256)return false;
+   if(kind==='IDAT')pixels=true;
+   if(kind==='IEND')return pixels&&end===raw.length;
+   pos=end;
+  }
+  return false;
+ }
+ if(raw.startsWith('RIFF')){
+  if(uint(4,true)+8!==raw.length)return false;
+  let pos=12,pixels=false;
+  while(pos+8<=raw.length){
+   const kind=raw.slice(pos,pos+4),size=uint(pos+4,true),end=pos+8+size+size%2;
+   if(end>raw.length||!['VP8 ','VP8L','VP8X','ALPH'].includes(kind))return false;
+   if(kind==='VP8X'&&(size!==10||byte(pos+8)&0x2e))return false;
+   if(kind==='VP8 '||kind==='VP8L')pixels=true;
+   pos=end;
+  }
+  return pixels&&pos===raw.length;
+ }
+ let pos=2,pixels=false;
+ while(pos<raw.length){
+  if(byte(pos)!==255)return false;
+  while(pos<raw.length&&byte(pos)===255)pos++;
+  if(pos>=raw.length)return false;
+  const marker=byte(pos++);
+  if(marker===0xd9)return pixels&&pos===raw.length;
+  if(![0xc0,0xc2,0xc4,0xdb,0xdd,0xda,0xe0].includes(marker)||pos+2>raw.length)return false;
+  const size=byte(pos)*256+byte(pos+1),end=pos+size;
+  if(size<2||end>raw.length)return false;
+  if(marker===0xe0&&(size!==16||raw.slice(pos+2,pos+7)!=='JFIF\0'||raw.slice(end-2,end)!=='\0\0'))return false;
+  pos=end;
+  if(marker===0xda){
+   pixels=true;
+   while(pos<raw.length){
+    if(byte(pos)!==255){pos++;continue;}
+    if(pos+1>=raw.length)return false;
+    if(byte(pos+1)===0||byte(pos+1)>=0xd0&&byte(pos+1)<=0xd7){pos+=2;continue;}
+    break;
+   }
+  }
+ }
+ return false;
+}
 function publicMediaIssue(m){
  if(!m.title?.trim())return 'Add a title in Edit';
- if(m.kind==='image')return !m.alt?.trim()?'Add an image description in Edit':publicImageSize(m.dataUrl)<0?'Replace the image in Edit':'';
+ if(m.kind==='image')return !m.alt?.trim()?'Add an image description in Edit':publicImageSize(m.dataUrl)<0?'Replace the image in Edit':!publicImageShareable(m.dataUrl)?'Re-add the screenshot to remove metadata':'';
  return publicVideoUrl(m.url)?'':m.url?.trim()?'Fix the link in Edit':'Add a link in Edit';
 }
 function publicMediaReady(m){return !publicMediaIssue(m);}
@@ -22,19 +77,20 @@ function validPublicMedia(items){
  for(const m of items){if(!m||typeof m.id!=='string'||!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,99}$/.test(m.id)||ids.has(m.id)||!['image','video'].includes(m.kind)||typeof m.included!=='boolean'||!text(m.title,200)||!text(m.caption,1000)||!text(m.credit,500))return false;ids.add(m.id);
   if(m.kind==='image'){const bytes=publicImageSize(m.dataUrl);if(bytes<0||!text(m.alt,500)||'url' in m)return false;total+=bytes;}
   else if(!text(m.url,2000)||'dataUrl' in m||'alt' in m)return false;
-  if(m.included&&!publicMediaReady(m))return false;
+  // Legacy metadata-bearing originals remain recoverable, but cannot be shared.
+  if(m.included&&(!m.title.trim()||(m.kind==='image'?!m.alt.trim():!publicVideoUrl(m.url,true))))return false;
  }
  return total<=6291456;
 }
 function publicProjection(value){
- return {name:value.name,headline:value.headline,overview:value.shareOverview===false?'':value.overview,direction:value.shareDirection===true?(value.direction||''):'',northStar:value.shareNorthStar===true?(value.northStar||''):'',media:publicMediaProjection(value.media),
-  examples:value.examples.filter(e=>e.included!==false).map(e=>({title:e.title,summary:e.summary,synthetic:e.synthetic,detail:e.shareDetail===true?(e.detail||''):''})),
-  timeline:(value.timeline||[]).filter(e=>e.included!==false).map(e=>({period:e.period,title:e.title,summary:e.summary}))};
+ return {name:value.name,headline:value.headline,overview:value.shareOverview===true?value.overview:'',direction:value.shareDirection===true?(value.direction||''):'',northStar:value.shareNorthStar===true?(value.northStar||''):'',media:publicMediaProjection(value.media),
+  examples:value.examples.filter(e=>e.included===true).map(e=>({title:e.title,summary:e.summary,synthetic:e.synthetic,detail:e.shareDetail===true?(e.detail||''):''})),
+  timeline:(value.timeline||[]).filter(e=>e.included===true).map(e=>({period:e.period,title:e.title,summary:e.summary}))};
 }
 // Private persistence retains withheld drafts; the export projection must not be used here.
-function publicDraft(value){return {name:value.name,headline:value.headline,overview:value.overview,contextSha256:value.contextSha256,updatedAt:value.updatedAt,shareOverview:value.shareOverview!==false,direction:value.direction||'',shareDirection:value.shareDirection===true,northStar:value.northStar||'',shareNorthStar:value.shareNorthStar===true,media:publicMediaDraft(value.media),
- examples:value.examples.map(e=>({title:e.title,summary:e.summary,synthetic:e.synthetic,included:e.included!==false,detail:e.detail||'',shareDetail:e.shareDetail===true})),
- timeline:(value.timeline||[]).map(e=>({period:e.period,title:e.title,summary:e.summary,included:e.included!==false}))};}
+function publicDraft(value){return {name:value.name,headline:value.headline,overview:value.overview,contextSha256:value.contextSha256,updatedAt:value.updatedAt,shareOverview:value.shareOverview===true,direction:value.direction||'',shareDirection:value.shareDirection===true,northStar:value.northStar||'',shareNorthStar:value.shareNorthStar===true,media:publicMediaDraft(value.media),
+ examples:value.examples.map(e=>({title:e.title,summary:e.summary,synthetic:e.synthetic,included:e.included===true,detail:e.detail||'',shareDetail:e.shareDetail===true})),
+ timeline:(value.timeline||[]).map(e=>({period:e.period,title:e.title,summary:e.summary,included:e.included===true}))};}
 function movePublicPeriod(value,index,step){
  const items=value.timeline,target=index+step;
  if(!Array.isArray(items)||!Number.isInteger(index)||![-1,1].includes(step)||index<0||index>=items.length||target<0||target>=items.length)return -1;
@@ -97,18 +153,18 @@ if(publicRoot){
  try{const saved=JSON.parse(localStorage.getItem(storageKey)||'null');if(validPublicProfile(saved)&&saved.updatedAt>value.updatedAt){value=publicDraft(saved);packet.publicProfile=value;}}catch{}
  const editor=document.getElementById('public-editor'),preview=document.getElementById('public-preview');
  function ready(){const p=publicProjection(value);return Boolean(p.name.trim()&&p.headline.trim()&&(p.overview.trim()||p.direction.trim()||p.northStar.trim()||p.media.length||p.examples.some(e=>e.title.trim()||e.summary.trim())||p.timeline.some(e=>e.period.trim()||e.title.trim()||e.summary.trim())));}
- function shareCount(){const p=publicProjection(value);document.getElementById('public-share-count').textContent=(Number(Boolean(p.overview.trim()))+Number(Boolean(p.direction.trim()))+Number(Boolean(p.northStar.trim()))+p.media.length+p.examples.filter(e=>e.title.trim()||e.summary.trim()).length+p.examples.filter(e=>e.detail.trim()).length+p.timeline.filter(e=>e.period.trim()||e.title.trim()||e.summary.trim()).length)+' selected';for(const [i,e] of value.examples.entries()){const input=document.getElementById('share-detail-'+i);if(input)input.disabled=e.included===false;}}
+ function shareCount(){const p=publicProjection(value);document.getElementById('public-share-count').textContent=(Number(Boolean(p.overview.trim()))+Number(Boolean(p.direction.trim()))+Number(Boolean(p.northStar.trim()))+p.media.length+p.examples.filter(e=>e.title.trim()||e.summary.trim()).length+p.examples.filter(e=>e.detail.trim()).length+p.timeline.filter(e=>e.period.trim()||e.title.trim()||e.summary.trim()).length)+' selected';for(const [i,e] of value.examples.entries()){const input=document.getElementById('share-detail-'+i);if(input)input.disabled=e.included!==true;}}
  function sharingFields(){
   const host=document.getElementById('public-sharing');host.replaceChildren();
   function group(title){const fieldset=publicNode('fieldset',undefined,'public-sharing-group');fieldset.append(publicNode('legend',title));host.append(fieldset);return fieldset;}
-  function toggle(parent,label,object,key,id,defaultIncluded=true){const row=publicNode('label'),input=publicNode('input');input.type='checkbox';input.id=id;input.checked=object[key]===undefined?defaultIncluded:object[key];input.addEventListener('change',()=>{object[key]=input.checked;savePublicProfile();});row.append(input,publicNode('span',label));parent.append(row);return input;}
+  function toggle(parent,label,object,key,id){const row=publicNode('label'),input=publicNode('input');input.type='checkbox';input.id=id;input.checked=object[key]===true;input.addEventListener('change',()=>{object[key]=input.checked;savePublicProfile();});row.append(input,publicNode('span',label));parent.append(row);return input;}
   const about=group('About');
   toggle(about,'Overview',value,'shareOverview','share-overview');
-  if(value.northStar?.trim())toggle(about,'North Star',value,'shareNorthStar','share-north-star',false);
-  if(value.direction?.trim())toggle(about,'Direction',value,'shareDirection','share-direction',false);
-  if(value.examples.length){const work=group('Work');value.examples.forEach((e,i)=>{const example=publicNode('div',undefined,'public-sharing-example');toggle(example,e.title||'Work example '+(i+1),e,'included','share-example-'+i);if(e.detail?.trim())toggle(example,'More context',e,'shareDetail','share-detail-'+i,false).setAttribute('aria-label','More context: '+(e.title||'Example '+(i+1)));work.append(example);});}
+  if(value.northStar?.trim())toggle(about,'North Star',value,'shareNorthStar','share-north-star');
+  if(value.direction?.trim())toggle(about,'Direction',value,'shareDirection','share-direction');
+  if(value.examples.length){const work=group('Work');value.examples.forEach((e,i)=>{const example=publicNode('div',undefined,'public-sharing-example');toggle(example,e.title||'Work example '+(i+1),e,'included','share-example-'+i);if(e.detail?.trim())toggle(example,'More context',e,'shareDetail','share-detail-'+i).setAttribute('aria-label','More context: '+(e.title||'Example '+(i+1)));work.append(example);});}
   if(value.timeline?.length){const periods=group('Progression');value.timeline.forEach((e,i)=>toggle(periods,[e.period,e.title].filter(Boolean).join(' · ')||'Period '+(i+1),e,'included','share-year-'+i));}
-  if(value.media?.length){const samples=group('Work samples');value.media.forEach((m,i)=>{const issue=publicMediaIssue(m),label=(m.kind==='image'?'Screenshot: ':'Video: ')+(m.title||'Untitled')+(issue?' · '+issue:'');const input=toggle(samples,label,m,'included','share-media-'+i,false);input.disabled=Boolean(issue);});}
+  if(value.media?.length){const samples=group('Work samples');value.media.forEach((m,i)=>{const issue=publicMediaIssue(m),label=(m.kind==='image'?'Screenshot: ':'Video: ')+(m.title||'Untitled')+(issue?' · '+issue:'');const input=toggle(samples,label,m,'included','share-media-'+i);input.disabled=Boolean(issue);if(issue)input.checked=false;});}
   shareCount();
  }
  function refreshFreshness(){document.getElementById('public-freshness').hidden=value.contextSha256===basis;document.getElementById('public-mark-reviewed').disabled=!ready();}
@@ -126,7 +182,7 @@ if(publicRoot){
   function refreshError(){
    if(!error)return;const invalid=Boolean(input.value&&!publicVideoUrl(input.value));
    input.setAttribute('aria-invalid',String(invalid));error.hidden=!invalid;
-   error.textContent=invalid?'Use an HTTPS video link without credentials. This link is not selected.':'';
+   error.textContent=invalid?'Use a public HTTPS video link without credentials or access tokens. This link is not selected.':'';
   }
   input.addEventListener('input',()=>{object[key]=input.value;savePublicProfile();sharingFields();refreshError();});wrap.append(input);
   if(error){error.id='public-url-error-'+object.id;error.setAttribute('aria-live','polite');input.setAttribute('aria-describedby',error.id);wrap.append(error);refreshError();}
@@ -134,17 +190,21 @@ if(publicRoot){
  }
  async function importScreenshot(file){
   if(!file||!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>2097152)throw Error('Choose a PNG, JPEG or WebP screenshot up to 2 MiB.');
-  const objectUrl=URL.createObjectURL(file),img=new Image();
-  try{await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(Error('This image could not be read. Choose another screenshot.'));img.src=objectUrl;});
+  const inputUrl=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(Error('This image could not be read. Choose another screenshot.'));reader.readAsDataURL(file);}),img=new Image();
+  try{await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(Error('This image could not be read. Choose another screenshot.'));img.src=inputUrl;});
    if(img.naturalWidth*img.naturalHeight>16000000)throw Error('Choose a screenshot under 16 megapixels.');
    // Decode and re-encode the selected copy to omit file metadata. Keep the original untouched.
-   const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;canvas.getContext('2d').drawImage(img,0,0);const dataUrl=canvas.toDataURL(file.type,.95);
+   const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;canvas.getContext('2d').drawImage(img,0,0);let dataUrl=canvas.toDataURL(file.type,.95);
+   // Some browsers attach ICC profiles to JPEG/WebP encodings. PNG fallback
+   // keeps the decoded pixels without copying those opaque metadata blocks.
+   if(!publicImageShareable(dataUrl))dataUrl=canvas.toDataURL('image/png');
+   if(!publicImageShareable(dataUrl))throw Error('This browser could not create a metadata-free image. Choose another screenshot.');
    const bytes=publicImageSize(dataUrl),used=(value.media||[]).filter(m=>m.kind==='image').reduce((n,m)=>n+publicImageSize(m.dataUrl),0);
    if(bytes<0||used+bytes>6291456)throw Error('Screenshots must be up to 2 MiB each and 6 MiB in total after import. Choose a smaller image.');
    if(value.media.length>=8)throw Error('Keep up to eight work samples.');
    value.media.push({id:'image-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),kind:'image',title:'Screenshot',alt:'Screenshot of the work',caption:'',credit:'',dataUrl,included:false});
    savePublicProfile('Screenshot added. Check the image and its description, then select it to share.');editFields();
-  }finally{URL.revokeObjectURL(objectUrl);}
+  }finally{img.removeAttribute('src');}
  }
  function mediaFields(){
   const bar=publicNode('div',undefined,'public-media-actions');bar.append(publicNode('h3','Work samples','public-editor-heading'));

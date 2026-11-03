@@ -1,6 +1,6 @@
 # Prepare an interview
 
-Use this workflow only when interview preparation is requested. It is an optional use of career context, never a required onboarding step. Prepare the draft inside the complete career document. Gather relevant material through the host's already-authorized sources, reuse their career context and stated target, and fill all six parts before asking for missing information. The person reviews and practises; do not hand them a blank worksheet or a separate default version.
+Use this workflow only when interview preparation is requested. It is an optional use of career context, never a required onboarding step. Prepare the draft inside the complete career document. For a focused question or wording request, use the existing context directly. Create or refresh the full preparation packet when requested or useful for the interview; its six parts are a rendering contract, not six mandatory research passes. Reuse authorized context and ask only consequential missing questions. The person reviews and practises; do not hand them a blank worksheet or a separate default version.
 
 Select the strongest supported accounts, keeping one to three as the lead stories. Preserve the person's voice, decisions, shared credit, corrections, later outcomes and useful personal context. Do not turn a team action into a personal one, an unfinished idea into delivery, or continued use into a measured benefit. A target role is optional; use null when none was supplied.
 
@@ -18,7 +18,7 @@ Draft these six parts:
 
 1. **Strongest evidence:** a throughline and one to three reasons to lead with particular accounts.
 2. **Core stories:** what each selected account demonstrates; the renderer carries its original contribution, shared work, outcome and limits.
-3. **Introduction:** a short opening in the person's voice that invites supported follow-up questions. For ordinary context capture, draft one provisional opening; do not start an introduction comparison. When the person requests an introduction or interview preparation with a new opening, first offer the alternatives in [introduction choices](introductions.md). Reuse an already chosen opening and retain existing alternatives; preserve the current draft while a requested comparison is undecided.
+3. **Introduction:** a short opening in the person's voice that invites supported follow-up questions. For a focused opening request, draft one provisional opening without generating a complete preparation packet. When the person requests an introduction or interview preparation with a new opening, use [introduction choices](introductions.md) when alternative framings would help. Reuse an already chosen opening and retain existing alternatives; preserve the current draft while a requested comparison is undecided.
 4. **Decode, select, deliver:** likely questions, what they test, the relevant story and a drafted answer.
 5. **Chapters:** the actual sequence, including decisions, feedback, repairs and later use where supported. Make a longer story easy to pause or expand.
 6. **Real pace:** recorded periods and milestones. Say when dates are not recorded; do not invent a faster cycle to fit a company.

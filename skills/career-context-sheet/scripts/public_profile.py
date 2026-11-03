@@ -3,18 +3,22 @@ import base64
 import binascii
 import html
 import re
-from urllib.parse import urlsplit
+from urllib.parse import parse_qsl, urlsplit
 
 MAX_IMAGE_BYTES = 2 * 1024 * 1024
 MAX_MEDIA_BYTES = 6 * 1024 * 1024
+PRIVATE_URL_KEYS = {'access_token', 'token', 'auth', 'authorization', 'api_key', 'apikey', 'signature', 'sig',
+                    'x-amz-credential', 'x-amz-signature', 'x-goog-credential', 'x-goog-signature', 'key-pair-id'}
 
 
-def safe_video_url(value):
+def safe_video_url(value, *, allow_access_tokens=False):
     if not isinstance(value, str) or not value.startswith('https://') or re.search(r'[\s\\\x00-\x1f\x7f]', value):
         return False
     try:
         url = urlsplit(value)
-        return bool(url.hostname and not url.username and not url.password and (url.port is None or 0 < url.port < 65536))
+        keys = {key.lower() for part in (url.query, url.fragment) for key, _ in parse_qsl(part, keep_blank_values=True)}
+        return bool(url.hostname and not url.username and not url.password and (allow_access_tokens or not keys.intersection(PRIVATE_URL_KEYS))
+                    and (url.port is None or 0 < url.port < 65536))
     except ValueError:
         return False
 
@@ -36,12 +40,80 @@ def image_bytes(value):
     return raw
 
 
+def image_shareable(value):
+    """Reject metadata, trailing bytes and unknown containers at the public boundary.
+
+    Private originals are preserved. Re-import through the browser to decode and
+    re-encode an image that fails this check; visible pixels still need review.
+    """
+    try:
+        raw = image_bytes(value)
+    except (ValueError, TypeError):
+        return False
+    if raw.startswith(b'\x89PNG'):
+        pos, pixels, header = 8, False, False
+        fixed = {b'IHDR': 13, b'IEND': 0, b'sRGB': 1, b'gAMA': 4, b'cHRM': 32, b'pHYs': 9}
+        allowed = {*fixed, b'PLTE', b'tRNS', b'IDAT'}
+        while pos + 12 <= len(raw):
+            size = int.from_bytes(raw[pos:pos + 4], 'big')
+            kind = raw[pos + 4:pos + 8]
+            end = pos + size + 12
+            if end > len(raw) or kind not in allowed or (not header and kind != b'IHDR'):
+                return False
+            if kind in fixed and size != fixed[kind]:
+                return False
+            if kind == b'IHDR':
+                if header: return False
+                header = True
+            if kind == b'PLTE' and (size == 0 or size > 768 or size % 3): return False
+            if kind == b'tRNS' and size > 256: return False
+            if kind == b'IDAT': pixels = True
+            if kind == b'IEND': return pixels and end == len(raw)
+            pos = end
+        return False
+    if raw.startswith(b'RIFF'):
+        if int.from_bytes(raw[4:8], 'little') + 8 != len(raw): return False
+        pos, pixels = 12, False
+        while pos + 8 <= len(raw):
+            kind, size = raw[pos:pos + 4], int.from_bytes(raw[pos + 4:pos + 8], 'little')
+            end = pos + 8 + size + size % 2
+            if end > len(raw) or kind not in {b'VP8 ', b'VP8L', b'VP8X', b'ALPH'}: return False
+            if kind == b'VP8X' and (size != 10 or raw[pos + 8] & 0x2e): return False
+            if kind in {b'VP8 ', b'VP8L'}: pixels = True
+            pos = end
+        return pixels and pos == len(raw)
+    # JPEG: metadata APP segments and comments are not image coding data.
+    pos, pixels = 2, False
+    while pos < len(raw):
+        if raw[pos] != 0xff: return False
+        while pos < len(raw) and raw[pos] == 0xff: pos += 1
+        if pos >= len(raw): return False
+        marker = raw[pos]; pos += 1
+        if marker == 0xd9: return pixels and pos == len(raw)
+        if marker not in {0xc0, 0xc2, 0xc4, 0xdb, 0xdd, 0xda, 0xe0} or pos + 2 > len(raw): return False
+        size = int.from_bytes(raw[pos:pos + 2], 'big')
+        end = pos + size
+        if size < 2 or end > len(raw): return False
+        if marker == 0xe0 and (size != 16 or raw[pos + 2:pos + 7] != b'JFIF\0' or raw[end - 2:end] != b'\0\0'): return False
+        pos = end
+        if marker == 0xda:
+            pixels = True
+            while pos < len(raw):
+                if raw[pos] != 0xff: pos += 1; continue
+                if pos + 1 >= len(raw): return False
+                if raw[pos + 1] == 0 or 0xd0 <= raw[pos + 1] <= 0xd7: pos += 2; continue
+                break
+    return False
+
+
 def media_projection(items):
     result = []
     for item in items:
         if item.get('included') is not True:
             continue
         if item['kind'] == 'video' and not safe_video_url(item['url']):
+            continue
+        if item['kind'] == 'image' and not image_shareable(item['dataUrl']):
             continue
         fields = ('kind', 'title', 'caption', 'credit', 'alt', 'dataUrl') if item['kind'] == 'image' else ('kind', 'title', 'caption', 'credit', 'url')
         result.append({k: item[k] for k in fields})
@@ -63,7 +135,7 @@ def media_preview(items):
 
 def initial_state(packet, basis):
     # Never infer public permission from a private overview or work account.
-    return {'contextSha256': basis, 'updatedAt': 0, 'name': packet['person']['name'],
+    return {'contextSha256': basis, 'updatedAt': 0, 'name': '',
             'headline': '', 'overview': '', 'shareOverview': False,
             'direction': '', 'shareDirection': False, 'northStar': '', 'shareNorthStar': False, 'media': [], 'examples': [], 'timeline': []}
 
@@ -97,7 +169,9 @@ def validate(packet, check_text, keys):
         else:
             check_text(item.get('url'), 'Video URL', 2000)
             if 'dataUrl' in item or 'alt' in item: raise ValueError('Video samples contain links only')
-            if item['included'] and not safe_video_url(item['url']): raise ValueError('Shared videos need an HTTPS link without credentials')
+            # Older drafts may retain a selected signed link. Preserve the draft;
+            # the public projection independently excludes its access tokens.
+            if item['included'] and not safe_video_url(item['url'], allow_access_tokens=True): raise ValueError('Shared videos need an HTTPS link without credentials')
     if total > MAX_MEDIA_BYTES: raise ValueError('Profile screenshots must total at most 6 MiB')
     check_text(profile.get('direction', ''), 'Profile direction', 1500)
     if 'shareDirection' in profile and type(profile['shareDirection']) is not bool:
@@ -140,15 +214,15 @@ def validate(packet, check_text, keys):
 def projection(profile):
     """Only selected, deliberately authored components cross the sharing boundary."""
     return {'name': profile['name'], 'headline': profile['headline'],
-            'overview': profile['overview'] if profile.get('shareOverview', True) else '',
-            'direction': profile.get('direction', '') if profile.get('shareDirection', False) else '',
-            'northStar': profile.get('northStar', '') if profile.get('shareNorthStar', False) else '',
+            'overview': profile['overview'] if profile.get('shareOverview') is True else '',
+            'direction': profile.get('direction', '') if profile.get('shareDirection') is True else '',
+            'northStar': profile.get('northStar', '') if profile.get('shareNorthStar') is True else '',
             'media': media_projection(profile.get('media', [])),
             'examples': [{**{k: e[k] for k in ('title', 'summary', 'synthetic')},
-                          'detail': e.get('detail', '') if e.get('shareDetail', False) else ''}
-                         for e in profile['examples'] if e.get('included', True)],
+                          'detail': e.get('detail', '') if e.get('shareDetail') is True else ''}
+                         for e in profile['examples'] if e.get('included') is True],
             'timeline': [{k: e[k] for k in ('period', 'title', 'summary')}
-                         for e in profile.get('timeline', []) if e.get('included', True)]}
+                         for e in profile.get('timeline', []) if e.get('included') is True]}
 
 
 def timeline_preview(profile):
@@ -175,8 +249,8 @@ def render(packet, basis):
     if 'publicProfile' not in packet:
         return ''
     markup = '''<section id="profile" class="document-view public-profile-shell" aria-labelledby="public-title" data-evidence="''' + basis + '''">
-<div class="public-toolbar js-only"><h2 id="public-title">Profile</h2><div class="public-switch" role="group" aria-label="Profile view"><button type="button" id="public-preview-tab" aria-pressed="true">Preview</button><button type="button" id="public-edit-tab" aria-pressed="false">Edit</button></div><span id="public-share-count" aria-live="polite"></span><button type="button" class="path-primary" id="public-export">Download selected profile <span aria-hidden="true">↓</span></button></div>
-<div class="public-context js-only"><details class="public-sharing" open><summary>Choose what to share</summary><p>Name and headline are always included. Unselected drafts stay private.</p><div id="public-sharing"></div></details><details><summary>Sharing guidance</summary><p>Describe the problem, your contribution and the general approach. Omit confidential names, dates, figures, internal methods and identifying combinations. Anonymising a name alone may leave the work recognisable.</p><p>Use “Synthetic example” only for newly invented or reconstructed demonstrations with no confidential data. It does not make a real private account safe to share.</p><p>Selected screenshots are embedded in the download; video links open the external site only when clicked. Check images, captions, credits and URLs for private information. This downloads a local file; nothing is published. Included details travel with it even when collapsed. Access cannot be revoked.</p></details></div>
+<div class="public-toolbar js-only"><h2 id="public-title">Public profile</h2><div class="public-switch" role="group" aria-label="Profile view"><button type="button" id="public-preview-tab" aria-pressed="true">Preview</button><button type="button" id="public-edit-tab" aria-pressed="false">Edit</button></div><span id="public-share-count" aria-live="polite"></span><button type="button" class="path-primary" id="public-export">Download selected profile <span aria-hidden="true">↓</span></button></div>
+<div class="public-context js-only"><details class="public-sharing" open><summary>Choose what to share</summary><p>Name and headline are always included. Unselected drafts stay private.</p><div id="public-sharing"></div></details><details><summary>Sharing guidance</summary><p>Describe the problem, your contribution and the general approach. Omit confidential names, dates, figures, internal methods and identifying combinations. Anonymising a name alone may leave the work recognisable.</p><p>Use “Synthetic example” only for newly invented or reconstructed demonstrations with no confidential data. It does not make a real private account safe to share.</p><p>Re-add screenshots flagged for metadata before selecting them. Selected screenshots are embedded in the download; video links open the external site only when clicked. Check images, captions, credits and URLs for private information. This downloads a local file; nothing is published. Included details travel with it even when collapsed. Access cannot be revoked.</p></details></div>
 <p id="public-status" class="public-status js-only" role="status"></p>
 <div id="public-freshness" class="public-freshness js-only" hidden><p>Your private context has changed. Check this profile against the current record.</p><button type="button" class="path-secondary" id="public-mark-reviewed">Mark profile reviewed</button></div>
 <div id="public-editor" class="js-only" hidden></div><div id="public-preview">''' + preview(packet['publicProfile'], packet.get('synthetic', False)) + '''</div>

@@ -1,7 +1,7 @@
 const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert/strict');
 const source=fs.readFileSync(path.join(__dirname,'../skills/career-context-sheet/assets/public-profile.js'),'utf8');
-const ctx={URL,atob:s=>Buffer.from(s,'base64').toString('binary')};vm.createContext(ctx);vm.runInContext(source.split('const publicRoot=')[0],ctx);
-const profile={contextSha256:'a'.repeat(64),updatedAt:1,name:'Example',headline:'Headline',overview:'Public text',examples:[],timeline:[{period:'2030',title:'Work',summary:'Public summary',sourceRefs:['PRIVATE_SOURCE'],privateNote:'PRIVATE_NOTE'}],sources:['PRIVATE_ARCHIVE']};
+const ctx={URL,URLSearchParams,atob:s=>Buffer.from(s,'base64').toString('binary')};vm.createContext(ctx);vm.runInContext(source.split('const publicRoot=')[0],ctx);
+const profile={contextSha256:'a'.repeat(64),updatedAt:1,name:'Example',headline:'Headline',overview:'Public text',shareOverview:true,examples:[],timeline:[{period:'2030',title:'Work',summary:'Public summary',included:true,sourceRefs:['PRIVATE_SOURCE'],privateNote:'PRIVATE_NOTE'}],sources:['PRIVATE_ARCHIVE']};
 const projected=ctx.publicProjection(profile),text=JSON.stringify(projected);
 assert(!text.includes('PRIVATE_'));assert.equal(projected.timeline[0].period,'2030');
 assert.deepEqual(Object.keys(projected.timeline[0]),['period','title','summary']);
@@ -9,6 +9,12 @@ assert(ctx.validPublicProfile({...profile,timeline:undefined}));
 assert(!ctx.validPublicProfile({...profile,timeline:[{period:'2030',title:'Work',summary:'x'.repeat(1501)}]}));
 assert(!ctx.validPublicProfile({...profile,timeline:Array(31).fill(profile.timeline[0])}));
 console.log('Public timeline allowlist, legacy compatibility and bounds passed.');
+const legacy={...profile,shareOverview:undefined,examples:[{title:'PRIVATE_LEGACY',summary:'Unapproved',synthetic:false}],timeline:[{period:'2030',title:'PRIVATE_LEGACY_YEAR',summary:'Unapproved'}]};
+assert.equal(ctx.publicProjection(legacy).overview,'');
+assert.equal(ctx.publicProjection(legacy).examples.length,0);assert.equal(ctx.publicProjection(legacy).timeline.length,0);
+const retained=ctx.publicDraft(legacy);assert.equal(retained.shareOverview,false);assert.equal(retained.examples[0].included,false);assert.equal(retained.timeline[0].included,false);
+assert.equal(retained.overview,legacy.overview);assert.equal(retained.examples[0].title,'PRIVATE_LEGACY');
+for(const flag of [undefined,null,1,'true',false])assert.equal(ctx.publicProjection({...profile,shareOverview:flag,timeline:[{...profile.timeline[0],included:flag}]}).timeline.length,0);
 
 const selected={...profile,shareOverview:false,examples:[{title:'Shared',summary:'Retained credit',synthetic:false,included:true},{title:'WITHHELD_EXAMPLE',summary:'Unselected draft',synthetic:false,included:false}],timeline:[{period:'2024',title:'WITHHELD_YEAR',summary:'Not shared',included:false}]};
 const saved=JSON.parse(JSON.stringify(selected)),visible=ctx.publicProjection(selected),draft=ctx.publicDraft(selected);
@@ -30,7 +36,7 @@ assert(!ctx.validPublicProfile({...deep,shareDirection:1}));assert(!ctx.validPub
 assert(!ctx.validPublicProfile({...deep,examples:[{...deep.examples[0],shareDetail:1}]}));
 console.log('Direction and deeper context selection boundaries passed.');
 
-const imageData='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADUlEQVR4nGOQ0NAAAAFMAJnVf7vDAAAAAElFTkSuQmCC';
+const imageData='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGOQC9AAAAEmAJdXDMsYAAAAAElFTkSuQmCC';
 const media={...deep,northStar:'Shared responsibility',shareNorthStar:true,media:[{id:'PRIVATE_ID',kind:'image',title:'Rota',caption:'Synthetic reconstruction',credit:'Shared work',alt:'Paper rota',dataUrl:imageData,included:true,privateSource:'PRIVATE_SOURCE'},{id:'hidden',kind:'video',title:'WITHHELD_VIDEO',caption:'',credit:'',url:'https://example.org/SECRET_LINK',included:false}]};
 assert(ctx.validPublicProfile(media));
 const projectedMedia=ctx.publicProjection(media);assert.equal(projectedMedia.media.length,1);assert.equal(projectedMedia.northStar,'Shared responsibility');
@@ -38,6 +44,8 @@ assert(!JSON.stringify(projectedMedia).includes('PRIVATE_'));assert(!JSON.string
 assert.equal(ctx.publicDraft(media).media[1].url,'https://example.org/SECRET_LINK');
 for(const url of ['javascript:alert(1)','http://example.org/video','https://user:pass'+'@'+'example.org/video','https://example.org/ video'])assert(!ctx.publicVideoUrl(url));
 assert(ctx.publicVideoUrl('https://vimeo.com/123?t=12s'));
+const signed={...media,media:[{id:'signed',kind:'video',title:'Private link',caption:'',credit:'',included:true,url:'https://example.org/video?access_token=PRIVATE_TOKEN'}]};
+assert(ctx.validPublicProfile(signed));assert.equal(ctx.publicProjection(signed).media.length,0);assert.equal(ctx.publicDraft(signed).media[0].url,signed.media[0].url);
 media.media[0].included=false;media.shareNorthStar=false;assert.equal(ctx.publicProjection(media).media.length,0);assert.equal(ctx.publicProjection(media).northStar,'');
 assert(!ctx.validPublicProfile({...media,media:[{...media.media[0],dataUrl:'data:image/svg+xml;base64,PHN2Zz4='}]}));
 console.log('Screenshot/video allowlist, withheld bytes and URLs, North Star and unsafe-link checks passed.');

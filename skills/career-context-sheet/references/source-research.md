@@ -2,9 +2,9 @@
 
 Start with the agreed work, dates, source locations and exclusions. The portable sheet is the output; it is not a source connector. Use available authorized connectors or selected local exports. Never imply that installing this skill connects an account.
 
-## Plan source coverage by month
+## Choose coverage for the question
 
-For a broad career-history collection, maintain `journey.coverage` as a source-location × calendar-month ledger. Start from existing location labels, then agree the date range, relevant accounts/folders/channels, exclusions and retention scope. Email is an optional source, alongside chat, documents, calendars, code and public writing. Do not require every platform or an exhaustive archive before producing a useful first account. Existing records and their dates do not prove a month was exhaustively checked.
+For explicitly systematic collection, use `journey.coverage` as a source-location × calendar-month ledger. For question-led research, a compact collection map with inspected scope, unanswered questions and the next useful reads is sufficient. Do not fabricate monthly receipts or scan every location without a reason. Reuse the selected dates, accounts/folders/channels, exclusions and retention scope. Email is optional, alongside chat, documents, calendars, code and public writing. Existing records and their dates do not prove a month was exhaustively checked.
 
 For each source-month:
 

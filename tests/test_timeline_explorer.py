@@ -29,9 +29,23 @@ class TimelineExplorerTests(unittest.TestCase):
             self.assertEqual(saved['sources'],self.packet['sources'])
 
     def test_invalid_selection_rejected(self):
-        for change in [{'fromId':'missing'},{'purpose':'fake'},{'updatedAt':True},{'updatedAt':-1},{'contextSha256':'wrong'},{'fromId':self.selection['toId'],'toId':self.selection['fromId']}]:
+        for change in [{'fromId':'missing'},{'purpose':'fake'},{'year':'2018'},{'year':2030},{'updatedAt':True},{'updatedAt':-1},{'contextSha256':'wrong'},{'fromId':self.selection['toId'],'toId':self.selection['fromId']}]:
             data=copy.deepcopy(self.packet);data['presentation']['timelineSelection'].update(change)
             with self.subTest(change=change),self.assertRaises(ValueError):renderer.validate(data)
+
+    def test_explicit_multi_year_records_are_available_in_each_year(self):
+        self.packet.pop('interview')  # This fixture changes dates, invalidating prepared stories.
+        self.packet['timeline'][0]['period'] = '2028–2030'
+        self.selection['year'] = '2029'
+        renderer.validate(self.packet)
+        self.assertEqual(renderer.sections.period_years(self.packet['timeline'][0]), ['2028', '2029', '2030'])
+        self.assertEqual(renderer.sections.period_years({'period': 'Date unknown'}), ['Other periods'])
+        markup = renderer.sections.timeline_html(self.packet)
+        self.assertIn('data-year="2029"', markup)
+        self.assertIn('<span>2028–2030</span>', markup)
+        self.assertNotIn('<span>–2030</span>', markup)
+        for label in ['Jan 2028 – Jun 2030', '2028-01-01 – 2030-06-30', 'January 2028 to June 2030']:
+            self.assertEqual(renderer.sections.period_years({'period': label}), ['2028', '2029', '2030'])
 
     def test_empty_timeline_has_no_dead_range_controls(self):
         data=copy.deepcopy(self.packet);data.pop('timeline');data['presentation'].pop('timelineSelection')

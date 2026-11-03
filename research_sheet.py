@@ -12,6 +12,7 @@ sys.path.insert(0, str(EXPERIMENTS))
 from completion_server import spans
 from mcp_server import check
 from ownership_review import compile_review, draft_hash, evidence_version
+from ownership_server import saved_notes
 from career_context import renderer
 import depth_protocol as depth
 import narrative_retention as retention
@@ -180,10 +181,21 @@ def compile_sheet(raw, plan, records, events, scope, snapshot, *, draft=False, s
     known = {r['id']: r for r in records}
     catalog = {(r['id'], s['span_id']): s for r in records for s in spans(r)}
     selected_spans = {}
+    notes = saved_notes(events)
     for claim in raw['claims']:
         for evidence in claim['evidence']:
             pair = evidence['record_id'], evidence['span_id']
             selected_spans[pair] = catalog[pair]
+        for role in claim['roles']:
+            attribution = notes[role['record_id']]['attributions'][role['attribution_index']]
+            for span_id in attribution['span_ids']:
+                pair = role['record_id'], span_id
+                selected_spans[pair] = catalog[pair]
+    for rejected in raw['rejected_conclusions']:
+        for record_id in rejected['record_ids']:
+            for pair, span in catalog.items():
+                if pair[0] == record_id:
+                    selected_spans[pair] = span
     source_ids = {pair: 'evidence-' + digest(pair)[:20] for pair in selected_spans}
     sources = []
     for pair, span in selected_spans.items():
@@ -250,6 +262,30 @@ def compile_sheet(raw, plan, records, events, scope, snapshot, *, draft=False, s
     packet = {'schema': 'career-context/v1', 'updatedAt': snapshot, 'reviewStatus': 'draft', 'synthetic': synthetic,
               'person': {'name': scope['subject'], 'overview': '\n\n'.join(sentence(i) for i in plan['overview']), 'background': background},
               'accounts': accounts, 'sources': sources}
+    source_map = {s['id']: s for s in sources}
+    def retained_anchor(record_id, span_id):
+        source = source_map[source_ids[(record_id, span_id)]]
+        return RENDERER.memory.anchor(source, 0, len(source['content']))
+    remembered = []
+    for claim in raw['claims']:
+        attributions = []
+        for role in claim['roles']:
+            attribution = notes[role['record_id']]['attributions'][role['attribution_index']]
+            attributions.append({k: attribution[k] for k in ['actor', 'action', 'state']} | {
+                'evidence': [retained_anchor(role['record_id'], sid) for sid in attribution['span_ids']]})
+        remembered.append({'id': 'claim-' + digest(claim['id'])[:20],
+            'statement': sentence(claim['id']), 'kind': 'interpretation',
+            'status': 'qualified' if claim['limits'].strip() else 'supported',
+            'accountIds': [a['id'] for a, selected in zip(accounts, account_claims) if claim['id'] in selected],
+            'evidence': [retained_anchor(e['record_id'], e['span_id']) for e in claim['evidence']],
+            'rationale': 'Researcher synthesis; exact sources establish provenance, not independent semantic verification.',
+            'attributions': attributions})
+    for rejected in raw['rejected_conclusions']:
+        remembered.append({'id': 'rejected-' + digest(rejected['statement'])[:20],
+            'statement': rejected['statement'], 'kind': 'interpretation', 'status': 'rejected',
+            'accountIds': [], 'evidence': [], 'rationale': rejected['reason'],
+            'counterEvidence': [retained_anchor(*pair) for pair in source_ids if pair[0] in rejected['record_ids']]})
+    packet['memory'] = {'schema': 'career-memory/v1', 'claims': remembered}
     try:
         RENDERER.validate(packet)
     except ValueError as error:
@@ -282,7 +318,7 @@ def build(workspace, output, force=False):
     raw['stop_receipt_id'] = stop['result']['receipt_id']
     records = list(full_records(events).values())
     audit = depth.current_review(events, evidence_version(records, events))
-    if session.get('depth_protocol') == depth.PROTOCOL and not audit:
+    if session.get('depth_protocol') in {'career-depth/v1', depth.PROTOCOL} and not audit:
         raise ValueError('This session requires a current depth review before building.')
     if session.get('retention_protocol') == retention.PROTOCOL:
         errors = retention.plan_errors(planned['arguments']['plan'], records, events, spans, challenged=True)
@@ -311,7 +347,7 @@ def build(workspace, output, force=False):
         'journal_sha256': hashlib.sha256((workspace / 'calls.jsonl').read_bytes()).hexdigest(),
         'stop': stop['result']['status'], 'unresolved': stop['result']['unresolved'],
         'source_calls': stop['result']['counts']['source_calls'], 'requests': len(events),
-        'depth_protocol': depth.PROTOCOL if audit else 'legacy; no enforced depth review',
+        'depth_protocol': audit['result']['protocol'] if audit else 'legacy; no enforced depth review',
         'retention_protocol': session.get('retention_protocol', 'legacy; no section retention'),
         'export_protocol': session.get('export_protocol', 'legacy'),
         'depth_review': audit['result'] if audit else None})

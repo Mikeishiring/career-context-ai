@@ -19,6 +19,15 @@ CREATE TABLE IF NOT EXISTS coverage_checks (revision TEXT REFERENCES revisions(i
     month TEXT, status TEXT, found INTEGER, records_read INTEGER, note TEXT, cursor TEXT,
     source_refs TEXT, PRIMARY KEY(revision,stream_id,month));
 '''
+MEMORY_DDL = '''
+CREATE TABLE IF NOT EXISTS memory_claims (revision TEXT REFERENCES revisions(id), id TEXT,
+    kind TEXT, status TEXT, statement TEXT, content TEXT, PRIMARY KEY(revision,id));
+CREATE TABLE IF NOT EXISTS memory_evidence (revision TEXT, claim_id TEXT, role TEXT, ordinal INTEGER,
+    source_id TEXT, source_sha256 TEXT, start_offset INTEGER, end_offset INTEGER,
+    PRIMARY KEY(revision,claim_id,role,ordinal),
+    FOREIGN KEY(revision,claim_id) REFERENCES memory_claims(revision,id),
+    FOREIGN KEY(revision,source_id) REFERENCES sources(revision,id));
+'''
 DDL = '''
 CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 CREATE TABLE revisions (id TEXT PRIMARY KEY, updated_at TEXT NOT NULL, packet TEXT NOT NULL, html BLOB NOT NULL);
@@ -118,12 +127,17 @@ def build(source, workspace, *, update=False, allow_view_removal=False):
     try:
         db.execute('BEGIN IMMEDIATE')
         # Additive tables keep old archives readable and all earlier revisions intact.
-        for statement in COVERAGE_DDL.split(';'):
+        for statement in (COVERAGE_DDL + MEMORY_DDL).split(';'):
             if statement.strip():
                 db.execute(statement)
         meta = dict(db.execute('SELECT key,value FROM metadata'))
         if meta.get('person') and meta['person'] != packet['person']['name']:
             raise ValueError('This archive belongs to a different person; use a separate workspace')
+        if meta.get('current') and not allow_view_removal:
+            retained = db.execute('SELECT packet FROM revisions WHERE id=?', (meta['current'],)).fetchone()
+            if not retained:
+                raise ValueError('Archive current revision is missing')
+            renderer.preserve_views(renderer.parse_packet(retained[0]), packet)
         if sheet.exists():
             previous = sheet.read_bytes()
             if hashlib.sha256(previous).hexdigest() != meta.get('current'):
@@ -143,6 +157,14 @@ def build(source, workspace, *, update=False, allow_view_removal=False):
                             source_item['scope'], source_item.get('locator', '')))
             db.executemany('INSERT INTO account_sources VALUES (?,?,?)',
                            [(revision, a['id'], ref) for a in clean['accounts'] for ref in a['sourceRefs']])
+            for claim in renderer.memory.claims(clean):
+                db.execute('INSERT INTO memory_claims VALUES (?,?,?,?,?,?)',
+                           (revision, claim['id'], claim['kind'], claim['status'], claim['statement'],
+                            json.dumps(claim, ensure_ascii=False)))
+                for role in ['evidence', 'counterEvidence']:
+                    db.executemany('INSERT INTO memory_evidence VALUES (?,?,?,?,?,?,?,?)',
+                        [(revision, claim['id'], role, i, e['sourceId'], e['sourceSha256'], e['start'], e['end'])
+                         for i, e in enumerate(claim.get(role, []))])
             db.executemany('INSERT INTO artifacts VALUES (?,?,?,?,?,?,?,?)', images)
             db.executemany('INSERT INTO collection VALUES (?,?,?,?,?,?,?,?)',
                            [(revision, i, *[item[k] for k in ['platform', 'location', 'access', 'status', 'scope', 'nextStep']])
@@ -173,23 +195,43 @@ def build(source, workspace, *, update=False, allow_view_removal=False):
             'accounts': len(clean['accounts']), 'sources': len(clean['sources']), 'artifacts': len(images)}
 
 
+def load_snapshot(database, revision=None):
+    """Read a selected revision in place, including private research memory."""
+    db = connect(database, readonly=True)
+    try:
+        if revision is None:
+            current = db.execute("SELECT value FROM metadata WHERE key='current'").fetchone()
+            if not current:
+                raise ValueError('Archive has no saved revision; run build --update to recover')
+            revision = current[0]
+        size = db.execute('SELECT length(CAST(packet AS BLOB)) FROM revisions WHERE id=?', (revision,)).fetchone()
+        if not size:
+            raise ValueError('Archive revision not found')
+        if size[0] > renderer.MAX_PACKET_BYTES:
+            raise ValueError('Archive packet exceeds the supported size')
+        row = db.execute('SELECT packet FROM revisions WHERE id=?', (revision,)).fetchone()
+        packet = renderer.parse_packet(row[0])
+        renderer.validate(packet)
+        return packet
+    finally:
+        db.close()
+
+
 def search(database, query):
     if not isinstance(query, str) or not query.strip() or len(query) > 500:
         raise ValueError('Supply a search phrase of 1–500 characters')
-    db = connect(database, readonly=True)
-    try:
-        current = db.execute("SELECT value FROM metadata WHERE key='current'").fetchone()
-        if not current:
-            raise ValueError('Archive has no saved revision; run build --update to recover')
-        pattern = '%' + query.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_') + '%'
-        rows = db.execute('''SELECT 'account',id,title,content FROM accounts
-            WHERE revision=? AND (title LIKE ? ESCAPE '\\' OR content LIKE ? ESCAPE '\\')
-            UNION ALL SELECT 'source',id,label,content FROM sources
-            WHERE revision=? AND (label LIKE ? ESCAPE '\\' OR content LIKE ? ESCAPE '\\') LIMIT 50''',
-                          (current[0], pattern, pattern, current[0], pattern, pattern)).fetchall()
-        return [{'kind': kind, 'id': key, 'title': title, 'content': content} for kind, key, title, content in rows]
-    finally:
-        db.close()
+    # Preserve the legacy list API; the retrieval CLI exposes pagination,
+    # individual revisions, source expansion and a compact index.
+    packet = load_snapshot(database)
+    retrieval = renderer.load_helper('retrieve_context')
+    rows = retrieval.search(packet, [query], layers=['accounts', 'sources', 'claims'], limit=50, mode='literal')
+    result = []
+    for layer, kind in [('accounts', 'account'), ('sources', 'source'), ('claims', 'claim')]:
+        for hit in rows['layers'][layer]['hits']:
+            record = retrieval.read_record(packet, layer + ':' + hit['id'])['record']
+            result.append({'kind': kind, 'id': hit['id'], 'title': hit['label'],
+                           'content': record['content'] if layer == 'sources' else json.dumps(record, ensure_ascii=False)})
+    return result[:50]
 
 
 def export(database, output, revision=None):

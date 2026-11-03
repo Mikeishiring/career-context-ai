@@ -1,4 +1,4 @@
 interface:
   display_name: "Career Context"
   short_description: "Build career understanding and choose what to share"
-  default_prompt: "Use $career-context-sheet to connect my stated North Star, supported progression and strongest relevant visual evidence, without assuming a role or industry or filling gaps with invented claims. Build private context first; keep Practice optional and let Profile control what I share."
+  default_prompt: "Use $career-context-sheet and its START-HERE.md. Check what this environment can read and save, resume my existing context, and build one useful account from authorized material. Preserve shared credit, uncertainty and my corrections. Handle the research and tools, ask only consequential questions, and save a private continuation."

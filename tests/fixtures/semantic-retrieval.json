@@ -1,0 +1,12 @@
+{
+  "synthetic": true,
+  "scope": "Small authored English paraphrase fixture; not a general retrieval benchmark.",
+  "records": [
+    {"id": "retries", "text": "The nightly job stalled whenever a partner's endpoint went quiet. I added a timeout and a queue that tried the request again later.", "query": "outage recovery"},
+    {"id": "decisions", "text": "Nobody knew who should sign off the final draft. I brought the designer and editor together and wrote down which decisions each could make.", "query": "clarifying authority"},
+    {"id": "dispute", "text": "The two organisers refused to speak to each other after an argument. I listened to both separately, then helped them agree a way to work together again.", "query": "conflict mediation"},
+    {"id": "spending", "text": "We could afford only one venue. I compared the hire prices, travel costs and expected attendance, then chose the option that left enough money for equipment.", "query": "budget allocation"},
+    {"id": "assisted", "text": "An assistant generated the database migration. I checked its output against the records and corrected two errors before a colleague deployed it.", "query": "reviewing machine-written code"},
+    {"id": "gardening", "text": "I planted tomatoes in the greenhouse, watered them every morning and picked the ripe fruit in August."}
+  ]
+}

@@ -111,7 +111,9 @@ class CollectionPathTests(unittest.TestCase):
             self.assertEqual(db.execute('SELECT COUNT(*) FROM revisions').fetchone()[0], 2)
         exported = self.folder / 'recovered.html'
         archive.export(workspace / 'career.sqlite', exported)
-        self.assertEqual(renderer.load_packet(exported)['journey'], self.packet['journey'])
+        restored = renderer.load_packet(exported)['journey']
+        self.assertEqual(restored.pop('reviewBasis'), renderer.memory.review_basis(self.packet))
+        self.assertEqual(restored, self.packet['journey'])
         self.assertNotEqual(before['revision'], after['revision'])
 
     def test_old_archive_gets_additive_tables_without_losing_revisions(self):

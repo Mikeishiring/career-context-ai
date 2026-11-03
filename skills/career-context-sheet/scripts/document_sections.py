@@ -12,6 +12,10 @@ def evidence_fingerprint(packet):
                 ('person', 'profile', 'accounts', 'sources', 'timeline') if k in packet}
     for account in evidence['accounts']:
         account.pop('artifacts', None)
+    if 'memory' in packet:
+        evidence['memory'] = copy.deepcopy(packet['memory'])
+        for claim in evidence['memory']['claims']:
+            claim.pop('aliases', None)  # Retrieval vocabulary does not alter a claim.
     return hashlib.sha256(json.dumps(evidence, sort_keys=True, ensure_ascii=True,
                                     separators=(',', ':')).encode()).hexdigest()
 
@@ -82,6 +86,33 @@ def period_year(period):
     return match.group() if match else 'Other periods'
 
 
+def period_years(period):
+    """Expand only an explicitly written year range, never missing chronology."""
+    months = r'(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)'
+    span = re.search(r'\b((?:19|20)\d{2})(?:[-/]\d{2}(?:[-/]\d{2})?)?\s*(?:[–—-]|\bto\b)\s*'
+                     r'(?:\d{1,2}\s+)?(?:' + months + r'\.?\s+)?(?:\d{1,2},?\s+)?((?:19|20)\d{2})\b', period['period'], re.I)
+    if span and int(span[1]) <= int(span[2]):
+        return [str(year) for year in range(int(span[1]), int(span[2]) + 1)]
+    return [period_year(period)]
+
+
+def context_overview(packet):
+    """A private reading of saved context, with links back to the full accounts."""
+    accounts = packet['accounts']
+    rows = ''.join(
+        f'<li><span class="context-period">{esc(a["period"]) or "Date not recorded"}</span>'
+        f'<div><a href="#account-{esc(a["id"])}">{esc(a["title"])}</a>'
+        f'{paragraphs(a["summary"])}</div><span class="context-row-arrow" aria-hidden="true">↗</span></li>'
+        for a in accounts[:6])
+    more = f'<a href="#work">All {len(accounts)} accounts →</a>' if len(accounts) > 6 else ''
+    register = (f'<section class="context-register"><div class="context-section-heading"><h2>Work &amp; experience</h2>'
+                f'<a href="#timeline">Explore timeline →</a></div><ol>{rows}</ol>{more}</section>') if accounts else ''
+    questions = [(a, q) for a in accounts for q in a['questions']][:3]
+    gaps = ''.join(f'<li>{esc(q)}<a href="#account-{esc(a["id"])}">{esc(a["title"])}</a></li>' for a, q in questions)
+    gaps = f'<section class="context-questions"><h2>Still to understand</h2><ul>{gaps}</ul></section>' if gaps else ''
+    return register + gaps
+
+
 def timeline_reading(packet):
     reading = packet.get('presentation', {}).get('timelineReading', {})
     return reading if reading.get('contextSha256') == evidence_fingerprint(packet) else {}
@@ -126,7 +157,7 @@ def validate_timeline_reading(packet, check_text, keys):
     periods = packet.get('timeline', [])
     accounts = {a['id'] for a in packet['accounts']}
     fresh = reading['contextSha256'] == evidence_fingerprint(packet)
-    for group, allowed in [('periods', {p['id'] for p in periods}), ('years', {period_year(p) for p in periods})]:
+    for group, allowed in [('periods', {p['id'] for p in periods}), ('years', {y for p in periods for y in period_years(p)})]:
         entries = reading.get(group)
         if not isinstance(entries, dict) or len(entries) > 240 or any(not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_ -]{0,99}', key) for key in entries) or (fresh and set(entries) - allowed):
             raise ValueError('Timeline reading must reference saved ' + group)
@@ -154,19 +185,22 @@ def timeline_html(packet):
     stories = {s['id'] for s in packet.get('interview', {}).get('stories', [])}
     reading = timeline_reading(packet)
     index, body = [], []
-    current_year = None
+    years = sorted({y for p in periods for y in period_years(p)})
+    for year in years:
+        index.append(f'<div class="timeline-year" data-year="{esc(year)}"><button type="button" class="timeline-year-label js-only" data-year="{esc(year)}" aria-pressed="false">{esc(year)}</button><span class="no-script">{esc(year)}</span><div class="timeline-periods">')
+        for ordinal, period in enumerate(periods):
+            if year not in period_years(period):
+                continue
+            # Keep multi-year labels intact; removing the start year creates "–2026".
+            short = period['period'] if len(period_years(period)) > 1 else period['period'].replace(year, '', 1).strip() or year
+            index.append(f'<a href="#quarter-{esc(period["id"])}" data-period-index="{ordinal}" aria-label="{esc(period["period"] + ": " + period["title"])}" title="{esc(period["title"])}"><span>{esc(short)}</span></a>')
+        index.append('</div></div>')
     for ordinal, period in enumerate(periods):
         key = esc(period['id'])
         year = period_year(period)
         brief = reading.get('periods', {}).get(period['id'])
         title = brief['title'] if brief else period['title']
         account_ids = list(dict.fromkeys(period['accountIds'] + (brief['accountIds'] if brief else [])))
-        if year != current_year:
-            if current_year is not None: index.append('</div></div>')
-            index.append(f'<div class="timeline-year" data-year="{esc(year)}"><button type="button" class="timeline-year-label js-only" data-year="{esc(year)}" aria-pressed="false">{esc(year)}</button><span class="no-script">{esc(year)}</span><div class="timeline-periods">')
-            current_year = year
-        short = period['period'].replace(year, '', 1).strip() or year
-        index.append(f'<a href="#quarter-{key}" data-period-index="{ordinal}" aria-label="{esc(period["period"] + ": " + title)}" title="{esc(title)}"><span>{esc(short)}</span></a>')
         work = ''.join(f'<a href="#account-{esc(aid)}">{esc(accounts[aid]["title"])} <span aria-hidden="true">↗</span></a>'
                        for aid in account_ids)
         practice = ''.join(f'<a href="#prep-story-{esc(aid)}">Practise: {esc(accounts[aid]["title"])} <span aria-hidden="true">→</span></a>'
@@ -182,11 +216,11 @@ def timeline_html(packet):
 {content}
 <details class="section-detail"><summary>Sources &amp; open questions</summary>{bullets(period['questions'])}{references(packet, period['sourceRefs'])}</details>
 <div class="related-work">{work}{practice}</div><nav class="period-next" aria-label="Adjacent career periods">{next_links}</nav></div></details>''')
-    index.append('</div></div>')
     overviews = ''.join(f'<section class="year-overview" data-overview-year="{esc(year)}"><h3>{esc(entry["title"])}</h3>{bullets(entry["bullets"])}</section>' for year, entry in reading.get('years', {}).items())
     options = ''.join(f'<option value="{esc(p["id"])}">{esc(p["period"])}</option>' for p in periods)
-    return ('<div class="timeline-layout"><nav class="period-index" aria-label="Select career years and periods">'
-            + ''.join(index) + '</nav><div class="timeline-selection js-only"><div class="timeline-range-summary"><strong id="timeline-range-label"></strong><span id="timeline-range-count"></span><a id="timeline-work" href="#work">View work →</a><a id="timeline-sources" href="#sources">Sources ↗</a></div><div class="timeline-brief-controls"><label><span class="sr-only">Use selected context for</span><select id="timeline-purpose"><option value="patterns">Patterns</option><option value="cv">CV bullets</option><option value="interview">Interview</option><option value="profile">Profile</option></select></label><button type="button" id="timeline-copy" class="primary">Copy prompt</button><details class="timeline-options"><summary>Adjust dates &amp; sources</summary><div class="timeline-dates"><label>From<select id="timeline-from">' + options + '</select></label><label>To<select id="timeline-to">' + options + '</select></label></div><label class="timeline-excerpts"><input type="checkbox" id="timeline-excerpts">Include source excerpts</label></details></div><p class="status" id="timeline-status" role="status"></p></div><div class="timeline-readings">' + overviews + ''.join(body) + '</div></div>')
+    year_picker = '<label class="timeline-year-picker js-only" for="timeline-year-select">Year<select id="timeline-year-select"><option value="" disabled>Selected range</option>' + ''.join(f'<option value="{esc(y)}">{esc(y)}</option>' for y in years) + '</select></label>'
+    return (year_picker + '<div class="timeline-layout"><nav class="period-index" aria-label="Select career years and periods">'
+            + ''.join(index) + '</nav><div class="timeline-content"><div class="timeline-selection js-only"><div class="timeline-range-summary"><strong id="timeline-range-label"></strong><span id="timeline-range-count"></span><a id="timeline-work" href="#work">View work →</a><a id="timeline-sources" href="#sources">Sources ↗</a></div><details class="timeline-use"><summary>Use this context</summary><div class="timeline-brief-controls"><label><span class="sr-only">Use selected context for</span><select id="timeline-purpose"><option value="patterns">Patterns</option><option value="cv">CV bullets</option><option value="interview">Interview</option><option value="profile">Profile</option></select></label><button type="button" id="timeline-copy" class="primary">Copy prompt</button><details class="timeline-options"><summary>Adjust dates &amp; sources</summary><div class="timeline-dates"><label>From<select id="timeline-from">' + options + '</select></label><label>To<select id="timeline-to">' + options + '</select></label></div><label class="timeline-excerpts"><input type="checkbox" id="timeline-excerpts">Include source excerpts</label></details></div></details><p class="status" id="timeline-status" role="status"></p></div><div class="timeline-readings">' + overviews + ''.join(body) + '</div></div></div>')
 
 
 

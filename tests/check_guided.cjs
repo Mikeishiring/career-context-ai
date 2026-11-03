@@ -14,7 +14,9 @@ if(!input||!output)throw Error('Usage: node tests/check_guided.cjs guided.html o
  const check=(name,condition)=>{assert.ok(condition,name);checks.push(name);};
  await page.goto(pathToFileURL(path.resolve(input)).href);
  const before=await page.evaluate(()=>structuredClone(packet));
+ await page.locator('.top [data-view="path"]').click();
  await page.locator('#path-link-gather').click();
+ await page.locator('#systematic-collection > summary').click();
  const setup=page.locator('.coverage-setup');if(!await setup.evaluate(n=>n.open))await setup.locator('summary').first().click();
  await page.locator('#coverage-start').fill('2030-12');await page.locator('#coverage-end').fill('2031-02');
  await page.locator('#coverage-build').press('Enter');
@@ -60,7 +62,7 @@ if(!input||!output)throw Error('Usage: node tests/check_guided.cjs guided.html o
  if(before.accounts.length>1){
   check('One account cannot complete the entire review activity',!(await page.locator('#path-link-review').getAttribute('class')).includes('is-reviewed'));
  }
- await page.getByText('Propose a correction',{exact:true}).click();await page.locator('#review-draft').fill('A new proposed correction after keeping the source account.');
+ await page.getByText('Propose exact wording and sources',{exact:true}).click();await page.locator('#review-draft').fill('A new proposed correction after keeping the source account.');
  check('Editing a kept account reopens its decision and controls',await page.locator('#path-count').innerText()==='0 of '+before.accounts.length+' accounts reviewed'&&await page.locator('#path-content .review-state').isHidden()&&(await page.locator('#path-continue').innerText()).includes('Review later')&&await page.locator('#path-reopen').isHidden());
  await page.locator('#path-link-deepen').click();
  await page.locator('#path-note').fill('DEPTH_HANDOFF_CANARY: keep uncertain outcomes explicit.');
@@ -70,7 +72,7 @@ if(!input||!output)throw Error('Usage: node tests/check_guided.cjs guided.html o
  check('Editing a cleared gap updates its feedback and next action immediately',(await page.locator('#path-content .review-state').innerText())==='Gap remains open.'&&(await page.locator('#path-continue').innerText()).includes('gap open')&&await page.locator('#path-reopen').isHidden());
  await page.locator('#path-link-write').click();
  await page.locator('#path-note').fill('WRITE_HANDOFF_CANARY: use ordinary words.');
- check('Profile is the final navigation destination',await page.locator('.top nav a').last().getAttribute('href')==='#profile');
+ check('Public profile remains explicitly accessible',await page.locator('.footer a[href="#profile"]').innerText()==='Public profile');
  for(const route of ['path-write','profile']){
   await page.evaluate(hash=>location.hash=hash,route);
   for(const width of [320,375,768,1440]){
@@ -89,6 +91,7 @@ if(!input||!output)throw Error('Usage: node tests/check_guided.cjs guided.html o
  await page.reload();await page.locator('.path-writing-guide summary').click();
  check('Writing guide survives reload',await page.locator('#writing-guide').inputValue()===style);
  await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{value:{writeText:async()=>{throw Error('denied');}},configurable:true}));
+ await page.locator('#wording-brief > summary').click();
  await page.click('#writing-copy');
  const brief=await page.locator('#agent-text').inputValue();
  check('Brief contains the preferred style and original wording',brief.includes(style)&&brief.includes(before.journey.baseline.overview));
@@ -103,18 +106,19 @@ if(!input||!output)throw Error('Usage: node tests/check_guided.cjs guided.html o
  await page.fill('#writing-draft',draft);
  await page.fill('#path-note','PRIVATE_REVIEW_CANARY');
  await page.click('#path-continue');
- check('Writing leads to Profile without copying private context',await page.locator('#profile').isVisible()&&await page.evaluate(d=>packet.publicProfile.overview!==d,draft));
+ check('Writing returns to private context without copying its draft to Profile',await page.locator('#context').isVisible()&&await page.evaluate(d=>packet.publicProfile.overview!==d,draft));
  check('Original wording and evidence are unchanged',await page.evaluate(b=>JSON.stringify(packet.person)===JSON.stringify(b.person)&&JSON.stringify(packet.accounts)===JSON.stringify(b.accounts)&&JSON.stringify(packet.sources)===JSON.stringify(b.sources)&&JSON.stringify(packet.journey.baseline)===JSON.stringify(b.journey.baseline),before));
- await page.click('#public-edit-tab');
+ await page.locator('.footer a[href="#profile"]').click();await page.click('#public-edit-tab');
+ await page.getByLabel('Name',{exact:true}).fill('Public example');
  const hostile='Literal </style><script>alert(1)</script> example';
  await page.getByLabel('Headline',{exact:true}).fill(hostile);
- await page.getByLabel('Overview',{exact:true}).fill('WITHHELD_OVERVIEW');
+ await page.getByRole('textbox',{name:'Overview',exact:true}).fill('WITHHELD_OVERVIEW');
  if(!before.publicProfile.examples.length)await page.click('#public-add');
  await page.getByLabel('Example title',{exact:true}).first().fill('Reconstructed demonstration');
  await page.getByLabel('General overview',{exact:true}).first().fill('A newly made example using fictional inputs.');
  await page.getByLabel('Synthetic example',{exact:true}).first().check();
  await page.click('#public-preview-tab');
- await page.locator('.public-sharing > summary').click();
+ if(!await page.locator('.public-sharing').evaluate(n=>n.open))await page.locator('.public-sharing > summary').click();
  await page.locator('#share-overview').uncheck();await page.locator('#share-example-0').check();
  check('Profile edits render as inert text',await page.locator('.profile-page h1').innerText()===hostile&&await page.locator('#public-preview script').count()===0);
  const downloaded=page.waitForEvent('download');await page.click('#public-export');const dl=await downloaded;
@@ -137,29 +141,29 @@ if(!input||!output)throw Error('Usage: node tests/check_guided.cjs guided.html o
  await page.click('#public-edit-tab'); // Profile controls may be offscreen after writing in another context, but remain in this page's profile.
  await page.getByLabel('Headline',{exact:true}).fill('');check('Empty profile cannot be exported',await page.locator('#public-export').isDisabled());
  await page.setViewportSize({width:320,height:900});check('Editor fits 320',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
- await page.getByLabel('Headline',{exact:true}).fill('A'.repeat(200));await page.getByLabel('Overview',{exact:true}).fill('A'.repeat(3000));
+ await page.getByLabel('Headline',{exact:true}).fill('A'.repeat(200));await page.getByRole('textbox',{name:'Overview',exact:true}).fill('A'.repeat(3000));
  await page.click('#public-preview-tab');check('Long content stays within narrow layout',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  await page.locator('#public-edit-tab').focus();await page.keyboard.press('Enter');check('Profile editor works by keyboard',await page.locator('#public-editor').isVisible());
- await page.emulateMedia({reducedMotion:'reduce'});check('Reduced motion keeps controls still',await page.locator('.path-token svg').first().evaluate(n=>getComputedStyle(n).transitionDuration==='0s'));
+ await page.emulateMedia({reducedMotion:'reduce'});check('Reduced motion keeps controls still',await page.locator('.path-save span').first().evaluate(n=>getComputedStyle(n).transitionDuration==='0s'));
  const stalePacket=structuredClone(before);stalePacket.publicProfile.contextSha256='0'.repeat(64);
  const stalePath=path.join(output,'stale-profile-check.html');
  const baseHTML=await fs.readFile(input,'utf8');
  await fs.writeFile(stalePath,baseHTML.replace(/(<script id="career-context-data" type="application\/json">)[\s\S]*?(<\/script>)/,(_,start,end)=>start+JSON.stringify(stalePacket).replace(/</g,'\\u003c').replace(/&/g,'\\u0026')+end));
  const staleContext=await browser.newContext(),stale=await staleContext.newPage();
  await stale.goto(pathToFileURL(stalePath).href+'#profile');await stale.click('#public-edit-tab');
- await stale.getByLabel('Headline',{exact:true}).fill('Retain this edited profile');await stale.reload();
+ await stale.getByLabel('Name',{exact:true}).fill('Public example');await stale.getByLabel('Headline',{exact:true}).fill('Retain this edited profile');await stale.reload();
  if(!await stale.locator('#public-editor').isVisible())await stale.click('#public-edit-tab');
  check('Profile edits survive reload after evidence changes',await stale.getByLabel('Headline',{exact:true}).inputValue()==='Retain this edited profile');
  check('Saving an edit does not approve stale evidence',await stale.evaluate(()=>packet.publicProfile.contextSha256==='0'.repeat(64))&&await stale.locator('#public-freshness').isVisible());
- await stale.getByLabel('Overview',{exact:true}).fill('A revised public draft that still needs review.');
+ await stale.getByRole('textbox',{name:'Overview',exact:true}).fill('A revised public draft that still needs review.');
  check('Editing cannot hide the stale-context reminder',await stale.locator('#public-freshness').isVisible());
- await stale.locator('.public-sharing > summary').click();await stale.locator('#share-overview').check();
+ if(!await stale.locator('.public-sharing').evaluate(n=>n.open))await stale.locator('.public-sharing > summary').click();await stale.locator('#share-overview').check();
  await stale.locator('#public-mark-reviewed').press('Enter');
  check('Explicit profile review updates freshness and returns focus',await stale.locator('#public-freshness').isHidden()&&await stale.evaluate(()=>packet.publicProfile.contextSha256===document.querySelector('#profile').dataset.evidence&&document.activeElement.id==='public-edit-tab'));
  await stale.reload();check('Explicit review survives reload',await stale.locator('#public-freshness').isHidden());
- await stale.click('#public-edit-tab');await stale.getByLabel('Overview',{exact:true}).fill('');
+ await stale.click('#public-edit-tab');await stale.getByRole('textbox',{name:'Overview',exact:true}).fill('');
  await stale.getByRole('link',{name:'Back to your context'}).click();await stale.fill('#writing-draft','A temporary writing candidate.');
- await stale.click('#path-continue');await stale.getByRole('link',{name:'Back to your context'}).click();
+ await stale.click('#path-continue');await stale.evaluate(()=>location.hash='path-write');
  check('Writing candidate can complete the writing step',await stale.locator('#path-link-write').evaluate(n=>n.classList.contains('is-reviewed')));
  await stale.fill('#writing-draft','');
  check('Retaining the starting overview needs no invented rewrite or practice',await stale.locator('#path-link-write').evaluate(n=>n.classList.contains('is-reviewed'))&&await stale.locator('#path-continue').isEnabled());

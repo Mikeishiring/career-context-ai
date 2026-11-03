@@ -91,10 +91,10 @@ PLAN_TOOL = next(t for t in TOOLS if t['name'] == 'sheet_plan')
 TOOLS += [base.tool('research_probe',
     'Investigate a consequential question within selected sources. Uses the same bounded search and pagination; '
     'saves the account, depth lens, question and actual search receipt. Read returned originals before judging them. '
-    'Use at least two lenses before drafting and a fresh contrary-evidence, ownership or later-outcome probe after the first draft.',
+    'Choose questions and source groups that could change the account. Reuse sufficient retained evidence; no search quota or fixed sequence applies.',
     depth.PROBE_PROPERTIES | {'cursor': {'type': 'string'}}, list(depth.PROBE_PROPERTIES)),
     base.tool('depth_review',
-    'After sheet_plan, review all ten lenses per account, every material actor/action and the proposed through-line. '
+    'After sheet_plan, choose relevant review questions for each account, covering every claim, material actor/action and the proposed through-line. '
     'Compare each prose clause with the saved actor, action and state, including collective actors. '
     'Reference real probe sequence numbers. Preserve gaps. This validates process and references, not semantic truth. '
     'New evidence, notes or changed prose/layout invalidate the review.',
@@ -304,11 +304,11 @@ class SheetSource(OwnershipSource):
         result['writing']['sheet_plan_current'] = bool(plans and plans[-1]['result']['evidence_version'] == version)
         review = depth.current_review(self.events, version)
         result['depth'] = {'protocol': depth.PROTOCOL, 'review_current': bool(review),
-                          'lenses': list(depth.LENSES), 'source_budget': self.source_budget,
+                          'suggested_lenses': list(depth.LENSES), 'source_budget': self.source_budget,
                           'request_limit': self.request_limit,
                           'pending_research': review['result']['pending_research'] if review else [],
                           'next_step': 'Resolve pending research or finish_check.' if review else
-                          'Investigate, draft, challenge the draft with a new probe, revise and plan, then depth_review.'}
+                          'Choose consequential questions; reuse sufficient retained originals or investigate useful gaps. Check claims, save sheet_plan, then depth_review.'}
         if self.turning_required:
             result['turning_points'] = turning_points.status(self.events, list(self.full_reads().values()), spans,
                                                             self.turning_protocol())
@@ -376,12 +376,6 @@ class SheetSource(OwnershipSource):
         if self.retention_required:
             validation['errors'] += retention.plan_errors(args['plan'], records, self.events, spans)
             validation['valid'] = not validation['errors']
-        for account in args['plan']['accounts']:
-            lenses = {e['arguments']['lens'] for e in self.events if e['tool'] == 'research_probe'
-                      and e['arguments']['account_id'] == account['id'] and not e['result'].get('error')}
-            if len(lenses) < 2:
-                validation['errors'].append(account['id'] + ': investigate two different depth questions before planning this account.')
-                validation['valid'] = False
         if not any(e['tool'] == 'draft_check' and e['result'].get('valid')
                    and e['result'].get('draft_hash') == draft_hash(args['review'])
                    and e['result'].get('evidence_version') == current for e in self.events):

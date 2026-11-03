@@ -16,13 +16,13 @@ Local storage does not make an AI session local: material you give an agent may 
 
 ## Start here
 
-[Download the project](https://github.com/Mikeishiring/career-context-ai/archive/refs/heads/main.zip), extract it and open **[CAREER-CONTEXT.html](CAREER-CONTEXT.html)** to try the fictional example offline. GitHub shows HTML as source; open the downloaded file in a browser.
+Give your assistant **[START-HERE.md](START-HERE.md)** and this project. If you already have career context, supply the latest saved private file too:
 
-To build your own archive, give an agent the complete [career-context-sheet folder](skills/career-context-sheet/) and ask:
+> Follow the career-context starter. Reuse what I've already supplied, check what you can read and save, and build one useful account from material I authorize. Preserve shared credit, uncertainty and my corrections. Save progress so we can continue later.
 
-> Help me build a local archive of my work. Reuse the context I've already supplied, collect from sources I authorize, and keep evidence separate from interpretation. Preserve shared credit, uncertainty and my wording. Save a searchable database and one HTML file. We'll adapt it to a particular purpose when I need it.
+The assistant checks its capabilities, starts from selected material and handles the tools. A missing connector, target role or complete career history does not prevent a first draft. File-capable hosts use Python 3.11+ with no extra packages for the core archive. Other hosts can provide a provisional draft and continuation in chat; they must not claim to have saved an archive. [Setup and supported fallbacks](docs/GETTING-STARTED.md).
 
-The local tools need Python 3.11+ and no additional packages. Start with the material you have; the skill does not connect accounts by itself. [Setup and first archive](docs/GETTING-STARTED.md).
+To try the fictional example offline, [download the project](https://github.com/Mikeishiring/career-context-ai/archive/refs/heads/main.zip), extract it and open **[CAREER-CONTEXT.html](CAREER-CONTEXT.html)** in a browser. The sheet supports reading, corrections and private saves; it has no embedded AI connection.
 
 ## Use it elsewhere
 
@@ -30,8 +30,10 @@ The archive is the reusable part. Resumes, profiles and interview preparation ar
 
 Export a reviewed selection for another agent or tool. The optional local MCP connection exposes only that snapshot, with no archive writes or automatic uploads. [Selected context and local MCP](skills/career-context-sheet/references/selected-context.md).
 
-**Build context** guides collection and review. **My context** connects Timeline to Work; Practice is optional. **Profile** controls which overview, progression periods, examples and visual evidence enter a selected public download. Full HTML and JSON remain private working files.
+**My context** opens on a private overview of the person and their work. **Timeline** explores dated records by year, including work spanning several years. **Develop context** holds ongoing review, investigation and writing; an empty archive starts with one account. **Public profile** controls an explicitly requested public draft. Full HTML and JSON remain private working files.
 
 The experiments test parts of the research process on fictional cases. They do not establish complete career coverage or better results than other tools.
 
 [Guides](docs/README.md) · [Contributing](CONTRIBUTING.md) · [Research experiments](ai-search-mvp/README.md) · [MIT license](LICENSE)
+
+Private [evidence memory](skills/career-context-sheet/references/memory-and-retrieval.md) retains exact claim anchors, hypotheses, corrections and rejected interpretations. Browse and search saved HTML/JSON or SQLite, including optional local semantic retrieval for different wording, then expand a claim to its evidence and counterevidence. Account reviews reopen only when their dependencies change; public and selected-context exports exclude this private memory. Semantic search needs a separately prepared CPU runtime and pinned model; it sends no evidence to a hosted embedding service.

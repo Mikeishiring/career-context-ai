@@ -31,6 +31,7 @@ def load_helper(name):
 
 
 sections = load_helper('document_sections')
+memory = load_helper('context_memory')
 guided_path = load_helper('guided_path')
 public_profile = load_helper('public_profile')
 _interview_renderer = None
@@ -44,7 +45,7 @@ def keys(value, allowed, label):
         raise ValueError(f'{label} has an unsupported field or is not an object')
 
 def validate(data):
-    keys(data, ['schema', 'updatedAt', 'reviewStatus', 'person', 'accounts', 'sources', 'synthetic', 'profile', 'collection', 'presentation', 'timeline', 'interview', 'rehearsal', 'journey', 'publicProfile'], 'Sheet')
+    keys(data, ['schema', 'updatedAt', 'reviewStatus', 'person', 'accounts', 'sources', 'synthetic', 'profile', 'collection', 'presentation', 'timeline', 'interview', 'rehearsal', 'journey', 'publicProfile', 'memory'], 'Sheet')
     if 'presentation' in data:
         presentation = data['presentation']
         keys(presentation, ['headline', 'files', 'briefs', 'timelineSelection', 'timelineReading', 'workGroups'], 'Presentation')
@@ -92,7 +93,7 @@ def validate(data):
     source_ids = {s['id'] for s in data['sources']}; used = set(); artifact_ids = set()
     selection = data.get('presentation', {}).get('timelineSelection')
     if selection is not None:
-        keys(selection, ['contextSha256', 'updatedAt', 'fromId', 'toId', 'purpose'], 'Timeline selection')
+        keys(selection, ['contextSha256', 'updatedAt', 'fromId', 'toId', 'purpose', 'year'], 'Timeline selection')
         if not isinstance(selection.get('contextSha256'), str) or not re.fullmatch('[a-f0-9]{64}', selection['contextSha256']):
             raise ValueError('Timeline selection needs an evidence fingerprint')
         if type(selection.get('updatedAt')) is not int or not 0 <= selection['updatedAt'] <= 9007199254740991:
@@ -104,6 +105,10 @@ def validate(data):
             raise ValueError('Timeline selection must run forward')
         if selection.get('purpose') not in ['patterns', 'cv', 'interview', 'profile']:
             raise ValueError('Unknown timeline purpose')
+        if 'year' in selection:
+            selected = data['timeline'][period_ids.index(selection['fromId']):period_ids.index(selection['toId']) + 1]
+            if not isinstance(selection['year'], str) or not any(selection['year'] in sections.period_years(p) for p in selected):
+                raise ValueError('Timeline year must intersect the selected saved periods')
     sections.validate_timeline_reading(data, check_text, keys)
     sections.validate_work_groups(data, check_text, keys)
     briefs = data.get('presentation', {}).get('briefs')
@@ -162,6 +167,7 @@ def validate(data):
             if not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9_-]{0,99}', aid) or aid in artifact_ids: raise ValueError('Artifacts need unique safe IDs')
             artifact_ids.add(aid)
     used.update(sections.validate_timeline(data, check_text, keys))
+    used.update(memory.validate(data, check_text, keys))
     if 'interview' in data:
         global _interview_renderer
         if _interview_renderer is None:
@@ -173,6 +179,9 @@ def validate(data):
         used.update(guided_path.validate_coverage(data['journey']['coverage'], source_ids, check_text, keys))
     for review in data.get('journey', {}).get('reviews', {}).values():
         used.update(review['sourceRefs'])
+    for name in ['rounds', 'leads']:
+        for row in data.get('journey', {}).get('investigation', {}).get(name, []):
+            used.update(row['sourceRefs'])
     public_profile.validate(data, check_text, keys)
     if used != source_ids: raise ValueError('Remove unreferenced source records from the packet')
     # HTML loading temporarily attaches image bytes. They live outside the
@@ -287,8 +296,10 @@ def account_capabilities(account):
 
 
 def preserve_views(previous, incoming):
-    missing = [key for key in ['timeline', 'interview', 'journey', 'publicProfile'] if previous.get(key) and not incoming.get(key)]
-    for key in ['coverage', 'reviews']:
+    missing = [key for key in ['timeline', 'interview', 'journey', 'publicProfile', 'memory'] if previous.get(key) and not incoming.get(key)]
+    if {c['id'] for c in memory.claims(previous)} - {c['id'] for c in memory.claims(incoming)}:
+        missing.append('memory claims (retain rejected or withdrawn interpretations)')
+    for key in ['coverage', 'reviews', 'continuation', 'investigation']:
         if previous.get('journey', {}).get(key) and not incoming.get('journey', {}).get(key):
             missing.append('journey.' + key)
     if missing:
@@ -361,15 +372,26 @@ def render(source, destination, *, overwrite=True, allow_view_removal=False, gui
                            for field, label in [('disciplines', 'Work'), ('targetRoles', 'Exploring'), ('emphasis', 'Focus')] if profile.get(field))
     coverage = ''.join('<tr>' + ''.join('<td>' + esc(location[field].replace('_', ' ') if field == 'status' else location[field]) + '</td>'
                                       for field in ['platform', 'location', 'status', 'scope', 'nextStep']) + '</tr>' for location in packet.get('collection', []))
+    review_basis = memory.review_basis(packet)
+    if 'journey' in packet and packet['journey']['contextSha256'] == sections.evidence_fingerprint(packet):
+        # Legacy current packets can safely acquire a baseline. A stale legacy
+        # packet has no account-level baseline and must reopen once, conservatively.
+        packet['journey'].setdefault('reviewBasis', review_basis)
     values = {
-        'PATH': guided_path.render(packet, sections.evidence_fingerprint(packet)),
-        'PATHNAV': '<a href="#path" data-view="path">Build context</a>' if 'journey' in packet else '',
-        'HOME': '#path' if 'journey' in packet else '#timeline' if packet.get('timeline') else '#work',
-        'CONTEXTHOME': '#timeline' if packet.get('timeline') else '#work',
+        'RESUME': json.dumps({'schema': 'career-resume/v1', 'contextSha256': sections.evidence_fingerprint(packet),
+                             'journeyUpdatedAt': packet.get('journey', {}).get('updatedAt', 0),
+                             'instructions': (SKILL / 'assets/continuation.txt').read_text(encoding='utf-8')}, ensure_ascii=False).replace('<', '\\u003c').replace('&', '\\u0026'),
+        'PATH': guided_path.render(packet, sections.evidence_fingerprint(packet), review_basis),
+        'PATHNAV': '<a href="#path" data-view="path">Develop context</a>' if 'journey' in packet else '',
+        'HOME': '#context',
+        'CONTEXTHOME': '#context',
+        'CONTEXTOVERVIEW': sections.context_overview(packet),
+        'CONTEXTACTION': '<a class="context-add" href="#path" data-add-context>Add context <span aria-hidden="true">+</span></a>' if 'journey' in packet else '',
+        'CONTEXTCSS': (SKILL / 'assets/context.css').read_text(encoding='utf-8'),
         'PATHCSS': (SKILL / 'assets/path.css').read_text(encoding='utf-8') if 'journey' in packet or 'publicProfile' in packet else '',
-        'PATHSCRIPT': '\n'.join((SKILL / ('assets/' + name)).read_text(encoding='utf-8') for name in ['coverage.js', 'path.js']) if 'journey' in packet else '',
+        'PATHSCRIPT': '\n'.join((SKILL / ('assets/' + name)).read_text(encoding='utf-8') for name in (['continuation.js', 'coverage.js', 'path.js'] if 'journey' in packet else ['continuation.js'])),
         'PUBLIC': public_profile.render(packet, sections.evidence_fingerprint(packet)),
-        'PUBLICNAV': '<a href="#profile" data-view="profile">Profile</a>' if 'publicProfile' in packet else '',
+        'PUBLICNAV': '<a href="#profile" data-view="profile">Public profile</a>' if 'publicProfile' in packet else '',
         'PUBLICCSS': (SKILL / 'assets/public-profile.css').read_text(encoding='utf-8') if 'publicProfile' in packet else '',
         'PUBLICSCRIPT': (SKILL / 'assets/public-profile.js').read_text(encoding='utf-8') if 'publicProfile' in packet else '',
         'SECTIONSCSS': (SKILL / 'assets/sections.css').read_text(encoding='utf-8') + '\n' + (SKILL / 'assets/explore.css').read_text(encoding='utf-8'),
@@ -392,7 +414,7 @@ def render(source, destination, *, overwrite=True, allow_view_removal=False, gui
         'OVERVIEW': paragraphs(packet['person']['overview']), 'BACKGROUND': ('<section class="background" aria-labelledby="background-title"><h2 id="background-title">Broader background</h2>' + bullets(packet['person']['background']) + '</section>') if packet['person'].get('background') else '',
         'DATE': esc(packet['updatedAt']), 'STATUS': 'Draft for review' if packet['reviewStatus']=='draft' else 'Reviewed by the person',
         'COUNT': f'{len(packet["accounts"])} work account' + ('' if len(packet['accounts']) == 1 else 's'),
-        'DEMO': '<p class="demo-notice">Synthetic demo data. These work accounts are fictional.</p>' if packet.get('synthetic') else '',
+        'DEMO': '<p class="demo-notice"><strong>Fictional example</strong><span>' + esc(packet['person']['name']) + ' is a sample person. The dates, work and sources are invented.</span></p>' if packet.get('synthetic') else '',
         'ACCOUNTS': ''.join(grouped_accounts or accounts) or '<p class="empty">No work accounts recorded yet. Start with one piece of work: what happened, what you did and what remains uncertain.</p>',
         'INDEX': ''.join(grouped_index) if grouped_index else ''.join(account_index.values()),
         'SOURCES': ''.join(sources) or '<p>No sources included yet.</p>',

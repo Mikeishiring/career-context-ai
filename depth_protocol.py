@@ -2,7 +2,7 @@
 from collections import Counter
 import narrative_retention as retention
 
-PROTOCOL = 'career-depth/v1'
+PROTOCOL = 'career-depth/v2'
 SOURCE_BUDGET = 450
 REQUEST_LIMIT = 1600
 LENSES = ('origins', 'stakes', 'personal_decisions', 'shared_ownership', 'implementation',
@@ -20,16 +20,17 @@ def array(items, minimum=0, maximum=1000):
 
 
 EVIDENCE = obj({'record_id': TEXT, 'span_id': TEXT})
-PROBE_PROPERTIES = {'account_id': TEXT, 'lens': {'type': 'string', 'enum': list(LENSES)},
+LENS = {'type': 'string', 'minLength': 1, 'maxLength': 80}
+PROBE_PROPERTIES = {'account_id': TEXT, 'lens': LENS,
                     'question': TEXT, 'source': {'type': 'string', 'enum': ['chat', 'docs', 'repo']}, 'query': TEXT}
 REVIEW_SCHEMA = obj({
     'accounts': array(obj({'account_id': TEXT, 'lenses': array(obj({
-        'lens': {'type': 'string', 'enum': list(LENSES)},
+        'lens': LENS,
         'status': {'type': 'string', 'enum': list(STATUSES)},
         'finding': TEXT, 'counterpoint': TEXT, 'next_action': TEXT,
         'evidence': array(EVIDENCE), 'claim_ids': array(TEXT),
         'probe_sequences': array({'type': 'integer', 'minimum': 1}),
-    }), len(LENSES), len(LENSES))}), 1, 12),
+    }), 1, 32)}), 1, 12),
     'attribution_coverage': array(obj({'record_id': TEXT,
         'attribution_index': {'type': 'integer', 'minimum': 0},
         'claim_ids': array(TEXT), 'omission_reason': TEXT})),
@@ -78,7 +79,7 @@ def current_review(events, version):
 
 
 def validate_review(audit, events, records, notes, scope, version, span_function):
-    """Check real searches, complete lenses, attribution-level accounting and current prose."""
+    """Check evidence and attribution; the agent chooses questions and search order."""
     plan_event = latest_plan(events)
     errors = []
     if not plan_event or plan_event['result']['evidence_version'] != version:
@@ -101,22 +102,9 @@ def validate_review(audit, events, records, notes, scope, version, span_function
             continue
         allowed_claims = {cid for field in fields for cid in accounts[aid][field]}
         covered = set()
-        if Counter(l['lens'] for l in account['lenses']) != Counter(LENSES):
-            errors.append(aid + ': review each depth lens exactly once.')
-        # Questions must actually be investigated, not just written into a checklist.
-        first_draft = next((e['sequence'] for e in events if e['tool'] == 'sheet_plan' and e['result'].get('valid')
-                            and any(a['id'] == aid for a in e['arguments']['plan']['accounts'])), None)
-        attempted = [e for e in probes.values() if e['arguments']['account_id'] == aid]
-        before = [e for e in attempted if first_draft and e['sequence'] < first_draft]
-        after = [e for e in attempted if first_draft and e['sequence'] > first_draft
-                 and e['arguments']['lens'] in {'shared_ownership', 'later_outcomes', 'contrary_evidence'}
-                 and not e['result'].get('cache_hit')]
-        if len({e['arguments']['lens'] for e in before}) < 2:
-            errors.append(aid + ': investigate at least two different depth questions before its first sheet plan.')
-        if not set(scope['sources']) <= {e['arguments']['source'] for e in attempted}:
-            errors.append(aid + ': investigate the account across every selected source group, including no-result searches.')
-        if not after:
-            errors.append(aid + ': after its first sheet plan, investigate an alternative explanation, ownership or later outcome with a new query.')
+        names = [lens['lens'] for lens in account['lenses']]
+        if not 1 <= len(names) <= 32 or any(not isinstance(n, str) or not n.strip() or len(n) > 80 for n in names) or len(set(names)) != len(names):
+            errors.append(aid + ': choose one to 32 distinct, meaningful review questions.')
         for lens in account['lenses']:
             label = aid + '/' + lens['lens']
             ids = set(lens['claim_ids'])
@@ -136,8 +124,6 @@ def validate_review(audit, events, records, notes, scope, version, span_function
             for seq in lens['probe_sequences']:
                 if seq not in probes or probes[seq]['arguments']['account_id'] != aid:
                     errors.append(label + ': probe receipts must come from this account.')
-            if not pairs and lens['status'] != 'out_of_scope' and not lens['probe_sequences']:
-                errors.append(label + ': a gap needs a real attempted search, not an untested assumption.')
             if lens['status'] != 'supported' and not lens['next_action'].strip():
                 errors.append(label + ': record the remaining question or boundary.')
             if plan.get('schema') == 'career-sheet/v2' and lens['status'] == 'needs_person':
