@@ -1,14 +1,19 @@
 // A selected span is a view of retained context, never a new career claim.
-function selectedTimelineContext(data, fromId, toId, basis=null) {
+function timelineYears(period){
+ const range=period.period.match(/\b((?:19|20)\d{2})(?:[-/]\d{2}(?:[-/]\d{2})?)?\s*(?:[–—-]|\bto\b)\s*(?:\d{1,2}\s+)?(?:(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+)?(?:\d{1,2},?\s+)?((?:19|20)\d{2})\b/i);
+ if(range&&Number(range[1])<=Number(range[2]))return Array.from({length:Number(range[2])-Number(range[1])+1},(_,i)=>String(Number(range[1])+i));
+ return [period.period.match(/\b(?:19|20)\d{2}\b/)?.[0]||'Other periods'];
+}
+function selectedTimelineContext(data, fromId, toId, basis=null, year=null) {
  const timeline=data.timeline||[],a=timeline.findIndex(p=>p.id===fromId),b=timeline.findIndex(p=>p.id===toId);
  if(a<0||b<0)return {periods:[],accounts:[],sources:[]};
- const periods=timeline.slice(Math.min(a,b),Math.max(a,b)+1);
+ const periods=timeline.slice(Math.min(a,b),Math.max(a,b)+1).filter(p=>!year||timelineYears(p).includes(year));
  const reading=data.presentation?.timelineReading,extra=basis&&reading?.contextSha256===basis?reading.periods:{};
  const accounts=new Set(periods.flatMap(p=>[...p.accountIds,...(extra?.[p.id]?.accountIds||[])])),sources=new Set(periods.flatMap(p=>p.sourceRefs));
  return {periods,accounts:data.accounts.filter(a=>accounts.has(a.id)),sources:data.sources.filter(s=>sources.has(s.id))};
 }
 function timelineBrief(data, selection, includeExcerpts=false) {
- const scope=selectedTimelineContext(data,selection.fromId,selection.toId,selection.contextSha256);
+ const scope=selectedTimelineContext(data,selection.fromId,selection.toId,selection.contextSha256,selection.year);
  if(!scope.periods.length)return '';
  const jobs={patterns:'Find a few supported patterns, changes and tensions. Do not force a single career narrative.',cv:'Draft a few CV bullets for this period. Keep contribution, shared credit and outcome distinct.',interview:'Suggest interview stories, each with an opening, a decision, an outcome and an honest limit.',profile:'Draft a concise public-facing profile angle grounded in this period. Remove confidential identifiers and identifying combinations.'};
  const writing=data.journey?.writing,custom=writing?.mode==='custom'||!writing?.mode&&writing?.guideText;
@@ -18,6 +23,7 @@ function timelineBrief(data, selection, includeExcerpts=false) {
   'Use the selected period records as the time boundary. Linked work accounts may span other dates: they are broader background, not proof that every event happened in this range. Cite period and source IDs for consequential claims. Do not infer inactivity from missing periods or complete coverage from the saved records.',
   'Return a short draft or a few findings, supporting IDs, and only questions that would change the result. Keep the original archive unchanged. If evidence is insufficient, say so.',
   'SELECTED SAVED PERIODS: '+scope.periods[0].period+' to '+scope.periods[scope.periods.length-1].period,
+  ...(selection.year?['YEAR FILTER: '+selection.year+'. Whole records that overlap this year follow. Do not assign every event in a multi-year record to the selected year.']:[]),
   includeExcerpts?'Selected source excerpts follow.':'Source references follow without excerpts. Use the latest private HTML alongside this brief to inspect originals; do not guess what unread sources establish.'];
  for(const p of scope.periods)lines.push('\nPERIOD '+p.id+' | '+p.period+' | '+p.title,p.focus,...p.actions.map(x=>'- '+x),'Pressure / limits: '+p.tension,'Approach: '+p.approach,'Open questions: '+p.questions.join('; '),'Source IDs: '+p.sourceRefs.join(', '));
  for(const a of scope.accounts)lines.push('\nBROADER ACCOUNT '+a.id+' | '+a.title+' | '+a.period,a.summary,'Contribution: '+a.contribution,'Shared credit: '+a.sharedCredit,'Outcome: '+a.outcome,'Limits: '+a.limits.join('; '),...(a.capabilities||[]).map(c=>'Assistance / scope: '+c.name+' — '+c.assistance+' '+c.limits.join('; ')));
@@ -26,7 +32,7 @@ function timelineBrief(data, selection, includeExcerpts=false) {
 }
 function validTimelineSelection(value, data, basis) {
  const ids=(data.timeline||[]).map(p=>p.id);
- return value&&value.contextSha256===basis&&Number.isSafeInteger(value.updatedAt)&&value.updatedAt>=0&&ids.includes(value.fromId)&&ids.includes(value.toId)&&ids.indexOf(value.fromId)<=ids.indexOf(value.toId)&&['patterns','cv','interview','profile'].includes(value.purpose);
+ return value&&value.contextSha256===basis&&Number.isSafeInteger(value.updatedAt)&&value.updatedAt>=0&&ids.includes(value.fromId)&&ids.includes(value.toId)&&ids.indexOf(value.fromId)<=ids.indexOf(value.toId)&&['patterns','cv','interview','profile'].includes(value.purpose)&&(!('year' in value)||typeof value.year==='string'&&selectedTimelineContext(data,value.fromId,value.toId,basis,value.year).periods.length>0);
 }
 let timelineSelection=null;
 function latestTimelineYear(years){
@@ -37,34 +43,36 @@ function mountTimelineExplorer(){
  const periods=packet.timeline,links=[...rail.querySelectorAll('[data-period-index]')],years=[...rail.querySelectorAll('button[data-year]')],basis=document.getElementById('timeline').dataset.evidence;
  const span=el=>el.dataset.periodIndex!==undefined?[Number(el.dataset.periodIndex),Number(el.dataset.periodIndex)]:[Number(el.dataset.from),Number(el.dataset.to)];
  for(const year of years){const items=[...year.parentElement.querySelectorAll('[data-period-index]')];year.dataset.from=items[0].dataset.periodIndex;year.dataset.to=items.at(-1).dataset.periodIndex;}
- const key='career-timeline:'+basis,first=span(latestTimelineYear(years));
- timelineSelection={contextSha256:basis,updatedAt:0,fromId:periods[first[0]].id,toId:periods[first[1]].id,purpose:'patterns'};
+ const key='career-timeline:'+basis,latest=latestTimelineYear(years),first=span(latest);
+ timelineSelection={contextSha256:basis,updatedAt:0,fromId:periods[first[0]].id,toId:periods[first[1]].id,purpose:'patterns',year:latest.dataset.year};
  if(validTimelineSelection(packet.presentation?.timelineSelection,packet,basis)&&packet.presentation.timelineSelection.updatedAt>0)timelineSelection={...packet.presentation.timelineSelection};
  try{const saved=JSON.parse(localStorage.getItem(key)||'null');if(validTimelineSelection(saved,packet,basis)&&saved.updatedAt>timelineSelection.updatedAt)timelineSelection=saved;}catch{}
  const explicit=periods.findIndex(p=>'#quarter-'+p.id===location.hash);
- if(explicit>=0)timelineSelection={...timelineSelection,fromId:periods[explicit].id,toId:periods[explicit].id,updatedAt:Date.now()};
+ if(explicit>=0){timelineSelection={...timelineSelection,fromId:periods[explicit].id,toId:periods[explicit].id,updatedAt:Date.now()};delete timelineSelection.year;}
  packet.presentation={...packet.presentation,timelineSelection:{...timelineSelection}};
- const from=document.getElementById('timeline-from'),to=document.getElementById('timeline-to'),purpose=document.getElementById('timeline-purpose'),notice=document.getElementById('timeline-status');
+ const from=document.getElementById('timeline-from'),to=document.getElementById('timeline-to'),purpose=document.getElementById('timeline-purpose'),notice=document.getElementById('timeline-status'),yearSelect=document.getElementById('timeline-year-select');
  let anchor=[periods.findIndex(p=>p.id===timelineSelection.fromId),periods.findIndex(p=>p.id===timelineSelection.toId)],gesture=null,suppressClick=false,lastReading='';
  purpose.value=timelineSelection.purpose;
  const persist=()=>{timelineSelection.updatedAt=Date.now();packet.presentation={...packet.presentation,timelineSelection:{...timelineSelection}};try{localStorage.setItem(key,JSON.stringify(timelineSelection));}catch{notice.textContent='Browser storage unavailable. Save full HTML to keep this selection.';}};
  function paint(){
-  const a=periods.findIndex(p=>p.id===timelineSelection.fromId),b=periods.findIndex(p=>p.id===timelineSelection.toId),scope=selectedTimelineContext(packet,timelineSelection.fromId,timelineSelection.toId,basis);
+  const a=periods.findIndex(p=>p.id===timelineSelection.fromId),b=periods.findIndex(p=>p.id===timelineSelection.toId),scope=selectedTimelineContext(packet,timelineSelection.fromId,timelineSelection.toId,basis,timelineSelection.year),selectedIds=new Set(scope.periods.map(p=>p.id));
   from.value=timelineSelection.fromId;to.value=timelineSelection.toId;
-  links.forEach((link,i)=>{link.classList.toggle('in-range',i>=a&&i<=b);link.removeAttribute('aria-current');link.setAttribute('role','button');link.setAttribute('aria-pressed',String(i>=a&&i<=b));});
-  const matching=years.filter(y=>a>=span(y)[0]&&b<=span(y)[1]);
-  years.forEach(y=>{const [lo,hi]=span(y),full=a<=lo&&b>=hi,partial=!full&&a<=hi&&b>=lo;y.setAttribute('aria-pressed',String(full));y.classList.toggle('part-selected',partial);y.parentElement.querySelector('.timeline-periods').hidden=!matching.includes(y);});
+  links.forEach(link=>{const selected=selectedIds.has(periods[Number(link.dataset.periodIndex)].id);link.classList.toggle('in-range',selected);link.removeAttribute('aria-current');link.setAttribute('role','button');link.setAttribute('aria-pressed',String(selected));});
+  const matching=years.filter(y=>timelineSelection.year?y.dataset.year===timelineSelection.year:a>=span(y)[0]&&b<=span(y)[1]);
+  yearSelect.value=matching.length===1?matching[0].dataset.year:'';
+  years.forEach(y=>{const [lo,hi]=span(y),full=timelineSelection.year?y.dataset.year===timelineSelection.year:a<=lo&&b>=hi,partial=!timelineSelection.year&&!full&&a<=hi&&b>=lo;y.setAttribute('aria-pressed',String(full));y.classList.toggle('part-selected',partial);y.parentElement.querySelector('.timeline-periods').hidden=!matching.includes(y);});
   const fullYears=years.filter(y=>y.getAttribute('aria-pressed')==='true');
   const whole=fullYears.length&&span(fullYears[0])[0]===a&&span(fullYears.at(-1))[1]===b;
-  document.getElementById('timeline-range-label').textContent=whole?fullYears[0].dataset.year+(fullYears.length>1?' – '+fullYears.at(-1).dataset.year:''):a===b?periods[a].period:periods[a].period+' – '+periods[b].period;
+  document.getElementById('timeline-range-label').textContent=timelineSelection.year||(whole?fullYears[0].dataset.year+(fullYears.length>1?' – '+fullYears.at(-1).dataset.year:''):a===b?periods[a].period:periods[a].period+' – '+periods[b].period);
   document.getElementById('timeline-range-count').textContent=scope.periods.length+' saved period'+(scope.periods.length===1?'':'s')+' · '+scope.accounts.length+' work account'+(scope.accounts.length===1?'':'s');
   document.getElementById('timeline-work').hidden=!scope.accounts.length;
   document.querySelectorAll('[data-overview-year]').forEach(el=>el.hidden=!fullYears.some(y=>y.dataset.year===el.dataset.overviewYear));
-  const range=a+':'+b;
-  document.querySelectorAll('.quarter-reading').forEach((el,i)=>{el.hidden=i<a||i>b;if(range!==lastReading)el.open=a===b;});lastReading=range;
+  const range=a+':'+b+':'+(timelineSelection.year||'');
+  document.querySelectorAll('.quarter-reading').forEach((el,i)=>{el.hidden=!selectedIds.has(periods[i].id);if(range!==lastReading)el.open=scope.periods.length===1;});lastReading=range;
  }
- function setRange(a,b,save=true){timelineSelection.fromId=periods[Math.min(a,b)].id;timelineSelection.toId=periods[Math.max(a,b)].id;notice.textContent='';paint();if(save){history.replaceState(null,'','#timeline');persist();}window.dispatchEvent(new Event('career-range-change'));}
- function choose(item,extend=false,save=true){const s=span(item);if(!extend)anchor=s;setRange(Math.min(anchor[0],s[0]),Math.max(anchor[1],s[1]),save);}
+ function setRange(a,b,save=true,year=null){timelineSelection.fromId=periods[Math.min(a,b)].id;timelineSelection.toId=periods[Math.max(a,b)].id;if(year)timelineSelection.year=year;else delete timelineSelection.year;notice.textContent='';paint();if(save){history.replaceState(null,'','#timeline');persist();}window.dispatchEvent(new Event('career-range-change'));}
+ function choose(item,extend=false,save=true){const s=span(item);if(!extend)anchor=s;setRange(Math.min(anchor[0],s[0]),Math.max(anchor[1],s[1]),save,extend?null:item.dataset.year);}
+ yearSelect.addEventListener('change',()=>{const year=years.find(y=>y.dataset.year===yearSelect.value);if(year)choose(year);});
  from.addEventListener('change',()=>{const a=periods.findIndex(p=>p.id===from.value),b=periods.findIndex(p=>p.id===timelineSelection.toId);anchor=[a,a];setRange(a,Math.max(a,b));});
  to.addEventListener('change',()=>{const b=periods.findIndex(p=>p.id===to.value),a=periods.findIndex(p=>p.id===timelineSelection.fromId);anchor=[a,a];setRange(Math.min(a,b),b);});
  purpose.addEventListener('change',()=>{timelineSelection.purpose=purpose.value;persist();notice.textContent='';});
@@ -99,7 +107,7 @@ function mountTimelineExplorer(){
  rail.addEventListener('pointercancel',()=>finish(true));rail.addEventListener('lostpointercapture',()=>{if(gesture)finish(true);});rail.addEventListener('dragstart',event=>event.preventDefault());
  document.addEventListener('visibilitychange',()=>{if(document.hidden)finish(true);});window.addEventListener('blur',()=>finish(true));
  document.getElementById('timeline-work').addEventListener('click',()=>{
-  const scope=selectedTimelineContext(packet,timelineSelection.fromId,timelineSelection.toId,basis);
+  const scope=selectedTimelineContext(packet,timelineSelection.fromId,timelineSelection.toId,basis,timelineSelection.year);
   timelineWorkIds=new Set(scope.accounts.map(a=>a.id));
   document.getElementById('work-period-label').textContent='Related to '+document.getElementById('timeline-range-label').textContent;
   accountScope.value='visible';workSearch.value='';skillFilter.value='';filterAccounts();
@@ -120,7 +128,7 @@ function mountSourceBrowser(){
  for(const type of [...new Set(packet.sources.map(s=>s.kind))].sort()){const o=document.createElement('option');o.value=type;o.textContent=type.replaceAll('_',' ');kind.append(o);}
  scope.querySelector('[value="range"]').disabled=!packet.timeline?.length;
  function filter(){
-  const selected=timelineSelection?new Set(selectedTimelineContext(packet,timelineSelection.fromId,timelineSelection.toId,timelineSelection.contextSha256).sources.map(s=>s.id)):new Set(),query=search.value.trim().toLocaleLowerCase();
+  const selected=timelineSelection?new Set(selectedTimelineContext(packet,timelineSelection.fromId,timelineSelection.toId,timelineSelection.contextSha256,timelineSelection.year).sources.map(s=>s.id)):new Set(),query=search.value.trim().toLocaleLowerCase();
   const matches=packet.sources.filter(s=>(!kind.value||s.kind===kind.value)&&(scope.value!=='range'||selected.has(s.id))&&(!query||[s.id,s.label,s.content,s.scope,s.date||'',s.locator||''].join(' ').toLocaleLowerCase().includes(query)));
   const shown=new Set(matches.slice(0,limit).map(s=>s.id));packet.sources.forEach(s=>document.getElementById('source-'+s.id).hidden=!shown.has(s.id));
   document.getElementById('source-count').textContent=matches.length+' of '+packet.sources.length+' sources';

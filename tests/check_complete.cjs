@@ -22,11 +22,11 @@ async function main(){
   result.accounts=data.accounts.length;result.periods=data.timeline.length;result.stories=data.interview.stories.length;
   const first=data.timeline[0],last=data.timeline.at(-1),story=data.interview.stories[0];
   const view=async name=>{if(['work','timeline','skills'].includes(name))await page.locator('[data-area="context"]').click();await page.locator('[data-view="'+name+'"]').first().click();};
-  assert.equal(await page.locator('#timeline').isVisible(),true);
+  assert.equal(await page.locator('#context').isVisible(),true);
   await page.locator('[data-view="timeline"]').click();
   assert.ok(await page.locator('.quarter-reading:visible').count()>=1);
   assert.equal(await page.locator('#quarter-'+first.id).isVisible(),true);
-  await page.locator('.timeline-options > summary').click();
+  await page.locator('.timeline-use > summary').click();await page.locator('.timeline-options > summary').click();
   await page.locator('#timeline-from').selectOption(last.id);
   await page.reload();assert.equal(await page.locator('#quarter-'+last.id).isVisible(),true);
   assert.equal(await page.locator('#timeline').isVisible(),true);
@@ -73,6 +73,12 @@ async function main(){
   await page.setViewportSize({width:1440,height:1000});
   await view('work');
   await page.locator('#view-context').click();
+  const visibleText=await page.locator('#agent-text').inputValue();
+  assert.ok(!visibleText.includes('## Career timeline')&&!visibleText.includes('## Interview prep'));
+  await page.keyboard.press('Escape');
+  await page.locator('.export-options').evaluate(el=>el.open=true);
+  await page.locator('#export-account').selectOption('all');
+  await page.locator('#view-context').click();
   const allText=await page.locator('#agent-text').inputValue();
   assert.ok(allText.includes('## Career timeline')&&allText.includes('## Interview prep'));
   await page.keyboard.press('Escape');
@@ -99,6 +105,8 @@ async function main(){
   assert.equal(await offline.locator('.prep-story:visible').count(),data.interview.stories.length);
   assert.equal(await offline.locator('.account:visible').count(),data.accounts.length);
   assert.equal(await offline.locator('.js-only:visible').count(),0);
+  const add=offline.locator('.context-add');
+  if(await add.count())assert.equal(await offline.locator(await add.getAttribute('href')).count(),1,'Add context has a real no-JavaScript destination');
   assert.ok((await offline.locator('[data-rehearsal-display="'+story.id+'"]').textContent()).includes('Portable rehearsal check'));
   result.checks.push('complete and scoped copy, portable save/reopen, print/restore, no-JavaScript reading');
   assert.deepEqual(result.errors,[]);assert.deepEqual(result.externalRequests,[]);

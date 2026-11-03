@@ -1,5 +1,7 @@
 # Your context, in your own local folder
 
+This is the advanced selected-export research workspace. For ordinary onboarding, use [the assistant-led starter](GETTING-STARTED.md); the assistant handles tools and begins with one useful account. The strict policy wizard below remains available when an enforced export boundary is needed.
+
 Start by choosing what work to cover, exactly which locations may be used, and what may be kept or sent to an AI host. These choices are saved as an enforced policy beside your local captures and career sheet.
 
 ```sh
@@ -86,6 +88,6 @@ Extraction is an intermediate step, not a finished biography. Continue with the 
 
 ## Depth is a checklist, not a collection count
 
-The local checklist distinguishes captured records from records read in research. The [deep research flow](research/DEEP-RESEARCH-FLOW.md) requires question-led research, a challenge after the first plan and a ten-lens review for each account. It stores findings, counterpoints, remaining questions and attribution coverage alongside the journal. New evidence, notes or a changed plan make the review stale. A completed agent review still leaves person review pending; a high read count does not establish semantic completeness.
+The local checklist distinguishes captured records from records read in research. The [deep research flow](research/DEEP-RESEARCH-FLOW.md) uses question-led research and a challenge to consequential conclusions; the agent chooses relevant review lenses. It stores findings, counterpoints, remaining questions and attribution coverage alongside the journal. New evidence, notes or a changed plan make the review stale. A completed agent review still leaves person review pending; a high read count does not establish semantic completeness.
 
 This version uses stable snapshots. Identical imports can be repeated before research; conflicting revisions and imports after research begins are refused. The saved run resumes against unchanged captures. For a changed scope or source revision, create a new scoped workspace and retain the previous context as a reference. Automatic synchronization and policy editing with selective deletion are not implemented.

@@ -55,7 +55,7 @@ function document(){
  doc.querySelectorAll=selector=>doc.documentElement.querySelectorAll(selector);
  doc.implementation={createHTMLDocument:()=>document()};return doc;
 }
-const image='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADUlEQVR4nGOQ0NAAAAFMAJnVf7vDAAAAAElFTkSuQmCC';
+const image='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGOQC9AAAAEmAJdXDMsYAAAAAElFTkSuQmCC';
 const initial={contextSha256:'a'.repeat(64),updatedAt:1,name:'Contributor 01',headline:'Shared practical work',overview:'An authored introduction.',shareOverview:true,northStar:'Make help easier to ask for.',shareNorthStar:true,direction:'Keep a small practical commitment.',shareDirection:true,
  examples:[{title:'Session card',summary:'Drafted with another volunteer.',synthetic:true,included:true,detail:'PRIVATE_DETAIL',shareDetail:true}],
  timeline:[{period:'2022',title:'Learning',summary:'Supervised work.',included:true},{period:'2025',title:'Smaller commitment',summary:'Later use unknown.',included:true},{period:'Summer 2024',title:'Parallel work',summary:'Shared contribution.',included:false}],
@@ -70,7 +70,7 @@ function launch(storage=new Map(),failStorage=false){
  doc.getElementById('public-editor').hidden=true;doc.getElementById('public-profile-styles').textContent=asset('public-profile.css');
  const sharing=doc.createElement('details');sharing.className='public-sharing';root.append(sharing);
  const packet={synthetic:true,publicProfile:structuredClone(initial)},downloads=[];
- const context=vm.createContext({document:doc,packet,URL,atob,Date,console,localStorage:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>{if(failStorage)throw Error('storage unavailable');storage.set(key,value);}},download:(name,type,content)=>downloads.push({name,type,content})});
+ const context=vm.createContext({document:doc,packet,URL,URLSearchParams,atob,Date,console,localStorage:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>{if(failStorage)throw Error('storage unavailable');storage.set(key,value);}},download:(name,type,content)=>downloads.push({name,type,content})});
  vm.runInContext(asset('public-profile.js'),context);
  return {doc,packet,context,downloads,storage,id:id=>doc.getElementById(id)};
 }

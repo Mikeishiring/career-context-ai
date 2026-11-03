@@ -23,7 +23,7 @@ flowchart TD
 
 The earlier gate checked discovery coverage, source spans, saved notes and whether each material record reached the draft. That allowed a subtle omission: a record could be cited while one person's contribution disappeared from the prose. The first fictional story omitted explicit credit for the original proposal, despite reading its source.
 
-The new gate accounts for each saved material **actor/action**, including the exact claim that carries it or a specific reason to omit it. It also requires actual question-led searches before planning an account and a fresh challenge after its first plan. A recorded intention to investigate is insufficient.
+The gate accounts for each saved material **actor/action**, including the exact claim that carries it or a specific reason to omit it. Version 2 lets the researcher choose questions and search order. Exact evidence, attribution coverage and review of every narrative claim remain required. Search quotas and compulsory fresh post-draft queries have been removed.
 
 ## What a deep account must consider
 
@@ -46,9 +46,9 @@ Each lens keeps a finding, counterpoint, exact evidence, represented claims and 
 
 The integrated server allows **450 charged source calls and 1,600 total requests**, compared with the first demonstration's **45 and 80**. Source: `depth_protocol.py` and the historical `completion_server.py` defaults. The total request ceiling includes extraction, cached recovery and batched attribution review; those local operations do not consume the charged source allowance. The demo launcher allows up to **one hour per attempt**, up from twenty minutes. These bounds increase capacity; they do not promise a tenfold runtime or require spending the entire budget.
 
-At least two different depth questions must be investigated before each account's first plan. Probes must cover each selected source group. After that plan, a fresh query must challenge contrary evidence, ownership or later outcomes for each account. The researcher should continue beyond those minimums whenever an accessible question could change the story.
+The researcher chooses consequential questions and may use its own lens labels. Search the source groups likely to resolve them, and reuse already-read originals. Continue while a consequential accessible question could change the account; no minimum number or order of probes applies.
 
-Repeated queries use cached results; relabelling a cached search does not satisfy the post-draft challenge. Notes, cached recovery and reviews cost requests but no source calls. The researcher can spend additional effort interpreting existing originals and repairing the narrative without acquiring more data. Source and request budgets survive resume.
+Repeated queries use cached results. Rechecking that evidence can be sufficient; a fresh query is not a completion requirement. Notes, cached recovery and reviews cost requests but no source calls. Source and request budgets survive resume.
 
 ## What stays local
 
@@ -58,7 +58,7 @@ DM access still requires explicit permission and exact selected conversations. M
 
 ## What the checks can establish
 
-The server checks real search receipts, full-read spans, current notes and drafts, complete lens accounting, attribution references and unresolved work. Changing evidence, notes or the selected plan makes the review stale. A proposed cross-episode pattern needs claims from at least two accounts; one episode cannot pass as a career-wide pattern.
+The server checks real search receipts, full-read spans, current notes and drafts, evidence-backed review of all narrative claims, attribution references and unresolved work. Changing evidence, notes or the selected plan makes the review stale. A proposed cross-episode pattern needs claims from at least two accounts; one episode cannot pass as a career-wide pattern.
 
 The researching agent still supplies the interpretations and omission reasons. The validator cannot determine whether a reason is thoughtful or a paraphrase is fair. It cannot recover material absent from the selected exports, independently verify privacy labels, or infer the person's unspoken motivations. Agent review never changes the sheet to person-reviewed.
 

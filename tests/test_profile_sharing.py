@@ -64,13 +64,17 @@ class ProfileSharingTests(unittest.TestCase):
                 with self.subTest(key=key, value=value), self.assertRaises(ValueError): r.validate(self.data)
             target[key] = before
 
-    def test_legacy_profile_and_optional_practice_state_survive(self):
+    def test_legacy_profile_stays_private_without_explicit_sharing_flags(self):
         self.profile.pop('shareOverview')
         for entry in self.profile['examples'] + self.profile['timeline']: entry.pop('included')
         self.data['journey']['current'] = 'practice'
         self.data['journey']['notes']['practice:watering-rota'] = 'Existing note'
         r.validate(self.data)
-        self.assertIn('WITHHELD_OVERVIEW', r.public_profile.preview(self.profile))
+        before = copy.deepcopy(self.profile)
+        self.assertNotIn('WITHHELD_', r.public_profile.preview(self.profile))
+        self.assertEqual(r.public_profile.projection(self.profile)['examples'], [])
+        self.assertEqual(r.public_profile.projection(self.profile)['timeline'], [])
+        self.assertEqual(self.profile, before)
         self.assertNotIn('practice', r.guided_path.CORE_STEPS)
 
     def test_direction_and_details_need_their_own_selection(self):

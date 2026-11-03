@@ -8,10 +8,9 @@ function routeDocument(scroll=false){
  let id='';try{id=decodeURIComponent(location.hash.slice(1));}catch{}
  const pathStep=packet.journey&&['gather','review','deepen','connect','write','practice'].some(s=>id==='path-'+s||id.startsWith('path-'+s+'--'));
  const target=document.getElementById(pathStep?'path':id);
- const view=target?.closest('.document-view')?.id||(!id?(packet.journey?'path':packet.timeline?.length?'timeline':'work'):'work');
+ const view=target?.closest('.document-view')?.id||(!id&&packet.journey&&!packet.accounts.length?'path':'context');
  document.querySelectorAll('.document-view').forEach(el=>el.hidden=el.id!==view);
- document.querySelector('.hero').hidden=view!=='work';
- const contextArea=['work','timeline','skills'].includes(view);document.querySelector('.context-nav').hidden=!contextArea;
+ const contextArea=['context','work','timeline','skills'].includes(view);document.querySelector('.context-nav').hidden=!contextArea;
  document.querySelector('[data-area="context"]').toggleAttribute('aria-current',contextArea);
  if(contextArea)document.querySelector('[data-area="context"]').setAttribute('aria-current','page');
  document.querySelectorAll('[data-view]').forEach(link=>{
@@ -25,7 +24,8 @@ function routeDocument(scroll=false){
  if(view==='interview'&&id.startsWith('prep-story-')&&target){target.open=true;}
  if(target){let parent=target.parentElement;while(parent){if(parent.tagName==='DETAILS')parent.open=true;parent=parent.parentElement;}}
  if(scroll&&target&&!pathStep){
-  target.scrollIntoView({block:'start'});
+  if(target.classList.contains('document-view'))window.scrollTo({top:0,behavior:'instant'});
+  else target.scrollIntoView({block:'start'});
   if(target.matches('.account')){target.tabIndex=-1;target.focus({preventScroll:true});}
   if(target.matches('details.source,.prep-story,.quarter-reading')){target.open=true;target.querySelector('summary').focus({preventScroll:true});}
  }
@@ -33,6 +33,7 @@ function routeDocument(scroll=false){
 }
 window.addEventListener('hashchange',()=>routeDocument(true));
 routeDocument(Boolean(location.hash));
+document.querySelector('[data-add-context]')?.addEventListener('click',event=>{event.preventDefault();location.hash='path-gather';});
 
 function appendCompanionText(data,lines){
  if(data.timeline?.length){

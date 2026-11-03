@@ -4,7 +4,7 @@ Use this after establishing work, sources and privacy. The agent owns the resear
 
 ## Give each pass a different job
 
-For a new or substantially expanded context, use this progression. Several passes can happen in one session; the person does not need to rerun the whole template. A narrow update can start at the affected pass using saved evidence.
+Use these activities when they help answer the current question. Combine or reorder them and reuse sufficient retained originals; neither the table nor a pass count requires another search. A narrow update revisits affected evidence and dependent outputs.
 
 | Pass | Work | Result to preserve |
 |---|---|---|
@@ -28,7 +28,7 @@ After each batch, save what changed, what was checked without changing, and the 
 
 ## Keep a small, durable research state
 
-For work spanning sessions, maintain one private `research-state.md` alongside the authoring input, outside the public checkout. Update it in place after each bounded batch. This is internal working material, not another user deliverable or a source of permission. When an existing evidence workspace provides equivalent state, use it instead.
+For work spanning sessions, use `journey.investigation` in the same private packet and the [investigation loop](investigation-loop.md). Update it after each meaningful batch. Keep `journey.continuation` as the short resume pointer. When an existing evidence workspace already provides tool cursors and equivalent research state, preserve that workspace and record the dependency; do not create a competing research-state document. This is internal working material, not another user deliverable or a source of permission.
 
 Retain:
 
@@ -93,7 +93,7 @@ Small operating choices and delivered work count: who chose the next step, which
 
 For each useful episode, connect the situation, stakes, choices, personal action, shared contribution, outcome and later understanding. Use the existing account fields; an unknown detail can remain empty. Do not require a dramatic turning point or a numerical result.
 
-Draft the connected account in `summary`; preserve the evidence and detail in `context`, `aim`, `contribution`, `decisions`, `sharedCredit`, `outcome`, `limits` and `sourceRefs`. Keep provenance at the assertion level in the private notes even though the portable format links sources at the account level.
+Draft the connected account in `summary`; preserve the evidence and detail in `context`, `aim`, `contribution`, `decisions`, `sharedCredit`, `outcome`, `limits` and `sourceRefs`. Keep assertion-level provenance, corrections and rejected interpretations in the private packet using [memory and retrieval](memory-and-retrieval.md). The account-level source list is a reading aid, not a substitute for those links.
 
 Only then propose a through-line in `person.overview`: recurring ways the person works, changes in responsibility, and what they say those changes meant. Link a proposed pattern to the episodes supporting it and check exceptions. One episode supports an episode-level observation; it does not establish a lifelong trait. Avoid forcing concurrent work into a linear career pivot. Do not infer personality, motives or identity from sparse activity.
 
@@ -123,10 +123,10 @@ Before handoff, compare visible prose, copied text and embedded JSON. Deliver on
 
 The integrated server provides 450 source calls and 1,600 requests. This capacity supports bounded extraction and event review; it is not a minimum duration. Prefer consequential questions over extra volume. The general skill works without the server, but then these obligations are instructions rather than executable checks.
 
-1. Use `research_probe` with an account ID, depth lens, question, source and query. Investigate at least two different lenses before that account's first `sheet_plan`, and cover every selected source group. These minimums do not imply sufficient depth.
+1. Use `research_probe` when a new read could change the account. Choose its question, source group and lens label. The listed lenses are suggestions; there is no source quota, minimum probe count or prescribed search order. Retained originals can already answer the question.
 2. Read the originals and finish known discovery. When the server reports `retention.protocol`, use `extraction_packet` and `save_extraction` to review every cached section, then `episode_packet` and `episode_inventory` to retain each event in a selected or reserve episode or a specific exclusion. Selected episode IDs become account IDs. The host derives source notes; `save_notes` is for legacy sessions. Draft, check and save the first plan.
-3. Challenge the plan with a fresh question about contrary evidence, shared ownership or later outcomes. A relabelled cached search does not count. Follow new leads, revisit whole originals and correct the evidence. In retention sessions, compare the strongest reserve episode with a selected account and resubmit the inventory after the first plan. Revise the draft and plan.
-4. Submit `depth_review` for all ten lenses per account: origins, stakes, personal decisions, shared ownership, implementation, setbacks, later outcomes, contrary evidence, personal meaning and trajectory. Cite real spans and search receipts. Record a counterpoint or limitation, not just confirmation.
+3. Challenge the strongest claims against relevant contrary evidence, shared ownership and later outcomes. Reuse retained originals; make a fresh search only when it could change the result. In retention sessions, compare the strongest reserve episode with a selected account and resubmit the inventory after the first plan. Revise the draft and plan as needed.
+4. Submit `depth_review` with the relevant questions for each account, using suggested lens names or your own. Every narrative claim still needs represented evidence and review. Cite exact spans and real probe receipts when probes were used. Record a consequential counterpoint or limitation; do not create filler categories.
 5. Map every material saved attribution to claims carrying that exact actor/action reference, or explain the omission. Check whether the saved note itself omitted a contribution from the original. A citation to the record cannot substitute for narrative credit.
 6. Review `turning_point_packet` including reserve events. In v2 sessions, `save_turning_points` requires importance, exact `prose_checks` and `qualifying_event_ids`. Essential events cannot be omitted; their qualifications must survive in the same account. Evaluate the through-line separately: a cross-episode pattern needs at least two grounded accounts and an exception or limit. Quote the actual overview's interpretation and limit in the depth review, so the connection reaches the reader. One episode cannot establish a career-wide trait.
 7. Resolve accessible pending questions before finishing. Unknown personal meaning, excluded sources and genuine evidence gaps remain explicit. New evidence, notes or a changed plan invalidate the prior review.

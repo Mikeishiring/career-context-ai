@@ -2,9 +2,9 @@
 
 Help the person recognise a faithful account of their career before repeatedly revising one draft. Reuse their known background, intended reader and purpose. An open destination is valid; do not invent a target title or employer.
 
-For the first About Me review, draft five or six complete alternatives. Change the organising idea and evidence emphasis. Useful angles might include depth in a craft, wider responsibility, progression, independent work or a supported next direction. Choose the angles for this person: they are not fixed career categories or a ladder of increasingly senior titles. Early-career, specialist, management, returning and changing-career contexts need different choices. Keep demonstrated experience separate from ambition.
+Draft one strong introduction, or offer a small set of alternatives when different supported organizing ideas would help the person choose. Let the purpose and evidence determine the count. Change the organising idea and evidence emphasis. Useful angles might include depth in a craft, wider responsibility, progression, independent work or a supported next direction. Choose the angles for this person: they are not fixed career categories or a ladder of increasingly senior titles. Early-career, specialist, management, returning and changing-career contexts need different choices. Keep demonstrated experience separate from ambition.
 
-Use comparable lengths suited to the intended use. Each version should establish who the person is, make their contribution tangible and point toward relevant work. Write naturally and professionally, without conversational filler or inflated executive language. Preserve the same factual boundaries across versions, including shared credit and material uncertainty. Keep sources accessible through the underlying accounts rather than repeating inventories beneath each introduction. If the context cannot support meaningful alternatives, gather the consequential missing account instead of filling six slots with invented differences.
+Use comparable lengths suited to the intended use. Each version should establish who the person is, make their contribution tangible and point toward relevant work. Write naturally and professionally, without conversational filler or inflated executive language. Preserve the same factual boundaries across versions, including shared credit and material uncertainty. Keep sources accessible through the underlying accounts rather than repeating inventories beneath each introduction. If the context cannot support meaningful alternatives, gather the consequential missing account instead of inventing differences to fill slots.
 
 Open the comparison as the first review destination. Number the options, label their emphasis and show their full wording. Ask which sounds most like the person and what they would keep or drop. Explain trade-offs candidly. Do not automatically select, combine or replace an introduction. Retain the alternatives, source basis and explicit feedback in private continuation context. Reuse them on return; a wording preference does not confirm a new fact, capability or career goal.
 
@@ -21,7 +21,7 @@ The host agent writes the options; static HTML does not generate them. Keep the 
 ]
 ```
 
-This illustrates the shape, not reusable wording. Supply five or six supported options for a full first review; retain a smaller existing set when appropriate. Keep their evidence in the underlying accounts. Structural validation does not prove factual support.
+This illustrates the shape, not reusable wording. Include only genuinely distinct supported options; retain a smaller existing set when appropriate. Keep their evidence in the underlying accounts. Structural validation does not prove factual support.
 
 Re-render the complete packet with `render_context.py`, or update its existing archive. In Interview prep, open **Alternative openings** beneath the retained opening. Comparing does not change the current introduction. Full HTML, JSON and complete copied preparation retain the options.
 

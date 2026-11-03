@@ -6,6 +6,10 @@ const range=sandbox.selectedTimelineContext(data,selection.fromId,selection.toId
 assert.equal(range.periods.length,data.timeline.length);
 assert.equal(new Set(range.sources.map(s=>s.id)).size,range.sources.length);
 assert.equal(sandbox.selectedTimelineContext(data,'missing',last.id).periods.length,0);
+for(const label of ['2018–2020','Jan 2018 – Jun 2020','2018-01-01 – 2020-06-30','January 2018 to June 2020'])assert.deepEqual(Array.from(sandbox.timelineYears({period:label})),['2018','2019','2020']);
+const overlapping={...data,timeline:[{...first,id:'multi',period:'2018–2020'}, {...last,id:'outside',period:'2025'}]};
+assert.deepEqual(Array.from(sandbox.selectedTimelineContext(overlapping,'multi','outside',null,'2019').periods.map(p=>p.id)),['multi']);
+assert(!sandbox.validTimelineSelection({...selection,year:'2018'},data,selection.contextSha256));
 assert.equal(sandbox.selectedTimelineContext(data,last.id,first.id).periods.length,data.timeline.length);
 const single=sandbox.selectedTimelineContext(data,first.id,first.id);
 assert.equal(single.periods.length,1);

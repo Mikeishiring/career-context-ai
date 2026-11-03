@@ -6,7 +6,7 @@ import personal
 
 class PersonalWorkspaceTests(unittest.TestCase):
     def setUp(self):
-        self.temp=tempfile.TemporaryDirectory(dir=personal.PROJECT.parent,prefix='.synthetic-test-')
+        self.temp=tempfile.TemporaryDirectory(prefix='.synthetic-test-')
         self.root=Path(self.temp.name);self.workspace=self.root/'private-evidence'
         personal.init(self.workspace,'My evidence',synthetic=True)
         self.record={'source':'chat','id':'1','title':'Proposal','date':'2030-01-01','author':'Contributor 01','text':'I can draft it. It has not shipped.'}

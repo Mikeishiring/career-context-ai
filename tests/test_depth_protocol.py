@@ -76,7 +76,7 @@ class DepthProtocolTests(unittest.TestCase):
         receipts = restarted.execute('research_status', {})['probe_receipts']
         self.assertEqual([p['sequence'] for p in receipts], [1, 2])
 
-    def test_relabelling_cached_search_is_not_a_second_pass(self):
+    def test_cached_evidence_can_support_review_without_a_fresh_search(self):
         self.planned()
         audit = self.depth_audit()
         # Keep the real post-draft event but change it to an earlier query.
@@ -85,8 +85,21 @@ class DepthProtocolTests(unittest.TestCase):
             'question': 'Can I count the same read twice?', 'source': 'chat', 'query': 'form'})
         self.assertTrue(result['cache_hit'])
         result = self.server.execute('depth_review', audit)
-        self.assertFalse(result['valid'])
-        self.assertTrue(any('new query' in e for e in result['errors']))
+        self.assertTrue(result['valid'], result['errors'])
+
+    def test_questions_and_search_sequence_are_agent_selected(self):
+        self.prepare()
+        # Full original reads and checked claims remain; remove ceremonial probes.
+        self.server.events = [e for e in self.server.events if e['tool'] != 'research_probe']
+        result = self.server.execute('sheet_plan', {'review': self.raw, 'plan': self.plan})
+        self.assertTrue(result['valid'], result['errors'])
+        audit = self.depth_audit()
+        audit['accounts'][0]['lenses'] = [audit['accounts'][0]['lenses'][0]]
+        audit['accounts'][0]['lenses'][0]['lens'] = 'What did the shared handoff actually change?'
+        self.server.events = [e for e in self.server.events if e['tool'] != 'research_probe']
+        result = self.server.execute('depth_review', audit)
+        self.assertTrue(result['valid'], result['errors'])
+        self.assertEqual(result['protocol'], 'career-depth/v2')
 
     def test_pending_research_blocks_finish_then_is_explicit_at_real_limit(self):
         self.planned()

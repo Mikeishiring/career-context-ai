@@ -1,10 +1,63 @@
 """A guided review path; notes and progress never change career evidence."""
 import html
+import hashlib
+import json
 import re
 
 STEPS = ('gather', 'review', 'deepen', 'connect', 'write', 'practice')
-LABELS = ('Collect context', 'Review accounts', 'Resolve gaps', 'Connect the pieces', 'Your voice', 'Practise')
+LABELS = ('Add context', 'Review accounts', 'Investigate a gap', 'Find connections', 'Work on wording', 'Practise')
 CORE_STEPS = STEPS[:-1]  # Keep legacy practice state readable without making it a requirement.
+
+
+def review_fingerprint(packet):
+    """Track the person's input independently of evidence and assistant round notes."""
+    journey = packet.get('journey', {})
+    reviews = {key: {field: value[field] for field in ['decision', 'draft', 'reason', 'sourceRefs', 'depth']}
+               for key, value in journey.get('reviews', {}).items()
+               if value['decision'] != 'pending' or value['draft'] or value['reason'] or value['sourceRefs'] or value['depth'] != 'pending'}
+    data = {'reviews': reviews, 'notes': {k: v for k, v in journey.get('notes', {}).items() if v.strip()},
+            'writing': {k: v for k, v in journey.get('writing', {}).items() if k != 'mode' and v}}
+    return hashlib.sha256(json.dumps(data, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
+
+
+def validate_investigation(value, packet, check_text, keys):
+    """Validate private work notes and links, never certify that research occurred."""
+    keys(value, ['schema', 'contextSha256', 'reviewSha256', 'goal', 'rounds', 'leads', 'stopReason'], 'Investigation')
+    if value.get('schema') != 'career-investigation/v1' or not isinstance(value.get('contextSha256'), str) or not re.fullmatch('[a-f0-9]{64}', value['contextSha256']):
+        raise ValueError('Investigation needs its schema and evidence fingerprint')
+    if 'reviewSha256' in value and (not isinstance(value['reviewSha256'], str) or not re.fullmatch('[a-f0-9]{64}', value['reviewSha256'])):
+        raise ValueError('Investigation review input needs a valid fingerprint')
+    for field in ['goal', 'stopReason']:
+        check_text(value.get(field), 'Investigation ' + field, 3000)
+    catalogs = {'accountIds': {a['id'] for a in packet['accounts']},
+                'sourceRefs': {s['id'] for s in packet['sources']},
+                'claimIds': {c['id'] for c in packet.get('memory', {}).get('claims', [])}}
+    for name in ['rounds', 'leads']:
+        rows = value.get(name)
+        if not isinstance(rows, list) or len(rows) > 64:
+            raise ValueError('Investigation needs bounded round notes and leads (at most 64 each)')
+        seen = set()
+        for row in rows:
+            fields = ['id', 'question', 'accountIds', 'sourceRefs', 'claimIds'] + (
+                ['purpose', 'finding'] if name == 'rounds' else ['status', 'why', 'nextAction'])
+            keys(row, fields, 'Investigation ' + name)
+            key = row.get('id')
+            if not isinstance(key, str) or not re.fullmatch('[A-Za-z0-9][A-Za-z0-9_-]{0,99}', key) or key in seen:
+                raise ValueError('Investigation entries need unique stable IDs')
+            seen.add(key)
+            texts = ['question', 'finding'] if name == 'rounds' else ['question', 'why', 'nextAction']
+            for field in texts:
+                check_text(row.get(field), 'Investigation ' + field, 3000)
+                if not row[field].strip():
+                    raise ValueError('Investigation questions, findings and next actions must be explicit')
+            if name == 'rounds' and row.get('purpose') not in ['orient', 'investigate', 'map', 'challenge', 'reconcile']:
+                raise ValueError('Unknown investigation round purpose')
+            if name == 'leads' and row.get('status') not in ['ready', 'needs_person', 'needs_access', 'unavailable', 'resolved']:
+                raise ValueError('Unknown investigation lead status')
+            for field, catalog in catalogs.items():
+                refs = row.get(field)
+                if not isinstance(refs, list) or len(refs) > 128 or any(not isinstance(ref, str) for ref in refs) or len(refs) != len(set(refs)) or set(refs) - catalog:
+                    raise ValueError('Investigation references must resolve to retained records')
 
 
 def month_number(value):
@@ -80,7 +133,7 @@ def validate_coverage(value, source_ids, check_text, keys):
 
 def initial_state(packet, basis):
     return {'contextSha256': basis, 'updatedAt': 0,
-            'current': 'gather',
+            'current': 'review' if packet['accounts'] else 'gather',
             'completed': [], 'notes': {},
             'writing': {'mode': 'own_skill', 'guideName': '', 'guideText': '', 'draft': ''},
             'reviews': {}, 'coverage': initial_coverage(packet),
@@ -93,7 +146,31 @@ def validate(packet, check_text, keys):
     state = packet.get('journey')
     if state is None:
         return
-    keys(state, ['contextSha256', 'updatedAt', 'current', 'completed', 'notes', 'storyId', 'baseline', 'writing', 'reviews', 'coverage'], 'Journey')
+    keys(state, ['contextSha256', 'updatedAt', 'current', 'completed', 'notes', 'storyId', 'baseline', 'writing', 'reviews', 'coverage', 'reviewBasis', 'continuation', 'investigation'], 'Journey')
+    if 'investigation' in state:
+        validate_investigation(state['investigation'], packet, check_text, keys)
+    if 'continuation' in state:
+        continuation = state['continuation']
+        keys(continuation, ['contextSha256', 'goal', 'nextAction', 'questions', 'scopeNotes'], 'Continuation')
+        if not isinstance(continuation.get('contextSha256'), str) or not re.fullmatch('[a-f0-9]{64}', continuation['contextSha256']):
+            raise ValueError('Continuation needs its context fingerprint')
+        for field in ['goal', 'nextAction', 'scopeNotes']:
+            check_text(continuation.get(field), 'Continuation ' + field, 3000)
+        questions = continuation.get('questions')
+        if not isinstance(questions, list) or len(questions) > 12:
+            raise ValueError('Continuation needs at most 12 questions')
+        for question in questions:
+            check_text(question, 'Continuation question', 1000)
+    if 'reviewBasis' in state:
+        basis = state['reviewBasis']
+        keys(basis, ['accounts', 'sources'], 'Review basis')
+        for field, maximum in [('accounts', 80), ('sources', 2048)]:
+            entries = basis.get(field)
+            if not isinstance(entries, dict) or len(entries) > maximum:
+                raise ValueError('Review basis must contain bounded fingerprint maps')
+            for key, value in entries.items():
+                if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,99}', key) or not isinstance(value, str) or not re.fullmatch('[a-f0-9]{64}', value):
+                    raise ValueError('Invalid review dependency fingerprint')
     if 'writing' in state:
         writing = state['writing']
         keys(writing, ['guideName', 'guideText', 'draft', 'mode'], 'Writing')
@@ -119,7 +196,7 @@ def validate(packet, check_text, keys):
         raise ValueError('Reviews must refer to existing accounts')
     for review in reviews.values():
         keys(review, ['decision', 'draft', 'reason', 'sourceRefs', 'depth', 'practised'], 'Account review')
-        if review.get('decision') not in ['pending', 'kept', 'revision', 'needs_evidence'] or review.get('depth') not in ['pending', 'clear', 'open']:
+        if review.get('decision') not in ['pending', 'kept', 'revision', 'needs_evidence', 'correction'] or review.get('depth') not in ['pending', 'clear', 'open']:
             raise ValueError('Invalid account review state')
         if type(review.get('practised')) is not bool:
             raise ValueError('Practice state must be boolean')
@@ -130,7 +207,7 @@ def validate(packet, check_text, keys):
             raise ValueError('Review references must resolve to included sources')
         if review['decision'] == 'revision' and (not review['draft'].strip() or not review['reason'].strip() or not refs):
             raise ValueError('A chosen revision needs wording, a reason and source references')
-        if review['decision'] == 'needs_evidence' and not review['reason'].strip():
+        if review['decision'] in ['needs_evidence', 'correction'] and not review['reason'].strip():
             raise ValueError('An unresolved correction needs a reason')
     if state.get('storyId') not in ids | {''}:
         raise ValueError('Journey story must exist')
@@ -150,27 +227,19 @@ def validate(packet, check_text, keys):
         check_text(summary, 'First account summary')
 
 
-def render(packet, basis):
+def render(packet, basis, review_basis=None):
     if 'journey' not in packet:
         return ''
     esc = lambda text: html.escape(str(text), quote=True)
-    icons = (
-        '<path d="M5 7h6l2 3h14v15H5z"/><path d="M9 5h14v5"/>',
-        '<path d="M8 5h12l5 5v17H8zM20 5v6h5M12 16h9M12 21h7"/>',
-        '<circle cx="14" cy="14" r="8"/><path d="m20 20 7 7M10 14h8M14 10v8"/>',
-        '<path d="M8 5v7c0 7 16 1 16 8v7M8 27v-8"/><circle cx="8" cy="5" r="3"/><circle cx="8" cy="27" r="3"/><circle cx="24" cy="27" r="3"/>',
-        '<path d="m8 24 2-7L23 4l5 5-13 13-7 2zM19 8l5 5M6 28h20"/>',
-        '<path d="M5 7h22v15H15l-7 5v-5H5zM11 12h10M11 17h7"/>',
-    )
-    nodes = ''.join(f'<li class="path-stop"><a id="path-link-{key}" href="#path-{key}" class="path-node" data-path-step="{key}" aria-label="{i+1}. {LABELS[i]}"><span class="path-token"><svg viewBox="0 0 32 32" aria-hidden="true">{icons[i]}</svg><span class="path-check" aria-hidden="true">✓</span></span><span class="path-label">{esc(LABELS[i])}</span><span class="path-state"></span></a></li>' for i, key in enumerate(CORE_STEPS))
+    nodes = ''.join(f'<li class="path-stop"><a id="path-link-{key}" href="#path-{key}" class="path-node" data-path-step="{key}"><span class="path-label">{esc(LABELS[i])}</span><span class="path-state"></span></a></li>' for i, key in enumerate(CORE_STEPS))
     options = ''.join(f'<option value="{esc(a["id"])}">{esc(a["title"])}</option>' for a in packet['accounts'])
-    return f'''<section id="path" class="document-view guided-path" aria-labelledby="path-title" data-evidence="{basis}">
-<div class="path-heading"><h1 id="path-title">Build your career context</h1><div class="path-progress"><span id="path-count">Review progress</span><progress id="path-progress" max="{len(packet['accounts']) or 1}" value="0" aria-label="Accounts reviewed"></progress><button type="button" class="path-save js-only" id="path-save">Save full HTML <span aria-hidden="true">↓</span></button></div></div>
-<div class="path-workspace js-only"><details class="path-map-shell" open><summary>Full path</summary><nav aria-label="Your career path" class="path-map"><svg class="path-route" aria-hidden="true"><path/></svg><ol>{nodes}</ol><a class="path-destination" href="#profile">Choose what to share <span aria-hidden="true">↗</span></a></nav></details>
+    return f'''<section id="path" class="document-view guided-path" aria-labelledby="path-title" data-evidence="{basis}" data-review-basis="{esc(json.dumps(review_basis or {}, separators=(',', ':')))}">
+<div class="path-heading"><h1 id="path-title">Develop context</h1><div class="path-progress"><span id="path-count"></span><progress id="path-progress" max="{len(packet['accounts']) or 1}" value="0" aria-label="Accounts reviewed" hidden></progress><button type="button" class="path-save js-only" id="path-save">Save private file <span aria-hidden="true">↓</span></button><button type="button" class="path-secondary js-only" id="path-handoff">Save for assistant</button></div><p id="path-save-state" role="status"></p></div>
+<div class="path-workspace js-only"><details class="path-map-shell" open><summary>Activities</summary><nav aria-label="Context activities" class="path-map"><ol>{nodes}</ol><a class="path-destination" href="#work">Read my context <span aria-hidden="true">→</span></a></nav></details>
 <article class="path-activity" aria-labelledby="path-activity-title"><div class="path-step-number" id="path-step-number"></div><h2 id="path-activity-title">Your first draft</h2>
 <div id="path-story-picker"><label for="path-story">Work account</label><select id="path-story">{options}</select><div class="review-queue"><span id="path-account-count"></span><button type="button" class="path-secondary" id="path-next-account">Next unreviewed account</button></div></div>
-<div id="path-content"></div><div class="path-note-area"><label for="path-note">Your bullet notes</label><textarea id="path-note" maxlength="10000" rows="3" placeholder="• Keep…&#10;• Change…&#10;• Missing…"></textarea><button type="button" class="path-secondary" id="path-copy" hidden>Copy review notes</button></div><p class="path-status" id="path-status" role="status"></p>
+<div id="path-content"></div><div class="path-note-area"><label for="path-note">Your bullet notes</label><textarea id="path-note" maxlength="10000" rows="3" placeholder="• Keep…&#10;• Change…&#10;• Missing…"></textarea><details><summary>Copy notes only</summary><button type="button" class="path-secondary" id="path-copy" hidden>Copy review notes</button></details></div><p class="path-status" id="path-status" role="status"></p><details class="path-brief"><summary>Copy a continuation brief</summary><button type="button" class="path-secondary" id="path-copy-continuation">Copy brief</button></details>
 <div class="path-actions"><button type="button" id="path-continue" class="path-primary">Reviewed · Next <span aria-hidden="true">→</span></button><button type="button" id="path-reopen" class="path-secondary" hidden>Mark unreviewed</button></div>
-<p class="path-finish" id="path-finish" hidden>Context review complete for this scope. You can revisit it as your experience grows.</p></article></div>
-<div class="no-script"><ol><li><a href="#sources">Review collected material</a></li><li><a href="#work">Read your work accounts</a></li><li><a href="#timeline">Connect the chapters</a></li><li><a href="#profile">Choose what to share</a></li></ol></div>
+<p class="path-finish" id="path-finish" hidden></p></article></div>
+<div class="no-script"><p>Give this private file to your approved assistant to start or continue. Interactive notes need JavaScript; saved accounts remain readable below.</p><ol><li><a href="#sources">Read retained material</a></li><li><a href="#work">Read your work accounts</a></li><li><a href="#timeline">Explore the timeline</a></li></ol></div>
 </section>'''

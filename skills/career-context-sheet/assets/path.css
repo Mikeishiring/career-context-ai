@@ -186,3 +186,48 @@
  .path-map-shell>summary{display:flex;align-items:center;gap:12px;width:max-content;max-width:100%;border:1px solid #a8b0a3;border-radius:7px;padding:8px 12px;min-height:42px;cursor:pointer}
  .path-map-shell>summary::after{content:'⌄';font-size:16px}.path-map-shell[open]>summary::after{content:'⌃'}
 }
+
+/* Optional activities surround the account; they are not a completion ladder. */
+.path-heading{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;margin-bottom:26px}
+.path-heading h1{font-size:30px;max-width:none}
+.path-progress{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:10px 16px;width:auto;max-width:100%}
+#path-save-state{flex-basis:100%;margin:0;font-size:12px;color:var(--muted)}
+#path-save-state:empty{display:none}
+.has-script .path-workspace{display:grid;grid-template-columns:190px minmax(0,1fr);gap:36px}
+.has-script .path-workspace:has(.path-map-shell[hidden]){grid-template-columns:minmax(0,760px)}
+.path-map ol{gap:4px}
+.path-stop,.path-stop:nth-child(even){width:auto;min-height:0;margin:0}
+.path-node{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;min-height:52px;padding:8px 12px;border-radius:6px;font-size:13px}
+.path-label,.path-state{align-self:auto;padding:0;min-height:0}
+.path-node[aria-current=step]{background:var(--wash)}
+.path-node[aria-current=step] .path-label{color:var(--ink)}
+.path-destination{margin:18px 12px 0;padding:14px 0;max-width:none}
+.path-activity{border:0;border-radius:0;padding:0;background:transparent}
+.path-activity h2{font-size:25px;margin-bottom:18px}
+.path-step-number:empty{display:none}
+.path-activity>.path-field:first-child{margin-top:0}
+#start-handoff{margin-top:16px;cursor:pointer}
+.path-handoff-note{font-size:12px;line-height:1.5;color:var(--muted);margin:10px 0 0!important}
+#systematic-collection{border-top:1px solid var(--line);margin-top:26px;padding-top:8px}
+#systematic-collection>summary{font-weight:500}
+.path-reading{overflow-wrap:anywhere}
+.path-note-area{margin-top:20px}
+.path-activity .path-field textarea{min-height:100px}
+#review-record{margin-top:10px}
+#review-handoff{display:block;margin-top:12px;cursor:pointer}
+@media(hover:hover) and (pointer:fine){.path-node:hover{background:var(--wash)}.path-node:hover .path-label{color:var(--accent)}}
+@media(max-width:700px){
+ .path-heading h1{font-size:27px;max-width:none;flex-basis:100%}
+ .path-progress{width:100%;margin:0;justify-content:flex-start;gap:10px}
+ .path-progress .path-save{padding:9px 12px;font-size:13px}
+ .has-script .path-workspace{display:flex;gap:24px}
+ .path-activity{order:0;padding:0;width:100%;border:0}
+ .path-map-shell{order:1;width:100%}
+ .path-map ol{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin-top:12px}
+ .path-node{text-align:left;align-items:flex-start;min-height:48px;font-size:13px}
+ .path-label{font-size:13px}.path-state{display:block;font-size:11px}
+ .path-destination{margin:12px 0 0}
+ .path-activity h2{font-size:24px}
+ .path-primary{width:auto}
+ .guided-path textarea,.guided-path input,.guided-path select{font-size:16px}
+}
