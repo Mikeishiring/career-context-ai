@@ -2,6 +2,8 @@
 
 Build your own local database of the work you've done: the records, decisions, shared contributions and unfinished attempts behind a resume.
 
+Use it to recall your experience, reflect on your choices, find examples for guiding others, or prepare for an interview. It builds an account from the context you supply; it does not rate your performance or establish how other people felt about you. Recorded feedback stays attributed to its source and circumstances.
+
 This is an early project: an agent skill with Python tools for keeping a searchable archive and a readable HTML file. Your chosen agent gathers and interprets the material. You review it, keep it and decide how to use it.
 
 ## Three principles

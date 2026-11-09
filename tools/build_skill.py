@@ -32,6 +32,7 @@ MEMBERS = (
     "assets/resume.html",
     "assets/notebook.html",
     "references/adaptation-and-discovery.md",
+    "references/background-and-history.md",
     "references/deepening-and-story.md",
     "references/investigation-loop.md",
     "references/memory-and-retrieval.md",

@@ -43,6 +43,7 @@ class GuidedPathTests(unittest.TestCase):
 
     def test_path_and_notes_roundtrip_without_changing_facts(self):
         before = copy.deepcopy(self.packet)
+        self.packet['journey']['notes']['gather'] = 'Operations coordinator; shared supplier decisions; no budget authority.'
         self.packet['journey']['notes']['review:' + self.packet['accounts'][0]['id']] = 'Keep the shared credit.'
         self.packet['journey']['completed'] = ['review']
         output = self.render()

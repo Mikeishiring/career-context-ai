@@ -39,3 +39,11 @@ For repositories, posts and portfolios, [GitHub and social discovery](github-and
 Read the original account and linked evidence first. Then prioritize unresolved ownership, contradictory outcomes, later corrections, missing parent context and relevant attachments. Alternate locations so one busy channel does not consume the whole budget. On a budget stop, preserve a resumable queue and the limits in the sheet.
 
 Calendar entries establish scheduled activity, not attendance or outcomes. Code establishes implementation activity, not adoption. A person's account can support a clearly attributed self-report without independent corroboration. Keep those distinctions in both prose and agent text.
+
+## Match the source to the claim
+
+Start from where the work happened. A repository may show a tool someone built; operational records establish how it was used and what happened. For example, recruiting source mix and stage progression belong in the relevant sourcing platforms and applicant-tracking records. GitHub activity cannot substitute for them. The person's starting account guides where to look; it does not establish the result.
+
+For requested statistics, inspect coverage before calculating. Record the unit, stable identifier, attribution rule, date field, population and denominator. Deduplicate repeated captures. Separate event-year activity from cohorts followed over time, identify partial years, and keep source, role and process changes visible where they affect comparisons. Current assignment is not historical participation or sole credit. A later stage does not prove every earlier stage occurred; a dataset selected for successful outcomes cannot establish a full funnel.
+
+Keep activity volume, observed outcomes and evidence about quality separate. A change in conversion or speed alone does not establish that someone's guidance caused it. Use comparable cohorts and supporting decisions or process records when available; otherwise retain the limitation. Metrics are optional and should fit the actual work. When the right records are inaccessible, use the missing-evidence choice in [adaptation and discovery](adaptation-and-discovery.md#when-evidence-is-missing).
