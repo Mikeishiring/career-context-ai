@@ -16,6 +16,12 @@ if(!input||!output)throw Error('Usage: node tests/check_guided.cjs guided.html o
  const before=await page.evaluate(()=>structuredClone(packet));
  await page.locator('.top [data-view="path"]').click();
  await page.locator('#path-link-gather').click();
+ const roleNote='Operations coordinator, 2024–25. Supplier follow-up and volunteer rotas. Finance approved spending. PRIVATE_ROLE_CANARY';
+ check('Starting role context is optional',await page.locator('#starting-note').evaluate(n=>!n.required));
+ await page.locator('#starting-note').fill(roleNote);
+ await page.reload();
+ check('Role context survives reload',await page.locator('#starting-note').inputValue()===roleNote);
+ check('Role context does not approve evidence',await page.evaluate(b=>packet.reviewStatus===b.reviewStatus,before));
  await page.locator('#systematic-collection > summary').click();
  const setup=page.locator('.coverage-setup');if(!await setup.evaluate(n=>n.open))await setup.locator('summary').first().click();
  await page.locator('#coverage-start').fill('2030-12');await page.locator('#coverage-end').fill('2031-02');
@@ -124,7 +130,7 @@ if(!input||!output)throw Error('Usage: node tests/check_guided.cjs guided.html o
  const downloaded=page.waitForEvent('download');await page.click('#public-export');const dl=await downloaded;
  const publicFile=path.join(output,'public-export-check.html');await dl.saveAs(publicFile);
  const html=await fs.readFile(publicFile,'utf8');
- check('Public export has no private packet, scripts, images or notes',!/<script\b|<img\b|career-context-data|PRIVATE_STYLE_CANARY|PRIVATE_REVIEW_CANARY|data:image/i.test(html));
+ check('Public export has no private packet, scripts, images or notes',!/<script\b|<img\b|career-context-data|PRIVATE_STYLE_CANARY|PRIVATE_REVIEW_CANARY|PRIVATE_ROLE_CANARY|data:image/i.test(html));
  check('Public export omits private record bodies',!before.sources.some(s=>s.content.length>80&&html.includes(s.content.slice(0,80))));
  check('Unexpected private fields cannot enter the export',await page.evaluate(()=>!publicDocument({...packet.publicProfile,privateNote:'PRIVATE_FIELD_CANARY',sources:packet.sources}).includes('PRIVATE_FIELD_CANARY')));
  check('Public export labels synthetic examples',html.includes('Synthetic example'));
@@ -135,8 +141,10 @@ if(!input||!output)throw Error('Usage: node tests/check_guided.cjs guided.html o
  const privateDownload=page.waitForEvent('download');await page.click('#public-save');const pd=await privateDownload;const saved=path.join(output,'profile-private-save-check.html');await pd.saveAs(saved);
  const privateHTML=await fs.readFile(saved,'utf8'),data=JSON.parse(privateHTML.match(/<script id="career-context-data" type="application\/json">([\s\S]*?)<\/script>/)[1]);
  check('Private save retains style, candidate and profile edits',data.journey.writing.guideText===style&&data.journey.writing.draft===draft&&data.publicProfile.headline===hostile);
+ check('Private save retains role context',data.journey.notes.gather===roleNote);
  const clean=await browser.newContext(),reopened=await clean.newPage();await reopened.goto(pathToFileURL(saved).href+'#profile');
  check('Profile survives save and reopen without storage',await reopened.locator('.profile-page h1').innerText()===hostile);
+ await reopened.evaluate(()=>location.hash='path-gather');check('Role context survives a private save',await reopened.locator('#starting-note').inputValue()===roleNote);
  await reopened.evaluate(()=>location.hash='path-write');check('Writing survives save and reopen without storage',await reopened.locator('#writing-draft').inputValue()===draft);await clean.close();
  await page.click('#public-edit-tab'); // Profile controls may be offscreen after writing in another context, but remain in this page's profile.
  await page.getByLabel('Headline',{exact:true}).fill('');check('Empty profile cannot be exported',await page.locator('#public-export').isDisabled());

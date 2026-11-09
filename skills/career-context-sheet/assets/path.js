@@ -65,7 +65,7 @@ if(pathRoot){
    if(checkpoint.questions.length)content.append(disclosure('Open questions',checkpoint.questions.join('\n')));
   }
   const input=el('textarea');input.id='starting-note';input.rows=4;input.maxLength=10000;input.value=state.notes.gather||'';
-  input.placeholder=packet.accounts.length?'What would help next?':'A project, a few notes, or what you remember doing…';
+  input.placeholder=packet.accounts.length?'What would help next? You can add a role, responsibilities or decisions you owned or shared.':'A project, your role and responsibilities, or what you remember doing…';
   input.addEventListener('input',()=>{state.notes.gather=input.value;persist();});
   content.append(field(packet.accounts.length?'What would you like to work on?':'Start with one piece of work',input));
   const send=action('Save for assistant',handoff,'start-handoff');send.className='path-primary';content.append(send);

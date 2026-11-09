@@ -4,6 +4,10 @@ Use this workflow only when interview preparation is requested. It is an optiona
 
 Select the strongest supported accounts, keeping one to three as the lead stories. Preserve the person's voice, decisions, shared credit, corrections, later outcomes and useful personal context. Do not turn a team action into a personal one, an unfinished idea into delivery, or continued use into a measured benefit. A target role is optional; use null when none was supplied.
 
+Choose these as useful examples to reflect on and discuss. "Strongest" means well-supported and informative for the conversation; it is not a performance grade or proof of how colleagues or an interviewer will regard the person. Keep documented outcomes and attributed feedback at their actual scope.
+
+Use the [responsibility check](adaptation-and-discovery.md#optional-responsibility-check) when role scope is unclear. Explain the recorded role and the work done in practice, including shared decisions and changes over time. A familiar title can be a qualified comparison, not a promotion or a substitute for the actual title. Reconcile onboarding notes before using them as career facts; do not repeat the intake or fit every story to one role.
+
 ## Draft from the current context
 
 Resolve both commands relative to this skill. Read the source and its fingerprint:
