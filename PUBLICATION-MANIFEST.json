@@ -1320,7 +1320,7 @@
     },
     {
       "path": "skills/career-context-sheet/references/selected-context.md",
-      "sha256": "650cbe0bcbdc91c2a1f81cb9bf19e2ac770a8b0b15971be41996e243ba763e1f"
+      "sha256": "c14c5a149b245fc47a87a906effdca42bb0930cf587ec186cde8dd4eb949cb3b"
     },
     {
       "path": "skills/career-context-sheet/references/source-research.md",
@@ -1344,7 +1344,7 @@
     },
     {
       "path": "skills/career-context-sheet/scripts/context_mcp.py",
-      "sha256": "3440a82229cacd708afa23d076fd17390b2e424665fd9a0dbb31fdb5fe79fd2f"
+      "sha256": "1471cb6dffdd8d6c1180387c360cb8e21b7c44d85ca76ad9adb45bb7af51412a"
     },
     {
       "path": "skills/career-context-sheet/scripts/context_memory.py",
@@ -1532,7 +1532,7 @@
     },
     {
       "path": "tests/test_context_selection.py",
-      "sha256": "f74a0236838be0ed15f048f365afa386aea066870d01b0aae7fe706899d0888a"
+      "sha256": "95a8978eb81a914b5999fc2cf83c564e4e5cd97bc2436d8a53d9fed907f54aab"
     },
     {
       "path": "tests/test_depth_coverage.py",

@@ -187,6 +187,54 @@ class ContextSelectionTests(unittest.TestCase):
         self.assertNotEqual(first['hits'][0]['id'], second['hits'][0]['id'])
         self.assertEqual(server.execute('context_selection_search', {'query': 'unfindable-sentinel'})['hits'], [])
 
+    def test_responsibility_terms_find_a_later_selected_account_and_carry_its_limits_into_the_read(self):
+        self.packet.pop('interview', None)
+        earlier, relevant, withheld = self.packet['accounts']
+        earlier['limits'] = ['Did not own supplier relationships or onboarding.']
+        relevant['title'] = 'Process review'
+        relevant['contribution'] = 'I revised the supplier onboarding checklist.'
+        relevant['sharedCredit'] = 'A colleague chose the approval rules.'
+        relevant['limits'] = ['Cycle time was not measured.']
+        relevant['capabilities'] = [{'name': 'Writing', 'kind': 'practice', 'application': 'Drafted a checklist.',
+                                     'assistance': 'A colleague tested it.', 'limits': ['One site.']}]
+        withheld['title'] = 'Unselected supplier onboarding example'
+        server = mcp.Server(selection.select(self.packet, [earlier['id'], relevant['id']]))
+        search = {'query': 'supplier, onboarding', 'mode': 'terms', 'limit': 1}
+        first = server.execute('context_selection_search', search)
+        self.assertEqual(first['totalMatches'], 2)
+        self.assertEqual(first['hits'], [{'id': relevant['id'], 'title': relevant['title'],
+                                         'period': relevant['period'], 'matchedFields': ['contribution']}])
+        second = server.execute('context_selection_search', {**search, 'offset': first['nextOffset']})
+        self.assertEqual(second['hits'][0]['matchedFields'], ['limits'])
+        self.assertIsNone(second['nextOffset'])
+        self.assertTrue(first['synthetic'])
+        self.assertFalse(first['sourceEvidenceIncluded'])
+        read = server.execute('context_selection_read', {'accountIds': [first['hits'][0]['id']],
+                               'selectionSha256': first['selectionSha256']})
+        for field in ('contribution', 'sharedCredit', 'limits', 'capabilities'):
+            self.assertEqual(read['accounts'][0][field], relevant[field])
+        for query in ['suppl onboarding', 'unselected', relevant['sourceRefs'][0]]:
+            self.assertEqual(server.execute('context_selection_search', {**search, 'query': query})['hits'], [])
+        for mode in ['semantic', None, 1]:
+            with self.assertRaises(ValueError):
+                server.execute('context_selection_search', {**search, 'mode': mode})
+
+    def test_terms_keep_technical_names_distinct_and_include_late_qualifiers(self):
+        self.packet.pop('interview', None)
+        self.account['contribution'] = 'I wrote C#, C++ and Node.js services on .NET.'
+        self.account['summary'] = 'Alpha beta gamma delta epsilon zeta.'
+        self.account['questions'] = ['What happened to eta?']
+        self.account['capabilities'][0]['assistance'] = 'A colleague helped with eta.'
+        server = mcp.Server(self.snapshot())
+        def search(query):
+            return server.execute('context_selection_search', {'query': query, 'mode': 'terms'})['hits']
+        for query in ['C#, C++', '.NET / node.js', '(c++); .NET', 'node.JS']:
+            self.assertEqual(search(query)[0]['matchedFields'], ['contribution'])
+        for query in ['C', 'NET', 'Node', '++', '---']:
+            self.assertEqual(search(query), [])
+        fields = search('alpha beta gamma delta epsilon zeta eta')[0]['matchedFields']
+        self.assertEqual(set(fields), {'summary', 'questions', 'capabilities.assistance'})
+
     def test_rpc_requires_initialization_and_never_exposes_path_arguments(self):
         server = mcp.Server(self.snapshot())
         self.assertIn('error', server.handle(call('context_selection_status')))
@@ -243,15 +291,18 @@ class ContextSelectionTests(unittest.TestCase):
         snapshot = selection.load_selection(output)
         requests = [initialize(), {'jsonrpc': '2.0', 'method': 'notifications/initialized'},
                     {'jsonrpc': '2.0', 'id': 2, 'method': 'tools/list'},
+                    call('context_selection_search', {'query': self.account['title'], 'mode': 'terms'}, request_id=3),
                     call('context_selection_read', {'accountIds': self.ids,
-                         'selectionSha256': snapshot['selectionSha256']})]
+                         'selectionSha256': snapshot['selectionSha256']}, request_id=4)]
         before = output.read_bytes()
         response = subprocess.run([sys.executable, '-I', str(scripts / 'context_mcp.py'), str(output)],
                                   cwd=self.folder, input=b''.join(json.dumps(r).encode() + b'\n' for r in requests),
                                   capture_output=True, timeout=15)
         self.assertEqual(response.returncode, 0, response.stderr)
         messages = [json.loads(line) for line in response.stdout.splitlines()]
-        self.assertEqual([m['id'] for m in messages], [1, 2, 3])
+        self.assertEqual([m['id'] for m in messages], [1, 2, 3, 4])
+        self.assertEqual(messages[2]['result']['structuredContent']['hits'][0]['id'], self.ids[0])
+        self.assertEqual(messages[2]['result']['structuredContent']['selectionSha256'], snapshot['selectionSha256'])
         self.assertEqual(messages[-1]['result']['structuredContent']['accounts'], snapshot['accounts'])
         self.assertEqual(before, output.read_bytes())
         self.assertFalse(response.stderr)
