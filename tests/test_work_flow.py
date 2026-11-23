@@ -55,6 +55,25 @@ class WorkFlowTests(unittest.TestCase):
         self.assertEqual(set(dom.preparation),{a['id'] for a in self.packet['accounts']})
         self.assertNotIn('interview',r.load_packet(output))
 
+    def test_roles_allow_parallel_and_unassigned_work(self):
+        role = {'id':'garden', 'title':'Volunteer gardener', 'current':True, 'accountIds':['watering-rota']}
+        earlier = {'id':'repair', 'title':'Independent repair work', 'accountIds':['chair-repair']}
+        self.packet['presentation']['experienceRoles'] = [earlier, role]
+        output = self.render()
+        page = output.read_text(encoding='utf-8').split('id="experience-groups">',1)[1].split('id="experience-status"',1)[0]
+        self.assertLess(page.index('Volunteer gardener'), page.index('Independent repair work'))
+        self.assertLess(page.index('Other work'), page.index('data-experience="display-sketch"'))
+        for a in self.packet['accounts']:
+            self.assertEqual(page.count('data-experience="'+a['id']+'"'), 1)
+        copy_file = self.folder/'rebuilt.html'
+        r.render(output, copy_file)
+        self.assertEqual(output.read_bytes(), copy_file.read_bytes())
+        earlier['current'] = True
+        r.validate(self.packet)
+        earlier['accountIds'].append('watering-rota')
+        with self.assertRaisesRegex(ValueError,'primary role'):
+            r.validate(self.packet)
+
     def test_grouping_rejects_loss_duplication_and_unknown_accounts(self):
         original=copy.deepcopy(self.packet['presentation']['workGroups'])
         for change in ['missing','duplicate','unknown','kind']:

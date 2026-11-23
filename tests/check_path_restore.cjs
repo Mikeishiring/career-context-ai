@@ -20,6 +20,10 @@ assert.equal(result.state.coverage.marker,'browser receipt');
 assert.equal(result.state.updatedAt,200);
 assert.equal(result.state.baseline.overview,'Original');
 assert.equal(result.changedEvidence,false);
+const requestA={...embedded,contextSha256:'current',notes:{output:'Alder'}};
+const requestB={...saved,notes:{output:'Birch',review:'Birch notes'}};
+assert.deepEqual(restore(requestA,requestB).state.notes,{output:'Alder'});
+assert.deepEqual(restore(requestA,{...saved,notes:{output:'Alder',review:'newer edit'}}).state.notes,{output:'Alder',review:'newer edit'});
 for(const draft of [null,{...saved,contextSha256:'unrelated'},{...saved,notes:{unknown:'invalid'}}]){
  result=restore(embedded,draft);
  assert.equal(result.state.contextSha256,'current');

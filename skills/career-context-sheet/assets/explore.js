@@ -51,12 +51,18 @@ function mountTimelineExplorer(){
  if(explicit>=0){timelineSelection={...timelineSelection,fromId:periods[explicit].id,toId:periods[explicit].id,updatedAt:Date.now()};delete timelineSelection.year;}
  packet.presentation={...packet.presentation,timelineSelection:{...timelineSelection}};
  const from=document.getElementById('timeline-from'),to=document.getElementById('timeline-to'),purpose=document.getElementById('timeline-purpose'),notice=document.getElementById('timeline-status'),yearSelect=document.getElementById('timeline-year-select');
+ const ruler=document.createElement('div');
+ ruler.className='period-ruler';ruler.setAttribute('aria-hidden','true');
+ const marks=periods.map(()=>document.createElement('i'));
+ ruler.append(...marks);
+ document.getElementById('timeline-range-count').after(ruler);
  let anchor=[periods.findIndex(p=>p.id===timelineSelection.fromId),periods.findIndex(p=>p.id===timelineSelection.toId)],gesture=null,suppressClick=false,lastReading='';
  purpose.value=timelineSelection.purpose;
  const persist=()=>{timelineSelection.updatedAt=Date.now();packet.presentation={...packet.presentation,timelineSelection:{...timelineSelection}};try{localStorage.setItem(key,JSON.stringify(timelineSelection));}catch{notice.textContent='Browser storage unavailable. Save full HTML to keep this selection.';}};
  function paint(){
   const a=periods.findIndex(p=>p.id===timelineSelection.fromId),b=periods.findIndex(p=>p.id===timelineSelection.toId),scope=selectedTimelineContext(packet,timelineSelection.fromId,timelineSelection.toId,basis,timelineSelection.year),selectedIds=new Set(scope.periods.map(p=>p.id));
   from.value=timelineSelection.fromId;to.value=timelineSelection.toId;
+  marks.forEach((mark,i)=>mark.classList.toggle('selected',selectedIds.has(periods[i].id)));
   links.forEach(link=>{const selected=selectedIds.has(periods[Number(link.dataset.periodIndex)].id);link.classList.toggle('in-range',selected);link.removeAttribute('aria-current');link.setAttribute('role','button');link.setAttribute('aria-pressed',String(selected));});
   const matching=years.filter(y=>timelineSelection.year?y.dataset.year===timelineSelection.year:a>=span(y)[0]&&b<=span(y)[1]);
   yearSelect.value=matching.length===1?matching[0].dataset.year:'';
@@ -142,6 +148,7 @@ function mountSourceBrowser(){
  window.addEventListener('hashchange',reveal);filter();reveal();
 }
 function snapshotExploration(clone){
+ clone.querySelector('.period-ruler')?.remove();
  clone.querySelectorAll('.source,.timeline-periods,.year-overview').forEach(el=>el.hidden=false);
  clone.querySelector('#work-period').hidden=true;
  clone.querySelectorAll('[data-work-group],.index,.mobile-index').forEach(el=>el.hidden=false);

@@ -21,16 +21,21 @@ async function main(){
   assert.ok(data.timeline.length&&data.interview.stories.length);
   result.accounts=data.accounts.length;result.periods=data.timeline.length;result.stories=data.interview.stories.length;
   const first=data.timeline[0],last=data.timeline.at(-1),story=data.interview.stories[0];
-  const view=async name=>{if(['work','timeline','skills'].includes(name))await page.locator('[data-area="context"]').click();await page.locator('[data-view="'+name+'"]').first().click();};
-  assert.equal(await page.locator('#context').isVisible(),true);
-  await page.locator('[data-view="timeline"]').click();
+  const view=async name=>{
+   if(['work','timeline','skills'].includes(name))await page.locator('[data-area="context"]').click();
+   await page.locator('[data-view="'+name+'"]').first().click();
+   await page.locator('#'+name).waitFor({state:'visible'});
+  };
+  await page.locator('[data-area="context"]').click();
+  await page.locator('#context').waitFor({state:'visible'});
+  await view('timeline');
   assert.ok(await page.locator('.quarter-reading:visible').count()>=1);
   assert.equal(await page.locator('#quarter-'+first.id).isVisible(),true);
   await page.locator('.timeline-use > summary').click();await page.locator('.timeline-options > summary').click();
   await page.locator('#timeline-from').selectOption(last.id);
   await page.reload();assert.equal(await page.locator('#quarter-'+last.id).isVisible(),true);
   assert.equal(await page.locator('#timeline').isVisible(),true);
-  await page.locator('[data-view="interview"]').click();
+  await view('interview');
   assert.equal(await page.locator('#interview').isVisible(),true);
   await page.locator('#prep-story-'+story.id+' > summary').click();
   assert.equal(await page.locator('#prep-story-'+story.id).isVisible(),true);
@@ -94,6 +99,7 @@ async function main(){
   const saved=await reopened.locator('#career-context-data').textContent().then(JSON.parse);
   assert.deepEqual(saved.timeline,data.timeline);assert.deepEqual(saved.interview,data.interview);
   assert.equal(saved.rehearsal.notes[story.id],'Portable rehearsal check: keep shared credit.');
+  await reopened.locator('[data-area="context"]').click();
   await reopened.locator('[data-view="timeline"]').click();assert.equal(await reopened.locator('.quarter-reading:visible').count(),1);
   await reopened.evaluate(()=>dispatchEvent(new Event('beforeprint')));
   assert.equal(await reopened.locator('.quarter-reading:visible').count(),data.timeline.length);

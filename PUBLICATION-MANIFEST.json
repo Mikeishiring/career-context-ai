@@ -16,7 +16,7 @@
     },
     {
       "path": "CAREER-CONTEXT.html",
-      "sha256": "4d6f9e2175c4c187a80b49572a797fa03ccdb3ccd415e957744cbe4abfcafbc0"
+      "sha256": "3e235fa01807af6ff5a1715923d56a9522d2e96d8c55d2a8785bd0e36a5d84a1"
     },
     {
       "path": "CONTRIBUTING.md",
@@ -28,11 +28,11 @@
     },
     {
       "path": "README.md",
-      "sha256": "bf02c4859f054a94cf61f662985f50caa188f874c1ce3be7345e57e185348bcd"
+      "sha256": "0d8184ef2bfde240db6fc3bb51800b0188218649a398944e64787a601fd26d02"
     },
     {
       "path": "START-HERE.md",
-      "sha256": "9bba61fdbb468e43ab9754abf5ba39e9b514e752b26281f86214dd3183097628"
+      "sha256": "efd74a8290d2dadf59b7b5c890428962b05f6cc58b0c8ac954b468491dd7f5dc"
     },
     {
       "path": "ai-search-mvp/AI-SEARCH-MVP.html",
@@ -332,7 +332,7 @@
     },
     {
       "path": "ai-search-mvp/mcp_server.py",
-      "sha256": "d808a0d52d9bbeca7024a155cf289274e17e73fe74ce50b71dece38f13867131"
+      "sha256": "cda748eab1032227caf9427d8fc0fcc399019694176a805295d987c7ba6cd342"
     },
     {
       "path": "ai-search-mvp/model/attribution-researcher.txt",
@@ -1020,7 +1020,7 @@
     },
     {
       "path": "docs/PRODUCT.md",
-      "sha256": "c55480e2d5d9848fa5fadcb3de40bf9582fd315accdae6e74971e8aa65cabd66"
+      "sha256": "2718129222157a5400509ee8dd4b96e519c3bd32d5314e4d1937a538c74f6885"
     },
     {
       "path": "docs/README.md",
@@ -1028,7 +1028,7 @@
     },
     {
       "path": "docs/career-context-preview.png",
-      "sha256": "027e7d76db052f116357ccacf82ff46719c0dca29085521819afe2a7decab185"
+      "sha256": "eb3fc029443a23832a1357fc9b68cc5b220ba322fb0eaad1404bff9f08002fb2"
     },
     {
       "path": "docs/research/ADAPTIVE-WORKFLOW-REVIEW.md",
@@ -1108,7 +1108,7 @@
     },
     {
       "path": "examples/complete-context.json",
-      "sha256": "316636afdd0958a45b56d8932a89b8b0c1d5df36cf9a1d07628aac0fe03ba8b8"
+      "sha256": "e947e80486096cb7b1826ede9bd08b95cc456add57ecf07ecb46dfe242452b1b"
     },
     {
       "path": "examples/first-records.json",
@@ -1116,7 +1116,7 @@
     },
     {
       "path": "examples/interview-preparation.json",
-      "sha256": "2a19818b95c4a6941b854e1c528ebedddc91c447d7851221e7190d89d970db05"
+      "sha256": "820bdd56068abcab859f02094dd9f2345113e35b9adc6f19ce2829bb484a21e0"
     },
     {
       "path": "examples/local-policy.json",
@@ -1156,7 +1156,7 @@
     },
     {
       "path": "prompts/RESEARCH-TO-SHEET.md",
-      "sha256": "cdc8d5fb9dbe52095b3dd9e34d6e53346db345184ba07393ac5d0f0df38ed6a8"
+      "sha256": "75e7529aff53b4302c8b17b052f072fb26123404fa0d40b67bf16f94e0158098"
     },
     {
       "path": "prompts/START-HERE.md",
@@ -1172,7 +1172,7 @@
     },
     {
       "path": "research_sheet.py",
-      "sha256": "2db8eb9018e007758d496cf4ccb8c51c72db65101616e5751cb8e319c393a936"
+      "sha256": "d450b223dc698b68740d411e6337411ea44e7c8b4946866c058515be59992114"
     },
     {
       "path": "research_sheet_server.py",
@@ -1180,7 +1180,7 @@
     },
     {
       "path": "skills/career-context-sheet/SKILL.md",
-      "sha256": "bfcc8c76bff80435606f65c4ce0959f999080816873875528811c2ee214a23c5"
+      "sha256": "30c3ce8039ecd05857866a48b126b0a4a53b1bbfff5508f7c11540bdc500c270"
     },
     {
       "path": "skills/career-context-sheet/START-HERE.md",
@@ -1191,20 +1191,32 @@
       "sha256": "97840a735af209e3ea2efc7e9da0b36c8fbde20a1037b50876d149f3ee044897"
     },
     {
+      "path": "skills/career-context-sheet/assets/audience.css",
+      "sha256": "a4fe780c862a6d099ff6d54b59a50204927f26467737bc70ed1e39daa361f243"
+    },
+    {
+      "path": "skills/career-context-sheet/assets/audience.js",
+      "sha256": "b949f52701dd3d515ea6347afce2b6947a883bf40732617241f66dd482e7fc93"
+    },
+    {
       "path": "skills/career-context-sheet/assets/context.css",
-      "sha256": "8179159cc99a456990df25089a3921768f7a0b56ebbd94ed9f31f3331b636d53"
+      "sha256": "b5b8c86c6fc8bbab860c4b5310b84eeff583abfaed6974194f75c00bb5fcf813"
     },
     {
       "path": "skills/career-context-sheet/assets/continuation.js",
-      "sha256": "a6b2f2f9bbbb93bb1035837fbd7240e71967a31340bc47a6bdced86f6ebd905f"
+      "sha256": "86050ca83de7b52d3d99626c4b650bf29a7cd0fbde0734f53e17d9d4b9fda885"
     },
     {
       "path": "skills/career-context-sheet/assets/continuation.txt",
-      "sha256": "4a809d1431359796fee9b69bfa562f7d2989472aecf965c97b303468e47690aa"
+      "sha256": "dfd72ba8148d18d6b42c026acfb6f4f30eb62e19040133e2f0fc5702c13b248f"
     },
     {
       "path": "skills/career-context-sheet/assets/coverage.js",
       "sha256": "5d71a257ce628af26f6b90453de28a9659cdf92595255aa24d579b5bfad49106"
+    },
+    {
+      "path": "skills/career-context-sheet/assets/experience.js",
+      "sha256": "0ff0e9f746280e5759bba8dd1947975f3ad3235084c7f54dd05d02a60a9d326d"
     },
     {
       "path": "skills/career-context-sheet/assets/explore.css",
@@ -1212,11 +1224,11 @@
     },
     {
       "path": "skills/career-context-sheet/assets/explore.js",
-      "sha256": "0d538bfe86c6ff79911a833ba0c6018ce174886278e97dff323a32ae14ad767e"
+      "sha256": "954886dbacd597d170a57fb23828d9f51a5a4804e022729bc2c791e4c99e5bc3"
     },
     {
       "path": "skills/career-context-sheet/assets/interview.html",
-      "sha256": "512d23932206bd14425614a81a91ce3b617833d49fcdf30f38b25f7ca8871ff4"
+      "sha256": "e90bbdee2898807fea5c1a2ce612da0f99e4ac98891cfe6416cdafd6a29d0398"
     },
     {
       "path": "skills/career-context-sheet/assets/investigation-prompts.json",
@@ -1232,7 +1244,7 @@
     },
     {
       "path": "skills/career-context-sheet/assets/path.js",
-      "sha256": "32b650e502c6ecb23a0d21d2740d2c97ccc8f268d8bc11f27d5935732b3f49b2"
+      "sha256": "9f2f03a3415c1bee94d09c7f2e145affcb2c06a27d952b305421f42cb90784d3"
     },
     {
       "path": "skills/career-context-sheet/assets/public-profile.css",
@@ -1252,11 +1264,19 @@
     },
     {
       "path": "skills/career-context-sheet/assets/sections.js",
-      "sha256": "71f6ba47ebfc5b6c1ada76b4b1e1a57d82d0538c6ba3e569ad6dfc2cba0b972e"
+      "sha256": "4619b5c1183f374fed6b523fc0f002e77d42b56a81768cbdab6b067631f5c158"
     },
     {
       "path": "skills/career-context-sheet/assets/sheet.html",
-      "sha256": "7c874ae3e59658652665281ebfe2d581eb868d81fc337111c03c6ddd88c2976a"
+      "sha256": "258fae1dbc2fd1333559b732ee32e769dd55281d6d88a5a1f468a7816df17f46"
+    },
+    {
+      "path": "skills/career-context-sheet/assets/studio.css",
+      "sha256": "32d5bd982e6ea9b835de0d45952285095c60b961d1150c1fe64720c64532aafe"
+    },
+    {
+      "path": "skills/career-context-sheet/assets/studio.js",
+      "sha256": "cd7ca914fe8d6522a5d56b7a96570896a2fdc7eab7145671e8c198990e693195"
     },
     {
       "path": "skills/career-context-sheet/references/adaptation-and-discovery.md",
@@ -1268,11 +1288,11 @@
     },
     {
       "path": "skills/career-context-sheet/references/deepening-and-story.md",
-      "sha256": "55a60c6c1edf5110c196a0daa903fb5ef6a81c35ae6cb9d77f4441241e1420e4"
+      "sha256": "3c41d3af09b3d36414810e90bb5432ebf675322d1947c43853f2fd0256d4e0d8"
     },
     {
       "path": "skills/career-context-sheet/references/format.md",
-      "sha256": "7283e476caf529fef162552b70795843e9adfc46f979d2e6e523141fb327a48e"
+      "sha256": "02e9f0fc7b13ec52afc61c96deab85dc31e2753509ef7830827f39113a8de6f9"
     },
     {
       "path": "skills/career-context-sheet/references/github-and-social.md",
@@ -1280,7 +1300,7 @@
     },
     {
       "path": "skills/career-context-sheet/references/interview-prep.md",
-      "sha256": "1df404b5e0dca75bb933c8b76bd99a8d2e322dc17af63fdaa73fc9c043d053fe"
+      "sha256": "e5c89b2ab89145b9a8eb98391063029c704c2dd772ac0c4838400104920b8747"
     },
     {
       "path": "skills/career-context-sheet/references/introductions.md",
@@ -1336,11 +1356,15 @@
     },
     {
       "path": "skills/career-context-sheet/scripts/agent_context.py",
-      "sha256": "7628cc7aede750022fa173e1f9a42ba88f2bdb3bcb6ba7a723784370b5cc5796"
+      "sha256": "fb452d799e57580e787759702e7cf365b9e5c57f99ac7a5d9f2840c85d5cc480"
     },
     {
       "path": "skills/career-context-sheet/scripts/archive_context.py",
       "sha256": "ab72e7957b878c265765e1532b95f08c422dee36d215356629264ab290dc5867"
+    },
+    {
+      "path": "skills/career-context-sheet/scripts/career_studio.py",
+      "sha256": "c430a149a4697f223a0744460a1f7bfff8b77df290b94d6bcd008c765d40afe2"
     },
     {
       "path": "skills/career-context-sheet/scripts/context_mcp.py",
@@ -1356,11 +1380,11 @@
     },
     {
       "path": "skills/career-context-sheet/scripts/document_sections.py",
-      "sha256": "6fe255d708e70c78b948847781499e0d906782ffd42cad43163c3597299fd55e"
+      "sha256": "deb3b7180e9a7fbf4ce1e9d0db8576545e0bde80b847f39bdb0e06a8e52a66ca"
     },
     {
       "path": "skills/career-context-sheet/scripts/guided_path.py",
-      "sha256": "73eee1a52727eb3b447ddc0cbcc231bb69e112ab0520372be7a028f5a973cbc4"
+      "sha256": "a201fe5ff395367da54bf6df242cd3802f801b1da5e3f55c96b8c90cdbd444e8"
     },
     {
       "path": "skills/career-context-sheet/scripts/merge_notebook.py",
@@ -1371,12 +1395,16 @@
       "sha256": "610c86a6263b30fff6c68996b8e8e7c81e282a3f7ca0c99d66885a0ee45c985c"
     },
     {
+      "path": "skills/career-context-sheet/scripts/question_links.py",
+      "sha256": "8c4591c63634f2ea019b363cf8ff3db0f717cdc45fc6017a289eb40ad2b090dd"
+    },
+    {
       "path": "skills/career-context-sheet/scripts/render_context.py",
-      "sha256": "4f832d797dfd8f875f512ea18deef91e9bdbd994baa7a63411762e493e88f260"
+      "sha256": "ab0c888f6f72eb25e9b0bfcab5159a9261cf6abbc9c8680b3ebf6759fc83955c"
     },
     {
       "path": "skills/career-context-sheet/scripts/render_interview.py",
-      "sha256": "9baf980db37dfde06e07a8116c4de6c38c2198a39c17a8ea1d8511c8168d16f6"
+      "sha256": "5d4498e2c3ac22bbdd09417326ee3840630b30b88865c533847c18c3b5f21a49"
     },
     {
       "path": "skills/career-context-sheet/scripts/render_notebook.py",
@@ -1411,12 +1439,16 @@
       "sha256": "bfdd4543a2d788826cc505ce3ca81f313bda5e3421079cc0a4cf3a43a17cec35"
     },
     {
+      "path": "tests/check_audience.cjs",
+      "sha256": "3465b7df0f6414594bf6db5a8d489e151346af9848ce96c34a05056fa941e072"
+    },
+    {
       "path": "tests/check_complete.cjs",
-      "sha256": "ff61d7711ba035d727ead99e41a8a5457647c90b007ea5c22f9b1a4045e27d9f"
+      "sha256": "9a9b21e2806c253d9c0c4611b072fca98035afd95477009216d12aeebdea0289"
     },
     {
       "path": "tests/check_context_home.cjs",
-      "sha256": "a8b390014c0c05889347921bcde3f301f613889fabbb3be2106ecf06725f98b7"
+      "sha256": "d7770c23604e420580f780a3284a16facc98be9b1763a7c0469bb8807a1e2e34"
     },
     {
       "path": "tests/check_coverage.cjs",
@@ -1432,7 +1464,7 @@
     },
     {
       "path": "tests/check_interview.cjs",
-      "sha256": "15204581e98260256fa63575efde26de63723a689b8f172b798cc03ea1930e23"
+      "sha256": "0ce7efb9e3f973bde5a7efabeac5e2f70a96275db7f5382c3fcf21da8889a8cb"
     },
     {
       "path": "tests/check_notebook.cjs",
@@ -1444,7 +1476,7 @@
     },
     {
       "path": "tests/check_path_restore.cjs",
-      "sha256": "dfd39004982ecab453bf35a9fd8f830cc72b275919240f3b944755205d69cc66"
+      "sha256": "cfaf6cf16cf95c795ca475459f8cd5e5edb76176325db89ca21a20c7ddd58484"
     },
     {
       "path": "tests/check_profile_controls.cjs",
@@ -1469,6 +1501,10 @@
     {
       "path": "tests/check_sheet.cjs",
       "sha256": "0f0d9ec739f229b487d70f2a2e4aa06c0963b38a37ccf7218d1b33fa2225dbd1"
+    },
+    {
+      "path": "tests/check_studio.cjs",
+      "sha256": "4635fe3288e58b5717f0e033a1589ad8019518dce17639cf541657e80ae9b697"
     },
     {
       "path": "tests/check_work_flow.cjs",
@@ -1513,6 +1549,10 @@
     {
       "path": "tests/test_career_context.py",
       "sha256": "77d5d2c5ef7e2bf3d1885dc2b8b342c26ea0b0c7cac7a975f070eec0874b08e8"
+    },
+    {
+      "path": "tests/test_career_studio.py",
+      "sha256": "b732fefaa7bf4fab00b8f59fb874036a371ceea5f514a925d301ef036ade0dc2"
     },
     {
       "path": "tests/test_collection_path.py",
@@ -1560,7 +1600,7 @@
     },
     {
       "path": "tests/test_interview.py",
-      "sha256": "3ad1ff0eb0367aa8e9e667194ff6bc9b1fefac9714376a309600c698d499e693"
+      "sha256": "6650bafe73a517051ed5177855568e0bbf6ad9953624b7de2ab24285d053db06"
     },
     {
       "path": "tests/test_local_context.py",
@@ -1576,7 +1616,7 @@
     },
     {
       "path": "tests/test_notebook.py",
-      "sha256": "7206f9b7f607bed3a4382ba0a5b772adde0ed4b8025b712e4af27f561ca64ae0"
+      "sha256": "33657a9e8297f74bdfa2690595bda577df3fcf4d394da2cbd0a4564282f8ebaf"
     },
     {
       "path": "tests/test_personal.py",
@@ -1604,7 +1644,7 @@
     },
     {
       "path": "tests/test_research_sheet.py",
-      "sha256": "9d15f675dcd2e79e930cae680fa40b64474b82df3720daea9b5164efe31c0800"
+      "sha256": "6396a53edabf04ea65288792fb389e1a962be7e3f4e42834d155b5699c6800a5"
     },
     {
       "path": "tests/test_semantic_retrieval.py",
@@ -1636,11 +1676,11 @@
     },
     {
       "path": "tests/test_work_flow.py",
-      "sha256": "7570d6b5b7739771bc85746e1056fb4afbb145f44b27e128f5abaf4c6fba29bc"
+      "sha256": "9a2057e74e4755e3b70de72c2dac3e33f67e576296ffdca52b3201398845bd49"
     },
     {
       "path": "tools/build_complete_example.py",
-      "sha256": "8a5020380bdb608f1c4e2460de8438fc5b38062c0c045ffb970151ce47299bdb"
+      "sha256": "b525131e109c1a9e43407c18d1540eeb598fa2bf23263a08685518ff44026f26"
     },
     {
       "path": "tools/build_demo.py",
@@ -1652,7 +1692,7 @@
     },
     {
       "path": "tools/build_skill.py",
-      "sha256": "6c750a21b318ef23a689494542e48d0e4bfa7d6db89a49a1819cec71ec2afd12"
+      "sha256": "5256332359adaa75e6aea14a48cb8f9dcb338d177e381d58ba8a9b9d07f17409"
     },
     {
       "path": "tools/check_career_workflow.py",

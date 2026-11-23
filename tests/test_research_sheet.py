@@ -190,6 +190,23 @@ class ResearchSheetTests(unittest.TestCase):
         self.assertTrue(result['valid'], result['errors'])
         self.assertEqual(packet['accounts'][0]['summary'], packet['accounts'][0]['contribution'])
 
+    def test_research_plan_exports_roles_with_original_refs(self):
+        self.prepare()
+        plan = self.current_plan()
+        plan['experienceRoles'] = [{'id': 'engagement', 'title': 'Project work', 'current': True,
+                                    'accountIds': [plan['accounts'][0]['id']], 'claimIds': ['c1']}]
+        packet, result = bridge.compile_sheet(self.raw, plan, [self.record], self.server.events,
+                                              self.scope, self.corpus['snapshot'], draft=True)
+        self.assertTrue(result['valid'], result['errors'])
+        role = packet['presentation']['experienceRoles'][0]
+        self.assertTrue(role['current'])
+        self.assertEqual(role['sourceRefs'], packet['accounts'][0]['sourceRefs'])
+        self.assertNotIn('organization', role)
+        plan['experienceRoles'][0]['claimIds'] = ['invented']
+        packet, result = bridge.compile_sheet(self.raw, plan, [self.record], self.server.events,
+                                              self.scope, self.corpus['snapshot'], draft=True)
+        self.assertIsNone(packet)
+
     def test_new_claim_id_cannot_hide_identical_detail_prose(self):
         self.prepare()
         raw = copy.deepcopy(self.raw)

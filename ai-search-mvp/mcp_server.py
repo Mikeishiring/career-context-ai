@@ -38,7 +38,7 @@ TOOLS = [
 
 def check(value, schema):
     kind = schema.get("type")
-    valid = {"object": isinstance(value, dict), "array": isinstance(value, list),
+    valid = {"object": isinstance(value, dict), "array": isinstance(value, list), "boolean": isinstance(value, bool),
              "string": isinstance(value, str), "integer": isinstance(value, int) and not isinstance(value, bool)}
     if not valid.get(kind, False):
         raise ValueError("Invalid argument type")

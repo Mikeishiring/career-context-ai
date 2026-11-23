@@ -8,7 +8,31 @@ Choose these as useful examples to reflect on and discuss. "Strongest" means wel
 
 Use the [responsibility check](adaptation-and-discovery.md#optional-responsibility-check) when role scope is unclear. Explain the recorded role and the work done in practice, including shared decisions and changes over time. A familiar title can be a qualified comparison, not a promotion or a substitute for the actual title. Reconcile onboarding notes before using them as career facts; do not repeat the intake or fit every story to one role.
 
+## Keep context gathering separate from rehearsal
+
+Save factual gaps and questions about story preference in the work account’s `questions`. Use `priorityGap` for the single clarification that would most affect the preparation. When the person wants to develop their context, ask it and wait. A reply can update the source account before a fresh draft.
+
+In rehearsal, use `interview.questions` and the listener’s `audiences.*.question` for questions an interviewer might ask after hearing the opening. Check the premise as well as the answer. A colleague’s presence does not establish supervision, a suggestion does not establish adoption, and a joint action does not establish who chose or approved it. Ask what the person saw or did. For thin notes, a short walkthrough can serve several listeners. Leave a listener-specific draft absent when you have no distinct angle. Keep candidate corrections and enthusiasm in context review.
+
 ## Draft from the current context
+
+Before saving a question, name the actor, the action and the words in the source that connect them. Check subordinate clauses, tools, objects, ownership and the opening too. “We”, a colleague standing nearby, and a job title leave the individual's part open. When the evidence only establishes handling an object, invite a concrete walkthrough of that action. A question may ask whether something happened. Its wording should allow the person to answer that it never did.
+
+For a thin story, set the optional story string `walkthrough` to one spoken question and omit `audiences`. Use that same question in the matching prepared answer. For a richer panel, choose the actual point at issue: who approved a change, what someone received, what the trial showed, or where an unfinished piece stopped. Read the panel questions for the selected stories together. If one could be exchanged with another without changing what it probes, revise it around the recorded event or use the shared walkthrough.
+
+Read the panel question aloud with the opening and evidence covered. Name the person, object or event needed to understand it inside the question. Keep source quotations in the work account. For example, ask “What input did you have when the producer approved the edit?” when that approval is recorded.
+
+Before drafting an intake or rehearsal question, silently finish “This question assumes …”. Find the passage in the account’s cited source that connects the two details. A date can belong to another activity. A displayed notice can go unread. A second person’s contribution may overlap the first. A test result rarely establishes the only way to learn something. Check the same connection in the opening and answer, since an earlier summary can already contain the inference.
+
+If the source establishes the link, use it plainly. If knowing the link would change the story, ask about it directly (“Did you work on the replay too?”). Otherwise drop the extra premise and ask about the known work (“What did the six tiles tell you?”). Choose the question a listener would actually ask. One sparse story needs one question.
+
+The render receipt lists `questionReview` findings for common English forms that assign an action to the candidate without a matching first-person account. A narrower action can support a broader description of the same object: personally chalking a sample can establish marking it. The reverse inference would introduce a tool. Check the object, scope and direction of a paraphrase against the source. Review unflagged questions for implied facts as well, especially causal links, timing, who observed the outcome and whether a trial settled a question.
+
+Read the person’s story choices when selecting examples. Prefer a story they want to tell when it answers the interviewer’s question. A story marked as oversold may need narrower wording, even when it is a personal favourite. Follow up on missing context that could materially change the answer.
+
+When preparing a story for particular listeners, write the corresponding entries in its optional `audiences` object (`recruiter`, `manager`, `panel`). Each has a spoken `opening` and a `question` someone might ask after hearing it. Anchor the question in one specific fact: a sign-on bonus, for example, invites “Why use a one-time payment instead of raising base?” If another story could take the question verbatim, look for the more interesting detail. A good follow-up leaves room for the person to think aloud or say what they still don’t know.
+
+For a recruiter, make the work and its relevance easy to grasp. For a manager, choose a decision worth probing. For a panel, connect the person's action to what a colleague built, approved, questioned or carried forward. Sometimes people worked in parallel or the next owner is still unknown. Preserve that distinction. Let the actual exchange set the order and phrasing. Use the interview brief when available. Older accounts can rehearse from their recorded actions, decisions, outcomes and prepared interview questions.
 
 Resolve both commands relative to this skill. Read the source and its fingerprint:
 
