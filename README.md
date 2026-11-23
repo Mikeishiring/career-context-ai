@@ -1,5 +1,7 @@
 # Career Context AI
 
+**[Open Career studio](CAREER-CONTEXT.html)** — the fictional product example. Your private HTML opens the same workspace with your own drafts, work examples and stories.
+
 Build your own local database of the work you've done: the records, decisions, shared contributions and unfinished attempts behind a resume.
 
 Use it to recall your experience, reflect on your choices, find examples for guiding others, or prepare for an interview. It builds an account from the context you supply; it does not rate your performance or establish how other people felt about you. Recorded feedback stays attributed to its source and circumstances.
@@ -14,7 +16,7 @@ This is an early project: an agent skill with Python tools for keeping a searcha
 
 Local storage does not make an AI session local: material you give an agent may reach its host or model provider. The files are unencrypted. Use work documents only with an approved model and sources you are allowed to share. [Storage and sharing](docs/PRIVACY.md).
 
-![Fictional career context with work accounts and source evidence](docs/career-context-preview.png)
+![Fictional Career studio with prepared stories and a Create draft action](docs/career-context-preview.png)
 
 ## Start here
 
@@ -32,7 +34,7 @@ The archive is the reusable part. Resumes, profiles and interview preparation ar
 
 Export a reviewed selection for another agent or tool. The optional local MCP connection exposes only that snapshot, with no archive writes or automatic uploads. [Selected context and local MCP](skills/career-context-sheet/references/selected-context.md).
 
-**My context** opens on a private overview of the person and their work. **Timeline** explores dated records by year, including work spanning several years. **Develop context** holds ongoing review, investigation and writing; an empty archive starts with one account. **Public profile** controls an explicitly requested public draft. Full HTML and JSON remain private working files.
+**Career studio** opens first, with prepared drafts, actual work artifacts and stories. **Review your stories** shows account-specific gaps and lets you flag missing work, judge the emphasis and choose which stories to tell. **Create draft** saves a resume, visual example or story request for your assistant. **My context** keeps a private overview of the person and their work. **Timeline** explores dated records by year, including work spanning several years. **Develop context** holds ongoing review, investigation and writing; an empty archive starts with one account. **Public profile** controls an explicitly requested public draft. Full HTML and JSON remain private working files.
 
 The experiments test parts of the research process on fictional cases. They do not establish complete career coverage or better results than other tools.
 

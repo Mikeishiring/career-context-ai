@@ -44,6 +44,40 @@ def investigation_view(state, limit=12, offset=0):
         'leads': page(copy.deepcopy(state['leads']), limit, offset)}
 
 
+def insight_candidates(packet):
+    """Expose authored interpretations, including rejected alternatives, without ranking truth."""
+    return [claim_summary(c) | {
+        'sourceRefs': list(dict.fromkeys(e['sourceId'] for e in renderer.memory.evidence(c))),
+        'readRef': 'claims:' + c['id']}
+        for c in renderer.memory.claims(packet) if c['kind'] in {'hypothesis', 'interpretation'}]
+
+
+def comparison_view(packet, *, limit=12, offset=0):
+    """Provide an archive-wide reading index before choosing a story; infer no dates or growth."""
+    renderer.validate(packet)
+    result = envelope(packet)
+    sources = page(packet['sources'], limit, offset)
+    sources['records'] = [
+        {k: copy.deepcopy(s[k]) for k in ['id', 'label', 'kind', 'date', 'scope', 'locator'] if k in s} |
+        {'readRef': 'sources:' + s['id']} | retrieval.links(packet, 'sources', s)
+        for s in sources['records']]
+    result.update(
+        accounts=page([{k: copy.deepcopy(a[k]) for k in ['id', 'title', 'period', 'sourceRefs']}
+                       for a in packet['accounts']], limit, offset),
+        timeline=page(copy.deepcopy(packet.get('timeline', [])), limit, offset),
+        sources=sources,
+        insights=page(insight_candidates(packet), limit, offset),
+        collection=copy.deepcopy(packet.get('collection', [])),
+        dateBasis='Source dates are retained metadata, not inferred event dates. Read originals for event time. '
+                  'Source order is retained order, not chronology; undated sources and periods stay undated.',
+        use='Compare originals across sources and accounts, including sources without an account. '
+            'Follow retained accountIds, timelineIds and claimIds; these are authored links, not inferred identity or causality. '
+            'Each list has independent pagination; use --compare --offset to continue and retrieve_context.py --read READ_REF '
+            'for exact records. Test changes, recurring patterns, continuity and alternative explanations; no trend or capability is computed here. '
+            'Retain useful interpretations in memory and unresolved checks as investigation leads.')
+    return result
+
+
 def briefing(packet, *, limit=12, offset=0):
     renderer.validate(packet)
     result = envelope(packet)
@@ -57,11 +91,16 @@ def briefing(packet, *, limit=12, offset=0):
                          'cautionClaimIds': [c['id'] for c in relevant if c['status'] in ['rejected', 'withdrawn', 'disputed', 'candidate']],
                          'sourceRefs': list(account['sourceRefs']),
                          'review': copy.deepcopy(journey.get('reviews', {}).get(account['id']))})
-    result.update(person=copy.deepcopy(packet['person']), continuation=copy.deepcopy(journey.get('continuation')),
+    roles = [{k: copy.deepcopy(v) for k, v in role.items() if k != 'logo'}
+             for role in packet.get('presentation', {}).get('experienceRoles', [])]
+    result.update(person=copy.deepcopy(packet['person']), experienceRoles=page(roles, limit, offset),
+                  continuation=copy.deepcopy(journey.get('continuation')),
+                  missingWork=journey.get('notes', {}).get('missingWork', ''),
                   investigation=investigation_view(journey.get('investigation'), limit, offset), accountMap=page(accounts, limit, offset),
                   unassignedClaims=page([claim_summary(c) for c in claims if not c['accountIds']], limit, offset),
+                  insights=page(insight_candidates(packet), limit, offset),
                   collection=copy.deepcopy(packet.get('collection', [])),
-                  use='Read relevant account bundles next; follow pagination. Read unassigned claims for preferences or unresolved material outside an account. Tool access must be authorized by the current host/session.')
+                  use='Read relevant account bundles next; follow pagination. Use --compare for evidence across accounts and periods, including sources outside selected stories. Read unassigned claims for preferences or unresolved material outside an account. Tool access must be authorized by the current host/session.')
     return result
 
 
@@ -80,7 +119,8 @@ def account_bundle(packet, account_id, *, limit=12, offset=0):
     investigation = {name: [row for row in journey.get('investigation', {}).get(name, [])
                             if account_id in row['accountIds'] or connected_ids.intersection(row['claimIds'])]
                      for name in ['rounds', 'leads']}
-    source_ids = list(dict.fromkeys([*account['sourceRefs'],
+    role = next((r for r in packet.get('presentation', {}).get('experienceRoles', []) if account_id in r['accountIds']), {})
+    source_ids = list(dict.fromkeys([*account['sourceRefs'], *role.get('sourceRefs', []),
                                     *(e['sourceId'] for c in claims for e in renderer.memory.evidence(c)),
                                     *(review or {}).get('sourceRefs', []),
                                     *(sid for t in timeline for sid in t['sourceRefs']),
@@ -88,6 +128,7 @@ def account_bundle(packet, account_id, *, limit=12, offset=0):
     source_map = {s['id']: s for s in packet['sources']}
     result = envelope(packet)
     result.update(account=retrieval.read_record(packet, 'accounts:' + account_id),
+                  experienceRole={k: copy.deepcopy(v) for k, v in role.items() if k not in ('logo', 'accountIds')} or None,
                   claims=page([dict(retrieval.read_record(packet, 'claims:' + c['id']),
                                     relationship='account' if c['id'] in direct else 'linked interpretation') for c in claims], limit, offset),
                   sources=page([{'record': copy.deepcopy(source_map[sid]), 'sourceSha256': renderer.memory.source_hash(source_map[sid])} for sid in source_ids], limit, offset),
@@ -130,6 +171,15 @@ def next_round(packet, goal=None):
                                     'leads: question, why it matters, state, exact nextAction and record links', 'stopReason'],
                   execution='This read-only tool supplies the next prompt. The host assistant performs authorized work and saves the checkpoint; no model, connector or background job runs here.',
                   stopReasonMissing=stage == 'handoff' and not state['stopReason'].strip())
+    if stage in {'orient', 'map', 'challenge'}:
+        result['comparison'] = {
+            'accounts': len(packet['accounts']), 'periods': len(packet.get('timeline', [])),
+            'sources': len(packet['sources']),
+            'insights': page([{k: c[k] for k in ['id', 'kind', 'status', 'readRef']}
+                             for c in insight_candidates(packet)], 12, 0),
+            'readAction': 'Use --compare for the paginated source/period index, then read selected originals. '
+                          'Revisit meaningful changes and continuity even when no ready lead was saved. '
+                          'For a narrow correction, compare only the affected evidence and interpretations.'}
     return result
 
 
@@ -139,6 +189,7 @@ def main(argv=None):
     actions = parser.add_mutually_exclusive_group(required=True)
     actions.add_argument('--brief', action='store_true')
     actions.add_argument('--account', help='Read an account with supporting and contrary records, reviews and timeline')
+    actions.add_argument('--compare', action='store_true', help='Compare retained periods, sources and candidate insights across accounts')
     actions.add_argument('--next', action='store_true', help='Generate the next foreground investigation prompt')
     parser.add_argument('--limit', type=int, default=12)
     parser.add_argument('--offset', type=int, default=0)
@@ -148,10 +199,17 @@ def main(argv=None):
         starter.inspect_runtime(args.input)  # Check selected handoff consistency and notebook compatibility.
         packet = retrieval.load_input(args.input)
         if args.next and (args.limit != 12 or args.offset != 0):
-            raise ValueError('Pagination applies only to briefing and account bundles.')
+            raise ValueError('Pagination applies only to briefing, comparison and account bundles.')
         if args.goal is not None and not args.next:
             raise ValueError('--goal applies to --next.')
-        result = next_round(packet, args.goal) if args.next else account_bundle(packet, args.account, limit=args.limit, offset=args.offset) if args.account else briefing(packet, limit=args.limit, offset=args.offset)
+        if args.next:
+            result = next_round(packet, args.goal)
+        elif args.account:
+            result = account_bundle(packet, args.account, limit=args.limit, offset=args.offset)
+        elif args.compare:
+            result = comparison_view(packet, limit=args.limit, offset=args.offset)
+        else:
+            result = briefing(packet, limit=args.limit, offset=args.offset)
         output = json.dumps(result, ensure_ascii=False, indent=2)
         if len(output) > MAX_OUTPUT_CHARS:
             raise ValueError('Agent context exceeds 120,000 characters. Use a smaller --limit for the briefing/bundle, or retrieve_context.py --read for individual linked records. Nothing was silently truncated; compact oversized investigation notes in the saved packet if needed.')

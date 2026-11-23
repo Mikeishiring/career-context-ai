@@ -7,6 +7,11 @@ import re
 STEPS = ('gather', 'review', 'deepen', 'connect', 'write', 'practice')
 LABELS = ('Add context', 'Review accounts', 'Investigate a gap', 'Find connections', 'Work on wording', 'Practise')
 CORE_STEPS = STEPS[:-1]  # Keep legacy practice state readable without making it a requirement.
+STORY_CHOICES = {
+    'importance': {'major': 'Major part of my work', 'supporting': 'Supporting work', 'minor': 'Small part of my work'},
+    'emphasis': {'under': 'Undersold', 'fair': 'About right', 'over': 'Oversold'},
+    'interest': {'lead': 'Want to tell', 'open': 'Happy to discuss', 'reserve': 'Prefer another story'},
+}
 
 
 def review_fingerprint(packet):
@@ -17,6 +22,10 @@ def review_fingerprint(packet):
                if value['decision'] != 'pending' or value['draft'] or value['reason'] or value['sourceRefs'] or value['depth'] != 'pending'}
     data = {'reviews': reviews, 'notes': {k: v for k, v in journey.get('notes', {}).items() if v.strip()},
             'writing': {k: v for k, v in journey.get('writing', {}).items() if k != 'mode' and v}}
+    for key, review in journey.get('reviews', {}).items():
+        personal = {k: review[k] for k in (*STORY_CHOICES, 'missingContext') if review.get(k)}
+        if personal:
+            reviews.setdefault(key, {}).update(personal)
     return hashlib.sha256(json.dumps(data, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
 
 
@@ -195,7 +204,12 @@ def validate(packet, check_text, keys):
     if not isinstance(reviews, dict) or set(reviews) - ids:
         raise ValueError('Reviews must refer to existing accounts')
     for review in reviews.values():
-        keys(review, ['decision', 'draft', 'reason', 'sourceRefs', 'depth', 'practised'], 'Account review')
+        keys(review, ['decision', 'draft', 'reason', 'sourceRefs', 'depth', 'practised', *STORY_CHOICES, 'missingContext'], 'Account review')
+        for field, choices in STORY_CHOICES.items():
+            if field in review and (not isinstance(review[field], str) or review[field] not in choices):
+                raise ValueError('Invalid story review ' + field)
+        if 'missingContext' in review:
+            check_text(review['missingContext'], 'Missing story context', 3000)
         if review.get('decision') not in ['pending', 'kept', 'revision', 'needs_evidence', 'correction'] or review.get('depth') not in ['pending', 'clear', 'open']:
             raise ValueError('Invalid account review state')
         if type(review.get('practised')) is not bool:
@@ -212,7 +226,7 @@ def validate(packet, check_text, keys):
     if state.get('storyId') not in ids | {''}:
         raise ValueError('Journey story must exist')
     notes = state.get('notes')
-    allowed = set(STEPS) | {step + ':' + key for step in ('review', 'deepen', 'practice') for key in ids}
+    allowed = set(STEPS) | {'output', 'missingWork'} | {step + ':' + key for step in ('review', 'deepen', 'practice') for key in ids}
     if not isinstance(notes, dict) or set(notes) - allowed:
         raise ValueError('Journey notes must refer to a step or story')
     for note in notes.values():
@@ -233,7 +247,7 @@ def render(packet, basis, review_basis=None):
     esc = lambda text: html.escape(str(text), quote=True)
     nodes = ''.join(f'<li class="path-stop"><a id="path-link-{key}" href="#path-{key}" class="path-node" data-path-step="{key}"><span class="path-label">{esc(LABELS[i])}</span><span class="path-state"></span></a></li>' for i, key in enumerate(CORE_STEPS))
     options = ''.join(f'<option value="{esc(a["id"])}">{esc(a["title"])}</option>' for a in packet['accounts'])
-    return f'''<section id="path" class="document-view guided-path" aria-labelledby="path-title" data-evidence="{basis}" data-review-basis="{esc(json.dumps(review_basis or {}, separators=(',', ':')))}">
+    return f'''<section id="path" class="document-view guided-path" aria-labelledby="path-title" data-evidence="{basis}" data-review-basis="{esc(json.dumps(review_basis or {}, separators=(',', ':')))}" data-story-choices="{esc(json.dumps(STORY_CHOICES))}">
 <div class="path-heading"><h1 id="path-title">Develop context</h1><div class="path-progress"><span id="path-count"></span><progress id="path-progress" max="{len(packet['accounts']) or 1}" value="0" aria-label="Accounts reviewed" hidden></progress><button type="button" class="path-save js-only" id="path-save">Save private file <span aria-hidden="true">↓</span></button><button type="button" class="path-secondary js-only" id="path-handoff">Save for assistant</button></div><p id="path-save-state" role="status"></p></div>
 <div class="path-workspace js-only"><details class="path-map-shell" open><summary>Activities</summary><nav aria-label="Context activities" class="path-map"><ol>{nodes}</ol><a class="path-destination" href="#work">Read my context <span aria-hidden="true">→</span></a></nav></details>
 <article class="path-activity" aria-labelledby="path-activity-title"><div class="path-step-number" id="path-step-number"></div><h2 id="path-activity-title">Your first draft</h2>

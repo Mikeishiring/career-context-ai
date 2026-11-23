@@ -20,8 +20,9 @@ WORKFLOW = [
     "Gather relevant context from sources the person has already authorized. Reuse existing accounts before asking for information.",
     "Choose the strongest supported evidence and core stories for the stated target; do not invent a target.",
     "Draft an introduction with supportable follow-up points in the person's voice.",
-    "Decode likely questions, select a relevant story and draft a direct answer.",
+    "For a thin account, use one shared walkthrough. For distinct audience angles, check the actor and action in every premise. Let the panel explore a recorded approval, handoff, result or limit, and leave unknown ownership open.",
     "Give longer stories clear chapters, preserving decisions, shared credit, corrections and outcomes.",
+    "Check the source passage joining each pair of details before asking a question. If a handoff could overlap, ask whether the person worked on the next part. Drop incidental timing or exclusivity and ask directly about the known work.",
     "Show the recorded sequence and feedback cycles without inventing dates or speed. Ask only consequential unresolved questions.",
 ]
 NAV = [
@@ -63,7 +64,11 @@ def inspect_context(source):
 
 def prepare(context, projection, context_sha256):
     render_context.validate(context)
-    return validate_projection(context, projection, context_sha256)
+    prepared = validate_projection(context, projection, context_sha256)
+    _, _, view, findings = render_context.reviewed_questions(context, prepared)
+    if findings:
+        view["questionReview"] = findings
+    return view
 
 
 def validate_projection(context, projection, context_sha256):
@@ -93,7 +98,9 @@ def validate_projection(context, projection, context_sha256):
     sources = {s["id"]: s for s in context["sources"]}
     stories, ids = [], set()
     for draft in projection["stories"]:
-        shape(draft, ["id", "tests", "takeaway", "chapters", "timeline"], "Story", optional=["practice"])
+        shape(draft, ["id", "tests", "takeaway", "chapters", "timeline"], "Story", optional=["practice", "audiences", "walkthrough"])
+        if "walkthrough" in draft:
+            text(draft["walkthrough"], "Shared walkthrough question")
         key = draft["id"]
         if not isinstance(key, str) or key not in accounts or key in ids:
             raise ValueError("Stories must reference unique account IDs from the current context")
@@ -102,6 +109,12 @@ def validate_projection(context, projection, context_sha256):
             text(draft[field], field)
         if "practice" in draft:
             render_context.check_text(draft["practice"], "Practice notes", 15000)
+        if "audiences" in draft:
+            shape(draft["audiences"], [], "Story audiences", optional=render_context.sections.AUDIENCES)
+            for angle in draft["audiences"].values():
+                shape(angle, ["opening", "question"], "Audience rehearsal")
+                for field in ("opening", "question"):
+                    text(angle[field], "Audience " + field)
         for field, keys in (("chapters", ["title", "text"]), ("timeline", ["when", "text"])):
             collection(draft[field], field, maximum=12)
             for entry in draft[field]:
@@ -112,8 +125,12 @@ def validate_projection(context, projection, context_sha256):
         # The original file retains images. Carry all narrative fields and source text;
         # never pull local artifact files into a derived preparation.
         account.pop("artifacts", None)
-        stories.append({**copy.deepcopy(draft), "title": account["title"], "when": account["period"],
-                        "account": account, "evidence": [copy.deepcopy(sources[ref]) for ref in account["sourceRefs"]]})
+        prepared = {**copy.deepcopy(draft), "title": account["title"], "when": account["period"],
+                    "account": account, "evidence": [copy.deepcopy(sources[ref]) for ref in account["sourceRefs"]]}
+        role = next((r for r in context.get("presentation", {}).get("experienceRoles", []) if key in r["accountIds"]), None)
+        if role:
+            prepared["role"] = {k: role[k] for k in ("title", "organization", "period", "current") if k in role}
+        stories.append(prepared)
     collection(projection["signals"], "Signals", maximum=3)
     lead_ids = []
     for signal in projection["signals"]:
@@ -142,7 +159,9 @@ def validate_projection(context, projection, context_sha256):
             raise ValueError("Priority gap references an unselected story")
         for field in ("question", "why", *(["label"] if "label" in gap else [])):
             text(gap[field], field)
-    return {**copy.deepcopy(projection), "stories": stories, "leadStoryIds": lead_ids,
+    interests = {key: review["interest"] for key, review in context.get("journey", {}).get("reviews", {}).items()
+                 if key in ids and review.get("interest") in ("lead", "open", "reserve")}
+    return {**copy.deepcopy(projection), "stories": stories, "leadStoryIds": lead_ids, "storyInterests": interests,
             "synthetic": context.get("synthetic", False), "reviewStatus": "draft",
             "person": copy.deepcopy(context["person"]),
             "contextReviewStatus": context["reviewStatus"], "contextUpdatedAt": context["updatedAt"],
@@ -169,7 +188,7 @@ def source_details(story):
     original += "<h4>Evidence limits</h4>" + bullets(account["limits"])
     original += "<h4>Decisions</h4>" + bullets(account["decisions"])
     if account["questions"]:
-        original += "<h4>Still to clarify</h4>" + bullets(account["questions"])
+        original += "<h4>What your AI still needs to ask</h4>" + bullets(account["questions"])
     evidence = []
     for source in story["evidence"]:
         metadata = " · ".join(part for part in [source["kind"].replace("_", " "), source.get("date")] if part)
@@ -181,7 +200,7 @@ def source_details(story):
             f'<div id="evidence-{escaped(story["id"])}">{"".join(evidence)}</div></details>')
 
 
-def render_html(packet):
+def render_html(packet, *, rehearsal_first=False):
     by_id = {s["id"]: s for s in packet["stories"]}
     stories = [by_id[key] for key in packet["leadStoryIds"]] + [s for s in packet["stories"] if s["id"] not in packet["leadStoryIds"]]
     def story_options(group):
@@ -190,6 +209,16 @@ def render_html(packet):
     options = '<optgroup label="Lead stories">' + story_options(stories[:lead_count]) + '</optgroup>'
     if len(stories) > lead_count:
         options += '<optgroup label="For specific questions">' + story_options(stories[lead_count:]) + '</optgroup>'
+    interests = packet.get("storyInterests", {})
+    if interests:
+        options = ''.join(f'<optgroup label="{label}">{story_options(group)}</optgroup>'
+                          for label, group in (
+                              ('Want to tell', [s for s in stories if interests.get(s["id"]) == "lead"]),
+                              ('Other stories', [s for s in stories if interests.get(s["id"]) not in ("lead", "reserve")]),
+                              ('Prefer another story', [s for s in stories if interests.get(s["id"]) == "reserve"]))
+                          if group)
+        if all(interests.get(s["id"]) == "reserve" for s in stories):
+            options = '<option value="">Choose a story</option>' + options
     signals = "".join(
         f'<li><h3><a href="#stories/{escaped(s["storyId"])}">{escaped(s["title"])}'
         f'<span class="arrow" aria-hidden="true">→</span></a></h3><p>{escaped(s.get("summary", s["reason"]))}</p></li>'
@@ -201,21 +230,23 @@ def render_html(packet):
             f'<button class="quiet" data-sources="{escaped(s["storyId"])}">Sources</button></section>'
             for s in packet["signals"]) + '</details>')
     gap = packet["priorityGap"]
-    gap_html = (f'<details class="reference gap"><summary>{escaped(gap.get("label", "One open question"))}</summary>'
+    gap_html = (f'<details class="reference gap"><summary>Context for your AI · {escaped(gap.get("label", "One open question"))}</summary>'
                 f'<h3>{escaped(gap["question"])}</h3><p>{escaped(gap["why"])}</p>'
                 '<button class="quiet" data-copy="gap">Copy question</button></details>') if gap else ""
     story_html, chapter_html, pace_html = [], [], []
     for index, story in enumerate(stories):
         account, key = story["account"], escaped(story["id"])
         attr = f'data-story-panel="{key}" class="reading' + (" is-selected" if index == 0 else "") + '"'
+        role = story.get("role", {})
+        setting = ' · '.join(filter(None, [role.get('title'), role.get('organization'), story['when']]))
         heading = (f'<header class="story-heading"><h2>{escaped(story["title"])}</h2>'
-                   f'<p class="meta">{escaped(story["when"])}</p></header>')
+                   f'<p class="meta">{escaped(setting)}</p></header>')
         action = f'<button class="quiet" data-sources="{key}">Sources and scope</button>'
         limits = ('<details class="reference evidence-limits"><summary>Evidence limits</summary>' +
                   bullets(account["limits"]) + '</details>') if account["limits"] else ""
         story_html.append(
             f'<article {attr}>{heading}<p class="takeaway">{escaped(story["takeaway"])}</p>'
-            f'<h3>What happened</h3>{paragraphs(account["outcome"])}<h3>Your part</h3>{paragraphs(account["contribution"])}'
+            f'{render_context.sections.audience_reference(story)}<h3>What happened</h3>{paragraphs(account["outcome"])}<h3>Your part</h3>{paragraphs(account["contribution"])}'
             f'<h3>Shared work</h3>{paragraphs(account["sharedCredit"])}'
             f'<div class="story-actions"><a class="quiet" href="#chapters/{key}">Read the chapters '
             f'<span class="arrow" aria-hidden="true">→</span></a>{action}</div>'
@@ -241,6 +272,10 @@ def render_html(packet):
             f'<div class="answer-actions"><button class="quiet" data-copy="answer" data-question-id="{escaped(question["id"])}">Copy answer</button>'
             f'<button class="quiet" data-sources="{key}">Sources</button><span class="copy-feedback" role="status"></span></div>{notes}</article>')
     values = {
+        "START_VIEW": "stories" if rehearsal_first else "signal",
+        "AUDIENCE_CARD": render_context.sections.audience_card('<div class="cue-actions"><button type="button" data-copy="audience">Copy rehearsal prompt</button></div>', [s['account'] for s in stories]),
+        "AUDIENCE_CSS": (render_context.SKILL / "assets/audience.css").read_text(encoding="utf-8"),
+        "AUDIENCE_JS": (render_context.SKILL / "assets/audience.js").read_text(encoding="utf-8"),
         "TARGET_NOTE": escaped(packet["target"] or "Prepared from your context · no target role selected"),
         "HEADLINE": escaped(packet["headline"]), "THROUGHLINE": escaped(packet["throughline"]),
         "DEMO": '<p class="demo-notice" id="synthetic-note">Fictional example · these work accounts are invented.</p>' if packet["synthetic"] else "",
@@ -268,6 +303,7 @@ def render(source, projection_source, destination, *, overwrite=False):
         raise ValueError("Preparation projection exceeds 4 MiB")
     projection = json.loads(projection_source.read_text(encoding="utf-8"))
     packet = prepare(inspected["context"], projection, inspected["contextSha256"])
+    findings = packet.pop("questionReview", [])
     output = render_html(packet).encode("utf-8")
     if destination.is_symlink():
         raise ValueError("Output must not be a symbolic link.")
@@ -285,7 +321,7 @@ def render(source, projection_source, destination, *, overwrite=False):
         if os.path.exists(temporary):
             os.unlink(temporary)
     return {"path": str(destination), "accounts": len(packet["stories"]),
-            "bytes": len(output), "sha256": hashlib.sha256(output).hexdigest()}
+            "bytes": len(output), "sha256": hashlib.sha256(output).hexdigest(), "questionReview": findings}
 
 
 def main(argv=None):

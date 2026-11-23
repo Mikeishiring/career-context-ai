@@ -8,14 +8,19 @@ if(pathRoot){
  const basis=pathRoot.dataset.evidence,storageKey='career-path:'+basis;
  const reviewBasis=JSON.parse(pathRoot.dataset.reviewBasis||'null');
  const validBasis=b=>b&&['accounts','sources'].every(k=>b[k]&&typeof b[k]==='object'&&!Array.isArray(b[k])&&Object.entries(b[k]).every(([id,hash])=>/^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$/.test(id)&&typeof hash==='string'&&/^[a-f0-9]{64}$/.test(hash)));
- const allowedNotes=new Set([...steps,...packet.accounts.flatMap(a=>['review','deepen','practice'].map(s=>s+':'+a.id))]);
+ const allowedNotes=new Set([...steps,'output','missingWork',...packet.accounts.flatMap(a=>['review','deepen','practice'].map(s=>s+':'+a.id))]);
  const validWriting=w=>w&&(w.mode===undefined||['own_skill','custom'].includes(w.mode))&&[['guideName',200],['guideText',20000],['draft',3000]].every(([k,n])=>typeof w[k]==='string'&&w[k].length<=n&&!w[k].includes('\0'));
- const validReviews=reviews=>reviews&&typeof reviews==='object'&&!Array.isArray(reviews)&&Object.entries(reviews).every(([id,r])=>packet.accounts.some(a=>a.id===id)&&r&&Object.keys(r).every(k=>['decision','draft','reason','sourceRefs','depth','practised'].includes(k))&&['pending','kept','revision','needs_evidence','correction'].includes(r.decision)&&['pending','clear','open'].includes(r.depth)&&typeof r.practised==='boolean'&&[['draft',6000],['reason',2000]].every(([k,n])=>typeof r[k]==='string'&&r[k].length<=n&&!r[k].includes('\0'))&&Array.isArray(r.sourceRefs)&&new Set(r.sourceRefs).size===r.sourceRefs.length&&r.sourceRefs.every(id=>packet.sources.some(s=>s.id===id))&&(r.decision!=='revision'||r.draft.trim()&&r.reason.trim()&&r.sourceRefs.length)&&(!['needs_evidence','correction'].includes(r.decision)||r.reason.trim()));
+ const storyChoices=JSON.parse(pathRoot.dataset.storyChoices||'{}');
+ function validStoryView(r){
+  return Object.entries(storyChoices).every(([field,options])=>!(field in r)||typeof r[field]==='string'&&Object.hasOwn(options,r[field]))&&
+   (!('missingContext' in r)||typeof r.missingContext==='string'&&r.missingContext.length<=3000&&!r.missingContext.includes('\0'));
+ }
+ const validReviews=reviews=>reviews&&typeof reviews==='object'&&!Array.isArray(reviews)&&Object.entries(reviews).every(([id,r])=>packet.accounts.some(a=>a.id===id)&&r&&validStoryView(r)&&Object.keys(r).every(k=>['decision','draft','reason','sourceRefs','depth','practised','missingContext',...Object.keys(storyChoices)].includes(k))&&['pending','kept','revision','needs_evidence','correction'].includes(r.decision)&&['pending','clear','open'].includes(r.depth)&&typeof r.practised==='boolean'&&[['draft',6000],['reason',2000]].every(([k,n])=>typeof r[k]==='string'&&r[k].length<=n&&!r[k].includes('\0'))&&Array.isArray(r.sourceRefs)&&new Set(r.sourceRefs).size===r.sourceRefs.length&&r.sourceRefs.every(id=>packet.sources.some(s=>s.id===id))&&(r.decision!=='revision'||r.draft.trim()&&r.reason.trim()&&r.sourceRefs.length)&&(!['needs_evidence','correction'].includes(r.decision)||r.reason.trim()));
  const validState=s=>s&&s.contextSha256===basis&&Number.isSafeInteger(s.updatedAt)&&s.updatedAt>=0&&steps.includes(s.current)&&Array.isArray(s.completed)&&s.completed.length<=steps.length&&new Set(s.completed).size===s.completed.length&&s.completed.every(x=>steps.includes(x))&&typeof s.notes==='object'&&s.notes!==null&&!Array.isArray(s.notes)&&Object.entries(s.notes).every(([k,v])=>allowedNotes.has(k)&&typeof v==='string'&&v.length<=10000&&!v.includes('\0'))&&typeof s.storyId==='string'&&(!s.storyId||packet.accounts.some(a=>a.id===s.storyId))&&(!s.writing||validWriting(s.writing))&&(!s.reviews||validReviews(s.reviews))&&(!s.coverage||!coverageError(s.coverage,packet));
  let state=packet.journey;
  // Compare real draft timestamps before an evidence migration creates a new one.
  let restoredNotes=false;
- try{const saved=JSON.parse(localStorage.getItem(storageKey)||'null');if(validState(saved)&&(!saved.continuation||validContinuation(saved.continuation))&&saved.updatedAt>state.updatedAt){const {baseline,writing,continuation,investigation}=state;state={...saved,baseline,writing:saved.writing||writing};if(continuation)state.continuation=continuation;if(investigation)state.investigation=investigation;else delete state.investigation;packet.journey=state;restoredNotes=true;}}catch{}
+ try{const saved=JSON.parse(localStorage.getItem(storageKey)||'null');if(validState(saved)&&(saved.notes.output||'')===(state.notes.output||'')&&(!saved.continuation||validContinuation(saved.continuation))&&saved.updatedAt>state.updatedAt){const {baseline,writing,continuation,investigation}=state;state={...saved,baseline,writing:saved.writing||writing};if(continuation)state.continuation=continuation;if(investigation)state.investigation=investigation;else delete state.investigation;packet.journey=state;restoredNotes=true;}}catch{}
  let changedEvidence=state.contextSha256!==basis;
  const comparable=validBasis(reviewBasis)&&validBasis(state.reviewBasis);
  const affected=Object.entries(state.reviews||{}).filter(([id,r])=>comparable?
@@ -44,13 +49,17 @@ if(pathRoot){
  const completedSteps=()=>steps.filter(s=>s==='gather'?coverageComplete(state.coverage):['review','deepen','practice'].includes(s)?packet.accounts.length&&packet.accounts.every(a=>accountDone(a,s)):s==='write'?state.completed.includes(s)&&Boolean(state.writing.draft.trim()||state.baseline.overview.trim()):state.completed.includes(s));
  const activityLabel=(step,done)=>done?(step==='review'?(Object.values(state.reviews).some(r=>['correction','revision','needs_evidence'].includes(r.decision))?'Awaiting assistant':'Reviewed'):step==='deepen'?'No open gap marked':'Recorded'):step===state.current?'You are here':'';
  const noteKey=()=>['review','deepen','practice'].includes(state.current)&&account()?state.current+':'+account().id:state.current;
- const hasReviewWork=()=>Object.values(state.notes).some(n=>n.trim())||Object.values(state.reviews).some(r=>r.decision!=='pending'||r.draft||r.reason);
+ const hasReviewWork=()=>Object.values(state.notes).some(n=>n.trim())||Object.values(state.reviews).some(r=>r.decision!=='pending'||r.draft||r.reason||storyVerdict(r)||r.missingContext);
  function persist(message='Notes changed in this browser.'){
   state.updatedAt=Math.max(Date.now(),Math.min(Number.MAX_SAFE_INTEGER,state.updatedAt+1));packet.journey=state;
   document.getElementById('path-copy').hidden=!hasReviewWork();
   document.getElementById('path-save-state').textContent='Changes in this browser · save a private file to keep them';
   try{localStorage.setItem(storageKey,JSON.stringify(state));notice.textContent=message;}
   catch{notice.textContent='Browser storage unavailable. Save full HTML to keep your notes.';}
+  if(location.hash==='#story-review'){
+   const status=document.getElementById('story-review-status');
+   if(status&&status.textContent!==notice.textContent)status.textContent=notice.textContent;
+  }
  }
  function handoff(){
   document.getElementById('save-html').click();
@@ -92,10 +101,100 @@ if(pathRoot){
   for(const a of packet.accounts.filter(a=>scope==='all'||a.id===scope)){
    const r=state.reviews[a.id];lines.push('ACCOUNT '+a.id+' — '+a.title,'CURRENT SOURCE ACCOUNT\n'+a.summary,'SOURCE REFERENCES: '+a.sourceRefs.join(', '));
    if(r)lines.push('REVIEW DECISION: '+r.decision+'; depth: '+r.depth,...(r.draft?['PROPOSED WORDING (chosen for next update only when decision=revision; check against sources)\n'+r.draft]:[]),...(r.reason?['REASON / UNRESOLVED GAP\n'+r.reason]:[]),'REVISION REFERENCES: '+r.sourceRefs.join(', '));
+   const view=storyVerdict(r);
+   if(view)lines.push('MY VIEW: '+view);
+   if(r?.missingContext)lines.push('CONTEXT I WOULD ADD: '+r.missingContext);
    for(const s of ['review','deepen','practice'])if(state.notes[s+':'+a.id]?.trim())lines.push(titles[steps.indexOf(s)]+' — annotations, not verified facts\n'+state.notes[s+':'+a.id]);
   }
   for(const s of steps)if(state.notes[s]?.trim())lines.push(titles[steps.indexOf(s)]+' — annotations, not verified facts\n'+state.notes[s]);
+  if(scope==='all'&&state.notes.missingWork)lines.push('WORK MISSING FROM MY LIST: '+state.notes.missingWork);
   return lines.join('\n\n');
+ }
+ function storyVerdict(r){
+  return Object.entries(storyChoices).map(([key,choices])=>choices[r?.[key]]).filter(Boolean).join(' · ');
+ }
+ function renderStoryChoices(){
+  window.dispatchEvent(new CustomEvent('career-story-preferences',{detail:state.reviews}));
+  for(const node of document.querySelectorAll('[data-story-verdict]')){
+   node.textContent=storyVerdict(state.reviews[node.dataset.storyVerdict]);
+  }
+  const cover=document.querySelector('.review-launch');
+  if(cover){
+   const pending=packet.accounts.filter(a=>!storyVerdict(state.reviews[a.id]));
+   const featured=pending[0]||packet.accounts[0],total=packet.accounts.length,rated=total-pending.length;
+   cover.dataset.featured=featured.id;
+   cover.querySelector('.folder-title').textContent=featured.title;
+   cover.querySelector('.folder-period').textContent=featured.period;
+   cover.querySelector('progress').value=rated;
+   document.getElementById('studio-rating-count').textContent=rated+' of '+total+(total===1?' story':' stories')+' rated';
+  }
+  const section=document.getElementById('studio-stories');
+  if(!section)return;
+  const prepared=new Map((practiceInterview?.stories||[]).map(s=>[s.id,s]));
+  const accounts=new Map(packet.accounts.map(a=>[a.id,a]));
+  const leads=packet.accounts.filter(a=>state.reviews[a.id]?.interest==='lead').map(a=>a.id);
+  const ids=[...leads,...[...prepared.keys()].filter(id=>!leads.includes(id)&&state.reviews[id]?.interest!=='reserve')].slice(0,3);
+  const list=section.querySelector('ul');
+  list.replaceChildren();
+  for(const id of ids){
+   const a=accounts.get(id),row=el('li'),title=link('','#rehearse-'+id);
+   title.dataset.rehearse=id;
+   const arrow=el('span','↗');arrow.setAttribute('aria-hidden','true');
+   title.append(el('span',a.title),arrow);
+   row.append(el('small',a.period),title,el('p',prepared.get(id)?.takeaway||a.contribution));list.append(row);
+  }
+  section.hidden=!ids.length;
+ }
+ function personalReview(a,r,desk=false){
+  const group=el('div',undefined,'story-view');
+  const reading=el('div',undefined,'story-reading');
+  const assessment=packet.presentation?.storyReview;
+  if(assessment?.contextSha256===basis&&Object.hasOwn(assessment.accounts,a.id)){
+   const read=el('section');read.append(el('h3','Your assistant’s read'),textBlock(assessment.accounts[a.id]));reading.append(read);
+   if(desk)read.append(disclosure('Compare draft wording',a.summary));
+  }else if(desk){
+   const current=el('section');current.append(el('h3','Current wording'),textBlock(a.summary));reading.append(current);
+  }
+  if(reviewedAccount(a).questions.length){
+   const open=el('section'),gaps=el('ul');
+   for(const q of reviewedAccount(a).questions)gaps.append(el('li',q));
+   open.append(el('h3','Still to clarify'),gaps);reading.append(open);
+  }else if(a.limits.length){
+   reading.append(disclosure('Where the evidence stops',a.limits.join('\n\n')));
+  }
+  group.append(reading,el('h3','Your take on this story','story-take-title'));
+  const controls=el('div',undefined,'story-choices');
+  const labels={importance:'How important was this work to you?',emphasis:'How does the write-up present it?',interest:'Would you like to tell this story?'};
+  for(const [key,choices] of Object.entries(storyChoices)){
+   const row=el('fieldset'),options=el('div',undefined,'review-options');row.append(el('legend',labels[key]),options);
+   const values=Object.keys(choices);
+   options.style.setProperty('--choice-count',values.length);
+   if(r[key])options.style.setProperty('--choice-index',values.indexOf(r[key]));
+   for(const [value,label] of Object.entries(choices)){
+    const choice=el('button',label);
+    choice.type='button';choice.value=value;choice.setAttribute('aria-pressed',String(r[key]===value));
+    choice.addEventListener('click',()=>{
+     if(r[key]===value)delete r[key];else r[key]=value;
+     if(r[key])options.style.setProperty('--choice-index',values.indexOf(value));
+     for(const peer of options.children)peer.setAttribute('aria-pressed',String(r[key]===peer.value));
+     persist();renderWorkReviews();renderStoryChoices();
+    });
+    options.append(choice);
+   }
+   controls.append(row);
+  }
+  const missing=el('textarea');missing.id=desk?'desk-story-missing':'story-missing';missing.rows=2;missing.maxLength=3000;missing.value=r.missingContext||'';
+  missing.addEventListener('input',()=>{
+   if(missing.value)r.missingContext=missing.value;else delete r.missingContext;
+   persist();
+  });
+  group.append(controls,field('What’s missing from this account?',missing));
+  if(!desk){
+   const back=link('Back to your story list','#story-review');
+   back.addEventListener('click',()=>{document.getElementById('review-picker').value=a.id;});
+   group.append(back);
+  }
+  return group;
  }
  function renderWorkReviews(){
   for(const a of packet.accounts){
@@ -103,6 +202,7 @@ if(pathRoot){
    const r=state.reviews[a.id];host.replaceChildren(link('Review this account','#path-review--'+a.id));
    const labels={pending:'Not reviewed',kept:'Current wording kept',revision:'Revision chosen for next update',needs_evidence:'Needs evidence',correction:'Correction recorded · unresolved'};
    host.append(el('span',labels[r?.decision||'pending'],'review-state'));
+   if(storyVerdict(r))host.append(el('span',storyVerdict(r),'story-verdict'));
    if(r?.decision==='revision'){const d=disclosure('Chosen revision',r.draft);d.append(el('p',r.reason),sourceLinks(r.sourceRefs));host.append(d);}
    if(r?.decision==='correction')host.append(disclosure('Your correction',r.reason));
   }
@@ -110,6 +210,7 @@ if(pathRoot){
  function reviewStep(a){
   const r=review(a),first=state.baseline.accounts[a.id]??a.summary;
   content.append(el('p','Current wording','path-content-label'),textBlock(a.summary));
+  content.append(personalReview(a,r));
   if(first!==a.summary)content.append(disclosure('First draft',first));
   const evidence=el('details');evidence.append(el('summary','Decisions, credit and evidence'),textBlock([...a.decisions,a.sharedCredit,a.outcome,...a.limits].filter(Boolean).join('\n\n')),sourceLinks(a.sourceRefs));content.append(evidence);
   const correction=el('textarea');correction.id='review-correction';correction.rows=3;correction.maxLength=2000;correction.value=r.reason;
@@ -134,7 +235,7 @@ if(pathRoot){
   content.append(el('p','','review-state'));
  }
  function deepenStep(a){
-  const r=review(a),questions=[...(['needs_evidence','correction'].includes(r.decision)&&r.reason?[r.reason]:[]),...a.questions];
+  const r=review(a),questions=[...(['needs_evidence','correction'].includes(r.decision)&&r.reason?[r.reason]:[]),...(r.missingContext?[r.missingContext]:[]),...reviewedAccount(a).questions];
   content.append(textBlock(r.decision==='revision'?r.draft:a.summary));
   if(questions.length){const list=el('ul',undefined,'path-evidence-list');questions.forEach(q=>list.append(el('li',q)));content.append(list);}else content.append(el('p','No factual question is recorded for this account. Keep it unless a specific gap would change the story.','path-question'));
   if(a.decisions.length)content.append(disclosure('Decisions already captured',a.decisions.join('\n\n')));
@@ -212,11 +313,12 @@ if(pathRoot){
   }else if(key==='write'){
    writingStep();
   }else if(key==='practice'&&a){
-   const q=packet.interview?.questions.find(q=>q.storyId===a.id);
-   content.append(el('p',q?.question||'What happened, what did you decide, and what changed?','path-question'));
+   const q=practiceInterview?.questions.find(q=>q.storyId===a.id);
+   const prepared=practiceInterview?.stories.find(s=>s.id===a.id);
+   const cue=rehearsalCue(a,prepared,'manager');
+   content.append(el('p',q?.question||[cue.anchor,cue.question].filter(Boolean).join('\n'),'path-question'));
    if(q)content.append(disclosure('Reveal the existing answer',q.answer));
-   const prepared=packet.interview?.stories.some(s=>s.id===a.id);
-   links.append(link(prepared?'Open this practice story':'Open interview prep',prepared?'#prep-story-'+a.id:'#interview'));
+   links.append(link(cue.single?'Practise this question':'Rehearse for an audience','#rehearse-'+a.id));
   }else content.append(el('p','No work story yet. Add your first account to begin.','path-question'));
   content.append(links);note.value=state.notes[noteKey()]||'';
   document.querySelector('.path-note-area').hidden=key==='gather'||!packet.accounts.length;
@@ -246,10 +348,26 @@ if(pathRoot){
   const feedback=content.querySelector('.review-state');if(feedback){feedback.textContent=key==='review'?({kept:'Current wording kept.',revision:'Revision chosen for the next coach update.',needs_evidence:'Unresolved · evidence needed.',correction:'Correction recorded · unresolved.'}[r?.decision]||''):key==='deepen'?({clear:'No further gap marked.',open:'Gap remains open.'}[r?.depth]||''):'';feedback.hidden=!feedback.textContent;}
  }
  function pathRoute(){
-  if(location.hash==='#path'||(!location.hash&&!packet.accounts.length))history.replaceState(null,'','#path-'+(state.current==='practice'?'gather':state.current));
+  if(location.hash==='#path')history.replaceState(null,'','#path-'+(state.current==='practice'?'gather':state.current));
   const route=parsePathHash(location.hash);if(route){state.current=route.step;if(route.accountId&&packet.accounts.some(a=>a.id===route.accountId))state.storyId=route.accountId;}renderStep();
  }
  function nextAccount(wrap=true){const current=packet.accounts.findIndex(a=>a.id===state.storyId),ordered=[...packet.accounts.slice(current+1),...(wrap?packet.accounts.slice(0,current):[])];const next=ordered.find(a=>!accountDone(a,state.current));if(next){state.storyId=next.id;location.hash='path-'+state.current+'--'+next.id;renderStep();return true;}if(wrap)notice.textContent='This is the remaining account for this activity.';return false;}
+ window.addEventListener('career-output-request',event=>{
+  const request=event.detail,formats={resume:'an evidence-linked resume draft',example:'a visual work example',story:'a career story',custom:''};
+  if(!request||!Object.hasOwn(formats,request.kind)||typeof request.direction!=='string'||request.direction.length>2000||request.direction.includes('\0'))return;
+  const selected=packet.accounts.find(a=>a.id===request.accountId);
+  if(request.accountId&&!selected)return;
+  const direction=request.direction.trim();
+  if(request.kind==='custom'&&!direction)return;
+  const lines=request.kind==='custom'?['Request: '+direction]:['Requested output: '+formats[request.kind]+'.'];
+  if(request.kind!=='custom'&&direction)lines.push('Audience or role: '+direction);
+  lines.push('Scope: '+(selected?selected.title+' [account '+selected.id+']':'Choose relevant accounts from all saved work'));
+  // The request belongs to the downloaded handoff. Keep this open file and its browser edits intact.
+  const journey={...state,notes:{...state.notes,output:lines.join('\n')},
+   updatedAt:Math.max(Date.now(),Math.min(Number.MAX_SAFE_INTEGER,state.updatedAt+1))};
+  saveFullHtml({...packet,journey});
+  document.getElementById('studio-status').textContent='Download started. Attach career-context.html to your assistant to make this draft.';
+ });
  document.getElementById('path-next-account').addEventListener('click',()=>nextAccount());
  select.addEventListener('change',()=>{state.storyId=select.value;location.hash='path-'+state.current+'--'+select.value;renderStep();});
  note.addEventListener('input',()=>{state.notes[noteKey()]=note.value;if(account()&&state.current==='review'){const r=review(account());if(['correction','needs_evidence'].includes(r.decision))r.depth='open';else{r.decision='pending';r.depth='pending';}}if(account()&&state.current==='deepen')review(account()).depth='open';persist();renderWorkReviews();updateProgress();});
@@ -274,7 +392,42 @@ if(pathRoot){
  });
  window.addEventListener('hashchange',pathRoute);
  const compact=matchMedia('(max-width:700px)'),mapShell=pathRoot.querySelector('.path-map-shell');const adaptMap=()=>{mapShell.open=!compact.matches;};adaptMap();compact.addEventListener('change',adaptMap);
- pathRoute();renderWorkReviews();
+ const missingWork=document.getElementById('missing-work');
+ if(missingWork){
+  const sheet=document.getElementById('review-sheet'),picker=document.getElementById('review-picker');
+  const index=document.querySelectorAll('[data-review-story]');
+  function showStory(id){
+   const a=packet.accounts.find(item=>item.id===id);
+   if(!a)return;
+   picker.value=id;
+   for(const item of index){
+    if(item.dataset.reviewStory===id)item.setAttribute('aria-current','true');else item.removeAttribute('aria-current');
+   }
+   const head=el('header',undefined,'review-sheet-head'),title=el('h2',a.title);
+   title.id='review-story-title';
+   head.append(title);
+   const meta=el('div',undefined,'review-story-meta');
+   if(a.period)meta.append(el('span',a.period));
+   meta.append(link('Full account and sources →','#account-'+a.id));
+   head.append(meta);
+   sheet.replaceChildren(head,personalReview(a,review(a),true));
+  }
+  for(const item of index)item.addEventListener('click',()=>showStory(item.dataset.reviewStory));
+  const cover=document.querySelector('.review-launch');
+  cover.addEventListener('click',()=>{picker.value=cover.dataset.featured;});
+  picker.addEventListener('change',()=>showStory(picker.value));
+  const openDesk=()=>{if(location.hash==='#story-review')showStory(picker.value);};
+  window.addEventListener('hashchange',openDesk);openDesk();
+  missingWork.value=state.notes.missingWork||'';
+  missingWork.addEventListener('input',()=>{
+   if(missingWork.value)state.notes.missingWork=missingWork.value;else delete state.notes.missingWork;
+   persist();
+  });
+  document.getElementById('save-story-review').addEventListener('click',()=>{
+   handoff();document.getElementById('story-review-status').textContent='Private file download started.';
+  });
+ }
+ pathRoute();renderWorkReviews();renderStoryChoices();
 }
 
 function snapshotJourney(clone){
@@ -283,4 +436,6 @@ function snapshotJourney(clone){
  clone.querySelector('#path-note').textContent='';
  clone.querySelector('#path-status').textContent='';
  clone.querySelector('#path-save-state').textContent='';
+ clone.querySelector('#review-sheet')?.replaceChildren();
+ const status=clone.querySelector('#story-review-status');if(status)status.textContent='';
 }

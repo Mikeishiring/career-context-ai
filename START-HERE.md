@@ -1,4 +1,12 @@
-# Career Context AI — start here
+# Start in the HTML
+
+Open [CAREER-CONTEXT.html](CAREER-CONTEXT.html) for the fictional product example. Your own saved HTML opens the same Career studio with your work, stories and draft files.
+
+Use **Create draft** to choose a resume, visual work example or story and save a request with your private evidence. Attach that file to your assistant to produce the draft. Existing product artifacts should be used when available; generated substitutes are not evidence.
+
+In **My context → Edit experience**, you can change role names, employers or clients, dates and the work examples listed under each role. Logos are optional. **Save private HTML** downloads the edited file. To have your assistant find roles in your existing records, choose **Save for AI review** and attach that download to your assistant.
+
+## Continue with your assistant
 
 Give your assistant this project and, if you have one, your latest private career-context file:
 

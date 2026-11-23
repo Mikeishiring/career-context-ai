@@ -42,6 +42,12 @@ EXPORT_PROTOCOL = 'career-sheet/v2'
 CURRENT_PLAN_SCHEMA = copy.deepcopy(PLAN_SCHEMA)
 CURRENT_PLAN_SCHEMA['required'].append('schema')
 CURRENT_PLAN_SCHEMA['properties']['schema'] = {'type': 'string', 'enum': [EXPORT_PROTOCOL]}
+CURRENT_PLAN_SCHEMA['properties']['experienceRoles'] = {
+    'type': 'array', 'maxItems': 80, 'items': {
+        'type': 'object', 'additionalProperties': False, 'required': ['id', 'title', 'accountIds', 'claimIds'],
+        'properties': {**{key: {'type': 'string'} for key in ['id', 'title', 'organization', 'period']},
+                       'current': {'type': 'boolean'}, 'accountIds': IDS,
+                       'claimIds': {**IDS, 'minItems': 1}}}}
 _current_account = CURRENT_PLAN_SCHEMA['properties']['accounts']['items']
 _current_account['required'].append('limits')
 _current_account['properties']['limits'] = IDS
@@ -175,6 +181,9 @@ def compile_sheet(raw, plan, records, events, scope, snapshot, *, draft=False, s
         errors.append('Overview must not repeat a claim.')
     if not plan['overview'] or any(i not in claimed for i in plan['overview']):
         errors.append('Overview must select claims represented in the accounts.')
+    for role in plan.get('experienceRoles', []):
+        if not role['claimIds'] or not set(role['claimIds']) <= claimed:
+            errors.append('Role and engagement details must cite checked claims in the sheet.')
     if errors:
         return None, validation | {'valid': False, 'errors': errors}
 
@@ -262,6 +271,12 @@ def compile_sheet(raw, plan, records, events, scope, snapshot, *, draft=False, s
     packet = {'schema': 'career-context/v1', 'updatedAt': snapshot, 'reviewStatus': 'draft', 'synthetic': synthetic,
               'person': {'name': scope['subject'], 'overview': '\n\n'.join(sentence(i) for i in plan['overview']), 'background': background},
               'accounts': accounts, 'sources': sources}
+    if plan.get('experienceRoles'):
+        packet['presentation'] = {'experienceRoles': [
+            {k: copy.deepcopy(v) for k, v in role.items() if k != 'claimIds'} | {
+                'sourceRefs': list(dict.fromkeys(source_ids[(e['record_id'], e['span_id'])]
+                    for cid in role['claimIds'] for e in raw_claims[cid]['evidence']))}
+            for role in plan['experienceRoles']]}
     source_map = {s['id']: s for s in sources}
     def retained_anchor(record_id, span_id):
         source = source_map[source_ids[(record_id, span_id)]]

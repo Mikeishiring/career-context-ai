@@ -29,6 +29,19 @@ def example():
             'Sketched an equipment checkout flow and used AI to generate a Python prototype.',
             'Checked checkout and return with fictional items. No real borrower or equipment data was imported.',
             'The team has not tried it. Deployment and maintenance remain open; independent Python ability is not claimed.']}}}
+    packet['presentation']['experienceRoles'] = [{
+        'id': 'library-operations', 'title': 'Operations and service design', 'organization': 'Community library',
+        'accountIds': [a['id'] for a in packet['accounts']],
+        'sourceRefs': ['handoff-account', 'guide-account', 'prototype-note'],
+    }]
+    packet['presentation']['storyReview'] = {
+        'contextSha256': renderer.sections.evidence_fingerprint(packet),
+        'accounts': {
+            'request-handoffs': 'Calling this a weekly meeting undersells your part. You traced where requests lost their owner and changed the labels after coordinators tried them. Knowing what they kept doing later would show how far the change lasted.',
+            'volunteer-guide': 'The interesting part is the room-booking instruction you changed after two volunteers tried it. A later example of someone using the guide on their own would support a stronger claim about independence.',
+            'equipment-prototype': 'This works as a story about testing an idea. Describing it as a service the team relied on would oversell it. You tried checkout and return with fictional items, and the team has yet to test the log.',
+        },
+    }
     packet['presentation']['timelineReading'] = {
         'contextSha256': renderer.sections.evidence_fingerprint(packet),
         'periods': {
@@ -45,4 +58,4 @@ def example():
 if __name__ == '__main__':
     source = ROOT / 'examples/complete-context.json'
     source.write_text(json.dumps(example(), ensure_ascii=True, indent=2) + '\n', encoding='utf-8', newline='\n')
-    print(json.dumps(renderer.render(source, ROOT / 'CAREER-CONTEXT.html')))
+    print(json.dumps(renderer.render(source, ROOT / 'CAREER-CONTEXT.html', guided=True, allow_view_removal=True)))

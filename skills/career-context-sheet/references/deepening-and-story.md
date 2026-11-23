@@ -4,6 +4,8 @@ Use this after establishing work, sources and privacy. The agent owns the resear
 
 ## Give each pass a different job
 
+Before asking someone to fill a gap, read the source wording for the relationship the question assumes. Two adjacent details may belong to different days, people or pieces of work. If the connection matters, ask whether the details went together. Otherwise ask about the concrete action by itself. Check earlier summaries against the source when they have already joined the details.
+
 Use these activities when they help answer the current question. Combine or reorder them and reuse sufficient retained originals; neither the table nor a pass count requires another search. A narrow update revisits affected evidence and dependent outputs.
 
 | Pass | Work | Result to preserve |
@@ -105,6 +107,10 @@ Challenge both transitions before polishing: **source to inventory**, then **con
 Revisit originals behind broad notes and strong omissions, including material read for another question. Compare an informative omission with a weaker retained passage, applying the same materiality test to achievements, criticism and routine work. For each material contribution, quote the actual sentence or sentences that convey the understanding selected before drafting. Check whether named work has an understandable purpose and personal contribution, not just a status or caveat. A topic mention, citation or raw record does not count as a readable account. Repair missing meaning or explicitly reconsider the selection; do not silently redefine it to match the draft. For a handoff, compare announcement, actual transfer and later continued involvement.
 
 Keep these notes private and proportional. For a small addition or correction, update the affected contribution and check its account; reuse the existing map and leave unrelated selections intact. Reopen the broader selection when new evidence changes the overall picture. The sheet contains the story and useful depth, not the selection machinery. A fully assigned inventory or a matching quote proves neither sound judgment nor complete meaning. Personal significance may still require the person's account; ask about that distinction instead of pretending the records determine it.
+
+## Compare across episodes before settling on a through-line
+
+Event retention and turning-point review do not by themselves discover a change distributed across records. Before final selection, use the [progression comparison](progression-and-direction.md) to inspect earlier and later states, sustained practice, transfer to other work or people, and meaningful continuity. Revisit reserve material when it changes that interpretation. A quiet beginning and a later ordinary working record may matter more together than either does alone. Preserve both sides, alternatives and unresolved baselines in memory; pursue accessible checks before asking the person to supply meaning.
 
 ## Build episodes before a career through-line
 

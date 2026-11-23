@@ -34,7 +34,7 @@ async function main() {
     assert.equal(seed.synthetic, true, 'Use only fictional input for this check');
     assert.equal(seed.reviewStatus, 'draft');
     assert.equal(await page.locator('#synthetic-note').isVisible(), true);
-    assert.equal(await page.locator('input,form,[data-field]').count(), 0);
+    assert.equal(await page.locator('input:not([name="prep-audience"]),form,[data-field]').count(), 0);
     assert.equal(await page.locator('.top,.eyebrow,.lede').count(), 0);
     assert.equal(await page.locator('.signals h3 a').count(), seed.signals.length);
     assert.equal(await page.locator('.selection-notes').getAttribute('open'), null);
@@ -57,6 +57,27 @@ async function main() {
     for (const story of seed.stories) {
       await navigate(page, 'stories', story.id);
       const panel = page.locator('#stories [data-story-panel="' + story.id + '"]');
+      const gaps = [...new Set([...(seed.priorityGap?.storyId === story.id ? [seed.priorityGap.question] : []), ...story.account.questions])];
+      assert.deepEqual(await page.locator('#cue-gaps li').allTextContents(), gaps);
+      assert.equal(await page.locator('#cue-context').isVisible(), Boolean(gaps.length));
+      if (gaps.length) {
+        await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', {configurable:true,value:{
+          writeText: async () => { throw Error('Clipboard unavailable'); }
+        }}));
+        await page.locator('#cue-context summary').click();
+        await page.locator('#copy-clarification').click();
+        assert.ok((await page.locator('#manual-copy').inputValue()).includes(gaps[0]));
+        await page.keyboard.press('Escape');
+        await page.locator('[data-copy=audience]').click();
+        assert.ok(!(await page.locator('#manual-copy').inputValue()).includes(gaps[0]));
+        await page.keyboard.press('Escape');
+      }
+      for (const [key,angle] of Object.entries(story.audiences || {})) {
+        await page.locator('input[name="prep-audience"][value="'+key+'"]').focus();
+        await page.keyboard.press('Space');
+        assert.equal(await page.locator('#cue-opening').innerText(),angle.opening);
+        assert.equal(await page.locator('#cue-question').innerText(),angle.question);
+      }
       for (const key of ['contribution', 'sharedCredit', 'outcome']) {
         assert((await panel.innerText()).includes(story.account[key]));
       }
@@ -137,6 +158,7 @@ async function main() {
     assert.equal(await page.locator('.arrow').first().evaluate(e => getComputedStyle(e).transitionDuration), '0s');
     await page.reload();
     await page.emulateMedia({ media: 'print' });
+    await page.evaluate(()=>dispatchEvent(new Event('beforeprint')));
     assert.equal(await page.locator('.section:visible').count(), 6);
     assert(await page.locator('#synthetic-note').isVisible());
     assert(await page.locator('.heading').isVisible());
@@ -148,6 +170,7 @@ async function main() {
       assert.equal(await title.innerText(), question.question);
     }
     await page.emulateMedia({ media: 'screen' });
+    await page.evaluate(()=>dispatchEvent(new Event('afterprint')));
     const staticContext = await browser.newContext({ javaScriptEnabled: false });
     const staticPage = await staticContext.newPage();
     observe(staticPage);

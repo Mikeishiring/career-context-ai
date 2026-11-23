@@ -31,6 +31,7 @@ def load_helper(name):
 
 
 sections = load_helper('document_sections')
+question_links = load_helper('question_links')
 memory = load_helper('context_memory')
 guided_path = load_helper('guided_path')
 public_profile = load_helper('public_profile')
@@ -48,7 +49,7 @@ def validate(data):
     keys(data, ['schema', 'updatedAt', 'reviewStatus', 'person', 'accounts', 'sources', 'synthetic', 'profile', 'collection', 'presentation', 'timeline', 'interview', 'rehearsal', 'journey', 'publicProfile', 'memory'], 'Sheet')
     if 'presentation' in data:
         presentation = data['presentation']
-        keys(presentation, ['headline', 'files', 'briefs', 'timelineSelection', 'timelineReading', 'workGroups'], 'Presentation')
+        keys(presentation, ['headline', 'files', 'briefs', 'storyReview', 'timelineSelection', 'timelineReading', 'workGroups', 'experienceRoles'], 'Presentation')
         check_text(presentation.get('headline', ''), 'Headline', 160)
         files = presentation.get('files', [])
         if not isinstance(files, list) or len(files) > 10: raise ValueError('Invalid related files')
@@ -111,6 +112,20 @@ def validate(data):
                 raise ValueError('Timeline year must intersect the selected saved periods')
     sections.validate_timeline_reading(data, check_text, keys)
     sections.validate_work_groups(data, check_text, keys)
+    sections.validate_experience_roles(data, check_text, keys, public_profile.image_bytes)
+    story_review = data.get('presentation', {}).get('storyReview')
+    if story_review is not None:
+        keys(story_review, ['contextSha256', 'accounts'], 'Story review')
+        basis = story_review.get('contextSha256')
+        readings = story_review.get('accounts')
+        if not isinstance(basis, str) or not re.fullmatch('[a-f0-9]{64}', basis):
+            raise ValueError('Story review needs its evidence fingerprint')
+        if not isinstance(readings, dict) or set(readings) - {a['id'] for a in data['accounts']}:
+            raise ValueError('Story review must reference saved accounts')
+        for reading in readings.values():
+            check_text(reading, 'Story assessment', 1200)
+            if not reading.strip():
+                raise ValueError('Story assessment must not be blank')
     briefs = data.get('presentation', {}).get('briefs')
     if briefs is not None:
         keys(briefs, ['contextSha256', 'accounts'], 'Work briefs')
@@ -161,8 +176,15 @@ def validate(data):
         used.update(account['sourceRefs'])
         if not isinstance(account.get('artifacts', []), list): raise ValueError('Artifacts must be a list')
         for artifact in account.get('artifacts', []):
-            keys(artifact, ['id', 'title', 'caption', 'file', 'embeddedId', 'mediaType', 'sha256', '_dataUrl'], 'Artifact')
+            keys(artifact, ['id', 'title', 'caption', 'file', 'embeddedId', 'mediaType', 'sha256', '_dataUrl', 'link'], 'Artifact')
             for field in ['id', 'title', 'caption']: check_text(artifact[field], field)
+            if 'link' in artifact:
+                link = artifact['link']
+                keys(link, ['label', 'url'], 'Artifact link')
+                check_text(link.get('label'), 'Artifact link label', 80)
+                check_text(link.get('url'), 'Artifact link URL', 2000)
+                if not link['label'].strip() or not public_profile.safe_video_url(link['url']):
+                    raise ValueError('Artifact links need a label and an HTTPS URL without credentials or access tokens')
             aid = artifact['id']
             if not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9_-]{0,99}', aid) or aid in artifact_ids: raise ValueError('Artifacts need unique safe IDs')
             artifact_ids.add(aid)
@@ -297,6 +319,8 @@ def account_capabilities(account):
 
 def preserve_views(previous, incoming):
     missing = [key for key in ['timeline', 'interview', 'journey', 'publicProfile', 'memory'] if previous.get(key) and not incoming.get(key)]
+    if previous.get('presentation', {}).get('experienceRoles') and 'experienceRoles' not in incoming.get('presentation', {}):
+        missing.append('experience roles')
     if {c['id'] for c in memory.claims(previous)} - {c['id'] for c in memory.claims(incoming)}:
         missing.append('memory claims (retain rejected or withdrawn interpretations)')
     for key in ['coverage', 'reviews', 'continuation', 'investigation']:
@@ -304,6 +328,40 @@ def preserve_views(previous, incoming):
             missing.append('journey.' + key)
     if missing:
         raise ValueError('Update would remove ' + ', '.join(missing) + '. Retain the complete packet; use --allow-remove-views only for intentional removal.')
+
+
+def reviewed_questions(packet, preparation):
+    sources = {s['id']: question_links.statements([s['content']]) for s in packet['sources']}
+    evidence = {a['id']: [line for ref in a['sourceRefs'] for line in sources[ref]] for a in packet['accounts']}
+    def review(account, question):
+        return question_links.review(question, evidence[account['id']], sections.panel_question(account))
+    edits, findings = {}, []
+    accounts = []
+    for account in packet['accounts']:
+        changes = question_links.reviewed_account(account, evidence[account['id']], sections.panel_question(account))
+        if changes:
+            edits[account['id']] = changes
+            for question in account['questions']:
+                replacement, reason = review(account, question)
+                if reason:
+                    findings.append(dict(storyId=account['id'], field='context', question=question, replacement=replacement, reason=reason))
+        accounts.append({**account, **changes})
+    rehearsal, checks = sections.review_rehearsal(accounts, preparation, review)
+    if rehearsal:
+        for story in rehearsal['stories']:
+            changes = edits.get(story['id'], {})
+            if 'account' in story:
+                story['account'].update(changes)
+            original = next(a for a in packet['accounts'] if a['id'] == story['id'])
+            wording = {original[k]: v for k, v in changes.items() if k in ('summary', 'contribution')}
+            if wording:
+                for obj, field in [(story, 'takeaway'), *[(c, 'text') for c in story['chapters'] + story['timeline']],
+                                   *[(q, k) for q in rehearsal['questions'] if q['storyId'] == story['id'] for k in ('answer', 'reason')],
+                                   *[(s, 'reason') for s in rehearsal['signals'] if s['storyId'] == story['id']]]:
+                    obj[field] = wording.get(obj[field], obj[field])
+                if len(rehearsal['stories']) == 1:
+                    rehearsal['throughline'] = wording.get(rehearsal['throughline'], rehearsal['throughline'])
+    return accounts, edits, rehearsal, findings + checks
 
 
 def render(source, destination, *, overwrite=True, allow_view_removal=False, guided=False):
@@ -326,16 +384,21 @@ def render(source, destination, *, overwrite=True, allow_view_removal=False, gui
     accounts = []
     briefs = packet.get('presentation', {}).get('briefs', {})
     brief_accounts = briefs.get('accounts', {}) if briefs.get('contextSha256') == sections.evidence_fingerprint(packet) else {}
+    practice_accounts, practice_edits, rehearsal, question_review = reviewed_questions(packet, packet.get('interview'))
+    by_id = {a['id']: a for a in practice_accounts}
     for ordinal, account in enumerate(packet['accounts'], 1):
         pictures = []
         for artifact in account.get('artifacts', []):
             mime, raw = image_data(artifact, source.parent); artifact.pop('file', None); artifact.pop('_dataUrl', None)
             artifact.update(embeddedId='artifact-'+artifact['id'], mediaType=mime, sha256=hashlib.sha256(raw).hexdigest())
             url = f'data:{mime};base64,' + base64.b64encode(raw).decode()
-            pictures.append(f'<figure><img id="{artifact["embeddedId"]}" src="{url}" alt="{esc(artifact["title"])}" loading="lazy"><figcaption>{esc(artifact["caption"])}</figcaption><button type="button" class="text-button artifact-expand" data-artifact="{artifact["embeddedId"]}" aria-haspopup="dialog">Enlarge image</button></figure>')
+            link = artifact.get('link')
+            artifact_link = (f' <a href="{esc(link["url"])}" target="_blank" rel="noopener noreferrer">{esc(link["label"])} ↗</a>') if link else ''
+            pictures.append(f'<figure><img id="{artifact["embeddedId"]}" src="{url}" alt="{esc(artifact["title"])}" loading="lazy"><figcaption>{esc(artifact["caption"])}</figcaption><button type="button" class="text-button artifact-expand" data-artifact="{artifact["embeddedId"]}" aria-haspopup="dialog">Enlarge image</button>{artifact_link}</figure>')
         fields = [('context', 'Context'), ('aim', 'Aim'), ('contribution', 'My contribution'), ('decisions', 'Decisions'), ('sharedCredit', 'Shared work'), ('outcome', 'Outcome')]
         details = '<div class="detail-grid">' + ''.join('<div><h4>' + label + '</h4>' + (bullets(account[key]) if isinstance(account[key], list) else paragraphs(account[key])) + '</div>' for key, label in fields if account[key]) + '</div>'
-        questions = '<h4>Still to clarify</h4>' + bullets(account['questions']) if account['questions'] else ''
+        gaps = by_id[account['id']]['questions']
+        questions = '<h4>Still to clarify</h4>' + bullets(gaps) if gaps else ''
         refs = ' · '.join(f'<a href="#source-{esc(ref)}">{esc(next(s["label"] for s in packet["sources"] if s["id"]==ref))}</a>' for ref in account['sourceRefs'])
         limits = '<div class="limit" aria-label="Limits">' + bullets(account['limits']) + '</div>' if account['limits'] else ''
         review_link = f'<div class="account-review js-only" data-account-review="{account["id"]}"><a href="#path-review--{account["id"]}">Review this account</a></div>' if 'journey' in packet else ''
@@ -377,27 +440,32 @@ def render(source, destination, *, overwrite=True, allow_view_removal=False, gui
         # Legacy current packets can safely acquire a baseline. A stale legacy
         # packet has no account-level baseline and must reopen once, conservatively.
         packet['journey'].setdefault('reviewBasis', review_basis)
+    rehearsal_view = sections.rehearsal_json('reviewed-interview', rehearsal) if rehearsal != packet.get('interview') else ''
+    if practice_edits:
+        rehearsal_view += sections.rehearsal_json('reviewed-account-fields', practice_edits)
     values = {
         'RESUME': json.dumps({'schema': 'career-resume/v1', 'contextSha256': sections.evidence_fingerprint(packet),
                              'journeyUpdatedAt': packet.get('journey', {}).get('updatedAt', 0),
                              'instructions': (SKILL / 'assets/continuation.txt').read_text(encoding='utf-8')}, ensure_ascii=False).replace('<', '\\u003c').replace('&', '\\u0026'),
         'PATH': guided_path.render(packet, sections.evidence_fingerprint(packet), review_basis),
         'PATHNAV': '<a href="#path" data-view="path">Develop context</a>' if 'journey' in packet else '',
-        'HOME': '#context',
+        'HOME': '#studio',
+        'STUDIO': load_helper('career_studio').render({**packet, 'accounts': practice_accounts}),
         'CONTEXTHOME': '#context',
-        'CONTEXTOVERVIEW': sections.context_overview(packet),
+        'CONTEXTOVERVIEW': sections.context_overview({**packet, 'accounts': practice_accounts}),
         'CONTEXTACTION': '<a class="context-add" href="#path" data-add-context>Add context <span aria-hidden="true">+</span></a>' if 'journey' in packet else '',
-        'CONTEXTCSS': (SKILL / 'assets/context.css').read_text(encoding='utf-8'),
+        'REVISEOVERVIEW': '<a class="revise-overview" href="#path-write">Revise overview</a>' if packet.get('journey') and packet['accounts'] else '',
+        'CONTEXTCSS': (SKILL / 'assets/context.css').read_text(encoding='utf-8') + '\n' + (SKILL / 'assets/studio.css').read_text(encoding='utf-8'),
         'PATHCSS': (SKILL / 'assets/path.css').read_text(encoding='utf-8') if 'journey' in packet or 'publicProfile' in packet else '',
-        'PATHSCRIPT': '\n'.join((SKILL / ('assets/' + name)).read_text(encoding='utf-8') for name in (['continuation.js', 'coverage.js', 'path.js'] if 'journey' in packet else ['continuation.js'])),
+        'PATHSCRIPT': '\n'.join((SKILL / ('assets/' + name)).read_text(encoding='utf-8') for name in (['continuation.js', 'coverage.js', 'path.js', 'studio.js'] if 'journey' in packet else ['continuation.js', 'studio.js'])),
         'PUBLIC': public_profile.render(packet, sections.evidence_fingerprint(packet)),
         'PUBLICNAV': '<a href="#profile" data-view="profile">Public profile</a>' if 'publicProfile' in packet else '',
         'PUBLICCSS': (SKILL / 'assets/public-profile.css').read_text(encoding='utf-8') if 'publicProfile' in packet else '',
         'PUBLICSCRIPT': (SKILL / 'assets/public-profile.js').read_text(encoding='utf-8') if 'publicProfile' in packet else '',
-        'SECTIONSCSS': (SKILL / 'assets/sections.css').read_text(encoding='utf-8') + '\n' + (SKILL / 'assets/explore.css').read_text(encoding='utf-8'),
-        'SECTIONSSCRIPT': (SKILL / 'assets/sections.js').read_text(encoding='utf-8') + '\n' + (SKILL / 'assets/explore.js').read_text(encoding='utf-8'),
+        'SECTIONSCSS': '\n'.join((SKILL / 'assets' / name).read_text(encoding='utf-8') for name in ('sections.css', 'explore.css', 'audience.css')),
+        'SECTIONSSCRIPT': '\n'.join((SKILL / 'assets' / name).read_text(encoding='utf-8') for name in ('audience.js', 'sections.js', 'experience.js', 'explore.js')),
         'TIMELINE': sections.timeline_html(packet),
-        'INTERVIEW': sections.interview_html(packet),
+        'INTERVIEW': rehearsal_view + sections.interview_html({**packet, 'accounts': practice_accounts, **({'interview': rehearsal} if rehearsal else {})}),
         'TIMELINECOUNT': f'{len(packet.get("timeline", []))} periods' if packet.get('timeline') else '',
         'EVIDENCE': sections.evidence_fingerprint(packet),
         'PREPSTATE': 'Draft for practice' if packet.get('interview') else '',
@@ -411,10 +479,10 @@ def render(source, destination, *, overwrite=True, allow_view_removal=False, gui
         'SKILLFILTERHIDDEN': '' if any(a.get('capabilities') for a in packet['accounts']) else ' hidden',
         'COVERAGE': '<details class="coverage"><summary>Source coverage</summary><div class="table-scroll"><table><thead><tr><th>Platform</th><th>Location</th><th>State</th><th>Read scope</th><th>Next step</th></tr></thead><tbody>' + coverage + '</tbody></table></div></details>' if coverage else '',
         'TITLE': esc(packet['person']['name'] + ' — Career context'), 'NAME': esc(packet['person']['name']),
-        'OVERVIEW': paragraphs(packet['person']['overview']), 'BACKGROUND': ('<section class="background" aria-labelledby="background-title"><h2 id="background-title">Broader background</h2>' + bullets(packet['person']['background']) + '</section>') if packet['person'].get('background') else '',
+        'OVERVIEW': paragraphs(packet['person']['overview']), 'BACKGROUND': ('<details class="background" open><summary><h2>Broader background</h2></summary>' + bullets(packet['person']['background']) + '</details>') if packet['person'].get('background') else '',
         'DATE': esc(packet['updatedAt']), 'STATUS': 'Draft for review' if packet['reviewStatus']=='draft' else 'Reviewed by the person',
         'COUNT': f'{len(packet["accounts"])} work account' + ('' if len(packet['accounts']) == 1 else 's'),
-        'DEMO': '<p class="demo-notice"><strong>Fictional example</strong><span>' + esc(packet['person']['name']) + ' is a sample person. The dates, work and sources are invented.</span></p>' if packet.get('synthetic') else '',
+        'DEMO': '<span class="demo-notice">Fictional example</span>' if packet.get('synthetic') else '',
         'ACCOUNTS': ''.join(grouped_accounts or accounts) or '<p class="empty">No work accounts recorded yet. Start with one piece of work: what happened, what you did and what remains uncertain.</p>',
         'INDEX': ''.join(grouped_index) if grouped_index else ''.join(account_index.values()),
         'SOURCES': ''.join(sources) or '<p>No sources included yet.</p>',
@@ -435,7 +503,8 @@ def render(source, destination, *, overwrite=True, allow_view_removal=False, gui
             publish_new(temporary, destination)
     finally:
         if os.path.exists(temporary): os.unlink(temporary)
-    return {'path': str(destination), 'accounts': len(packet['accounts']), 'sources': len(packet['sources']), 'bytes': len(output.encode()), 'sha256': hashlib.sha256(output.encode()).hexdigest()}
+    return {'path': str(destination), 'accounts': len(packet['accounts']), 'sources': len(packet['sources']), 'bytes': len(output.encode()), 'sha256': hashlib.sha256(output.encode()).hexdigest(),
+            'questionReview': question_review}
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)

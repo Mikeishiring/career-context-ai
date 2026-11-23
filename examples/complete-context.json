@@ -240,6 +240,20 @@
     "stories": [
       {
         "id": "request-handoffs",
+        "audiences": {
+          "recruiter": {
+            "opening": "Library requests came in by email, at the desk and through a shared notebook. It wasn\u2019t always clear who should act next. I drafted a shared list and helped the coordinators try a weekly review. They kept it after the trial.",
+            "question": "What made a request worth bringing to the weekly review?"
+          },
+          "manager": {
+            "opening": "I kept the trial in the team's spreadsheet and gave the next owner a separate field from the person who received the request. When coordinators read the priority labels differently, I removed that field.",
+            "question": "Why keep the next-owner field and drop priority?"
+          },
+          "panel": {
+            "opening": "I traced where requests crossed desks. A colleague proposed the weekly review, I facilitated it, and the coordinators chose the handoff rules. They kept the review going. We never measured whether requests moved faster.",
+            "question": "What could the coordinators confirm about the weekly review after the trial?"
+          }
+        },
         "tests": "Practical judgment and shared delivery",
         "takeaway": "I made the next owner visible, then revised the trial with the coordinators.",
         "chapters": [
@@ -273,6 +287,20 @@
       },
       {
         "id": "volunteer-guide",
+        "audiences": {
+          "recruiter": {
+            "opening": "I turned recurring library desk questions into a printable guide. After I watched two volunteers try it, I rewrote the room-booking instructions. The coordinator kept that version for the next induction.",
+            "question": "What did the two volunteers do that made you revisit the room-booking instructions?"
+          },
+          "manager": {
+            "opening": "I chose a paper guide because volunteers couldn\u2019t always get to the desk computer. I watched two volunteers try the guide during supervised shifts. They couldn\u2019t tell which room-booking exceptions needed a coordinator, so I rewrote that step.",
+            "question": "How would you test the new escalation step on an unsupervised shift?"
+          },
+          "panel": {
+            "opening": "I drafted the guide, a colleague checked the procedures, and two volunteers showed me where the instructions broke down. I revised the escalation step. The coordinator kept responsibility for the policy and the training.",
+            "question": "Which room-booking problem could you fix in the guide, and which decisions stayed with the coordinator?"
+          }
+        },
         "tests": "Writing, observation and iteration",
         "takeaway": "The guide improved when I watched where two supervised volunteers needed help.",
         "chapters": [
@@ -306,6 +334,20 @@
       },
       {
         "id": "equipment-prototype",
+        "audiences": {
+          "recruiter": {
+            "opening": "I wanted to see whether a simple log could handle equipment loans. I sketched the flow, used AI to generate a Python prototype and tried it with fictional items. It hasn\u2019t had a team trial yet.",
+            "question": "What could you check with fictional loans before anyone tried the log at the library?"
+          },
+          "manager": {
+            "opening": "I sketched checkout and return before asking AI to generate the Python. I checked both paths with fictional items. That let me test my idea locally while leaving real borrower records out of it.",
+            "question": "What did testing checkout and return tell you, and what would still need a real trial?"
+          },
+          "panel": {
+            "opening": "A colleague walked me through the current process. I sketched a flow and tested an AI-generated prototype with fictional items. The coordinator still needs to decide whether to trial it, and maintenance ownership is open.",
+            "question": "Who decides whether to trial the log, and has anyone agreed to maintain it?"
+          }
+        },
         "tests": "Scope and readiness to stop",
         "takeaway": "A functioning prototype still needs a reason to be used and someone to maintain it.",
         "chapters": [
@@ -389,6 +431,31 @@
           "Checked checkout and return with fictional items. No real borrower or equipment data was imported.",
           "The team has not tried it. Deployment and maintenance remain open; independent Python ability is not claimed."
         ]
+      }
+    },
+    "experienceRoles": [
+      {
+        "id": "library-operations",
+        "title": "Operations and service design",
+        "organization": "Community library",
+        "accountIds": [
+          "request-handoffs",
+          "volunteer-guide",
+          "equipment-prototype"
+        ],
+        "sourceRefs": [
+          "handoff-account",
+          "guide-account",
+          "prototype-note"
+        ]
+      }
+    ],
+    "storyReview": {
+      "contextSha256": "d783716e0165d70052ce066ebd2ecb662b488ab7c5798e561b4a811ca955932b",
+      "accounts": {
+        "request-handoffs": "Calling this a weekly meeting undersells your part. You traced where requests lost their owner and changed the labels after coordinators tried them. Knowing what they kept doing later would show how far the change lasted.",
+        "volunteer-guide": "The interesting part is the room-booking instruction you changed after two volunteers tried it. A later example of someone using the guide on their own would support a stronger claim about independence.",
+        "equipment-prototype": "This works as a story about testing an idea. Describing it as a service the team relied on would oversell it. You tried checkout and return with fictional items, and the team has yet to test the log."
       }
     },
     "timelineReading": {

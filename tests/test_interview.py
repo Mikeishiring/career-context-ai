@@ -250,6 +250,97 @@ class InterviewTests(unittest.TestCase):
                 self.render()
         self.assertFalse(self.output.exists())
 
+    def test_assumed_actions_require_personal_evidence(self):
+        check = interview.render_context.sections.unsupported_action
+        account = dict.fromkeys(('contribution', 'summary', 'context', 'sharedCredit', 'outcome'), '')
+        account.update(contribution='I clipped the sheets.', sharedCredit='The lead counted them. We wrote labels.')
+        self.assertEqual(check('How did you clip the sheets while you were counting?', account), 'counting')
+        self.assertEqual(check('How did you know what to write?', account), 'write')
+        self.assertEqual(check('After you signed the invoice, what happened?', account), 'signed')
+        self.assertIsNone(check('Did you count any yourself?', account))
+        account['summary'] = 'I did not write the labels. I was counted among the volunteers.'
+        self.assertEqual(check('How did you count them?', account), 'count')
+        self.assertEqual(check('How did you write the labels?', account), 'write')
+        account['contribution'] = 'I wrote the labels. I counted the trays.'
+        self.assertIsNone(check('How did you know what to write?', account))
+        self.assertIsNone(check('What helped while you were counting?', account))
+
+    def test_rehearsal_view_preserves_original_and_shares_a_thin_story(self):
+        account = self.packet['accounts'][0]
+        account.update(summary='I packed an order.', contribution='I packed an order.', title='Packing an order',
+                       aim='', context='', decisions=[], outcome='', sharedCredit='A colleague stood beside me.')
+        original = copy.deepcopy(self.projection)
+        view, _ = interview.render_context.sections.review_rehearsal(self.packet['accounts'], self.projection)
+        story = view['stories'][0]
+        self.assertNotIn('audiences', story)
+        self.assertEqual([q['question'] for q in view['questions'] if q['storyId']==story['id']], [story['walkthrough']])
+        self.assertEqual(self.projection, original)
+        self.assertNotIn('walkthrough', view['stories'][1])
+
+    def test_directional_physical_mark_requires_actor_and_object(self):
+        check = interview.render_context.sections.unsupported_action
+        a = dict.fromkeys(('contribution','summary','context','sharedCredit','outcome'), '')
+        a['contribution'] = 'I chalked a line on the rehearsal floor.'
+        for q in ('How did you mark the rehearsal floor?', 'How far did you follow the floor after you marked it?'):
+            self.assertIsNone(check(q, a))
+        for q in ('How did you mark the final floor?', 'Where did you mark the invoice?', 'How did you mark it?'):
+            self.assertIsNotNone(check(q, a))
+        for text in ('The designer chalked the floor.', 'I never chalked the floor.', 'If I chalked the floor, we could reset it.',
+                     'I chalked up the floor damage to wear.', 'I chalked the board near the floor.', 'I chalked the floor plan.'):
+            a['contribution'] = text
+            self.assertEqual(check('When did you mark the floor?', a), 'mark', text)
+        a['contribution'] = 'I marked the floor.'
+        self.assertEqual(check('How did you chalk the floor?', a), 'chalk')
+
+    def test_panel_carries_its_subject_without_a_quote(self):
+        sections = interview.render_context.sections
+        a = dict(self.packet['accounts'][0], title='Editing the trailer', outcome='',
+                 sharedCredit='The producer approved the trailer edit.')
+        plan = sections.rehearsal_plan(a)
+        self.assertNotIn('anchor', plan)
+        self.assertIn('the producer approved the trailer edit', plan['question'])
+        a['sharedCredit'] = 'The producer never approved the trailer edit.'
+        self.assertIn('editing the trailer', sections.rehearsal_plan(a)['question'])
+        self.assertNotIn('when the producer approved', sections.rehearsal_plan(a)['question'])
+
+    def test_repeated_prepared_panel_uses_each_stories_evidence(self):
+        for story in self.projection['stories']:
+            story['audiences']['panel']['question'] = 'What do you remember about that?'
+        view, findings = interview.render_context.sections.review_rehearsal(self.packet['accounts'], self.projection)
+        self.assertEqual(len(findings), len(view['stories']))
+        self.assertNotIn('What do you remember about that?', [s['audiences']['panel']['question'] for s in view['stories']])
+
+    def test_questions_keep_explicit_links_and_open_unsupported_ones(self):
+        links = interview.render_context.question_links
+        examples = [
+            ('What did the nurse see on the monitor?', 'The nurse saw the monitor.',
+             'The nurse called. The trainee saw the monitor.', 'Did the nurse see the monitor?'),
+            ('What did you observe on the next night shift?', 'I worked the next night shift.',
+             'I missed the next night shift.', 'Was there another night shift?'),
+            ('Where were you helping Mondays when you checked the register?', 'On Mondays I checked the register.',
+             'I helped Mondays. I checked the register.', 'Where were you when you checked the register?'),
+            ('What does reading the log look like on a typical Monday?', 'On Mondays we read the log.',
+             'We met on Mondays. We read the log.', 'What does reading the log look like?'),
+            ('Where did your work on the layout end and the printer’s work on the proofs begin?',
+             'The printer took over the proofs from me.', 'The printer sent the proofs. I worked on the layout.',
+             'Did you work on the proofs too?'),
+            ('Which part of tracing the fault did the mechanic work out for herself?',
+             'The mechanic traced the fault independently.', 'The mechanic spotted the fault. I worked independently.',
+             'How did you learn about the fault?'),
+            ('What did these trials tell you, and what could you only test on a prototype?',
+             'I could only test on a prototype.', 'I only kept one sheet. We tested on a prototype.',
+             'What did the trials tell you?'),
+        ]
+        for q, supported, separate, revised in examples:
+            with self.subTest(question=q):
+                fallback = 'How did you learn about the fault?'
+                self.assertEqual(links.review(q, links.statements([supported]), fallback), (q, ''))
+                result, reason = links.review(q, links.statements([separate]), fallback)
+                self.assertEqual(result, revised)
+                self.assertTrue(reason)
+        q = 'Did you read the log on Monday?'
+        self.assertEqual(links.review(q, [], ''), (q, ''))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -15,9 +15,9 @@ function careerContinuationBrief(data,basis){
  ].join('\n\n');
 }
 
-function snapshotContinuation(clone){
+function snapshotContinuation(clone,data=packet){
  const node=clone.querySelector('#career-resume-data'),resume=JSON.parse(node.textContent);
  // The evidence fingerprint is fixed for this read/review surface. Notes do not change facts.
- resume.journeyUpdatedAt=packet.journey?.updatedAt||0;
+ resume.journeyUpdatedAt=data.journey?.updatedAt||0;
  node.textContent=JSON.stringify(resume).replace(/</g,'\\u003c').replace(/&/g,'\\u0026');
 }
