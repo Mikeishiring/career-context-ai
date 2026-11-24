@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Career Context Studio v2</title>
+<style>
+:root {
+  --bg: #f7f8fc;
+  --paper: #ffffff;
+  --surface: #f1f3fa;
+  --wash: #eef1fb;
+  --ink: #182643;
+  --muted: #5a657d;
+  --line: #dce0ed;
+  --line-strong: #c6cde0;
+  --accent: #5141bd;
+  --accent-hover: #4233a8;
+  --accent-soft: #eae7ff;
+  --mint: #105947;
+  --mint-bg: #d8f6e9;
+  --mint-bar: #299475;
+  --amber: #8a5200;
+  --amber-bg: #fef3c7;
+  --danger: #b42318;
+  --danger-bg: #fee4e2;
+  --raised: 0 3px 0 #dce0ed;
+  --raised-hover: 0 10px 24px -8px rgba(81, 65, 189, 0.2), 0 3px 0 #c7c0ef;
+  --raised-accent: 0 3px 0 #362986;
+  --radius: 16px;
+  --ease-spring: cubic-bezier(0.22, 0.85, 0.25, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+body.dark {
+  --bg: #0f1320;
+  --paper: #171c2c;
+  --surface: #1e2438;
+  --wash: #232a42;
+  --ink: #eef2ff;
+  --muted: #98a4c2;
+  --line: #2a324b;
+  --line-strong: #394466;
+  --accent: #8b7dff;
+  --accent-hover: #9f93ff;
+  --accent-soft: #272252;
+  --mint: #6ee7b7;
+  --mint-bg: #113429;
+  --mint-bar: #34d399;
+  --amber: #fcd34d;
+  --amber-bg: #3b2a08;
+  --danger: #fca5a5;
+  --danger-bg: #3f181c;
+  --raised: 0 3px 0 #0a0d16;
+  --raised-hover: 0 12px 26px -8px rgba(0, 0, 0, 0.45), 0 3px 0 #3c3478;
+  --raised-accent: 0 3px 0 #4d3fb8;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.55 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+/* Sticky Top Bar + Sliding Segmented Nav */
+header {
+  position: sticky; top: 0; z-index: 30;
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.header-inner {
+  max-width: 1320px; margin: 0 auto; padding: 0.62rem clamp(1rem, 2.5vw, 2.2rem);
+  display: flex; align-items: center; justify-content: space-between; gap: 0.65rem; flex-wrap: wrap;
+}
+.brand {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  text-decoration: none; color: var(--ink); flex-shrink: 0; cursor: pointer;
+}
+.workspace-mark { position: relative; display: block; width: 28px; height: 30px; flex: none; }
+.workspace-mark::before, .workspace-mark::after {
+  position: absolute; content: ""; width: 19px; height: 22px; border-radius: 6px;
+  transition: transform 240ms var(--ease-spring);
+}
+.workspace-mark::before { left: 1px; top: 1px; transform: rotate(-13deg); background: #9d93ff; }
+.workspace-mark::after {
+  left: 7px; top: 5px;
+  background: linear-gradient(155deg, #836dff, #4c39c0);
+  box-shadow: inset 0 -3px #4934aa, 0 2px 4px #3e358330;
+}
+.brand:hover .workspace-mark::before { transform: rotate(-20deg) translate(-2px, -1px); }
+.brand:hover .workspace-mark::after { transform: translateY(-2px); }
+.brand h1 { margin: 0; font-size: 1.04rem; font-weight: 720; letter-spacing: -0.04em; white-space: nowrap; }
+
+nav {
+  position: relative; isolation: isolate;
+  display: inline-flex; align-items: center; gap: 2px; flex-wrap: nowrap;
+  padding: 3px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+}
+.nav-glider {
+  position: absolute; top: 3px; bottom: 3px; left: 0; z-index: 0;
+  border-radius: 9px; background: var(--paper);
+  box-shadow: 0 1px 4px rgba(27, 37, 84, 0.14);
+  transition: transform 260ms var(--ease-spring), width 260ms var(--ease-spring), opacity 160ms ease;
+  pointer-events: none; opacity: 0;
+}
+nav button {
+  position: relative; z-index: 1;
+  background: transparent; color: var(--muted); border: 0; border-radius: 9px;
+  padding: 0.4rem 0.68rem; cursor: pointer; font: 600 0.8rem/1.2 var(--sans);
+  white-space: nowrap; transition: color 160ms ease;
+}
+nav button:hover { color: var(--ink); }
+nav button.active { color: var(--accent); }
+
+.owner-box { display: flex; align-items: center; gap: 0.55rem; flex-shrink: 0; }
+.owner-meta { text-align: right; line-height: 1.25; }
+.owner-meta strong { display: block; font-size: 0.82rem; font-weight: 650; white-space: nowrap; }
+.owner-meta span { font-size: 0.7rem; color: var(--muted); white-space: nowrap; }
+.theme-btn {
+  background: var(--paper); color: var(--muted); border: 1px solid var(--line);
+  border-radius: 9px; padding: 0.38rem 0.68rem; font: 600 0.76rem var(--sans);
+  cursor: pointer; box-shadow: 0 2px 0 var(--line); white-space: nowrap;
+  transition: transform 140ms var(--ease-spring), border-color 140ms ease, color 140ms ease;
+}
+.theme-btn:hover { color: var(--ink); border-color: #b7b1e6; transform: translateY(-1px); }
+.theme-btn:active { transform: translateY(1px); box-shadow: none; }
+
+/* Main container & View entrance */
+main { max-width: 1320px; margin: 0 auto; padding: 1.6rem clamp(1rem, 2.5vw, 2.2rem) 4rem; }
+.tab-view { animation: view-in 240ms var(--ease-out) both; }
+.sheet-animate { animation: sheet-in 220ms var(--ease-out) both; }
+@keyframes view-in {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes sheet-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.page-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap; margin-bottom: 1.35rem;
+}
+.page-head h2 {
+  margin: 0; font-size: clamp(1.7rem, 2.7vw, 2.35rem);
+  font-weight: 700; letter-spacing: -0.045em; line-height: 1.1;
+}
+
+/* Studio Hero Deck + Context Library */
+.studio-desk {
+  display: grid; grid-template-columns: minmax(0, 2.15fr) minmax(260px, 1fr);
+  gap: 22px; align-items: stretch; margin-bottom: 2rem;
+}
+.hero-launch {
+  position: relative; isolation: isolate; overflow: hidden;
+  display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(160px, 0.85fr);
+  align-items: center; gap: 16px; min-height: 230px;
+  padding: clamp(22px, 2.8vw, 36px); border-radius: 18px; color: #fff;
+  background: radial-gradient(ellipse at 95% 110%, #9992ff 0, transparent 58%),
+              linear-gradient(112deg, #36318d 0%, #5141b4 48%, #7967dd 100%);
+  box-shadow: 0 4px 0 #48409d, 0 14px 30px -14px rgba(54, 49, 141, 0.5);
+  transition: transform 240ms var(--ease-spring), box-shadow 240ms var(--ease-spring);
+}
+.hero-launch:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #48409d, 0 20px 36px -12px rgba(54, 49, 141, 0.55);
+}
+.hero-launch::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: repeating-linear-gradient(151deg, transparent 0 44px, rgba(255,255,255,0.06) 45px, transparent 46px);
+  mask-image: linear-gradient(90deg, transparent 28%, black 76%);
+}
+.hero-copy h3 { margin: 0; font-size: clamp(1.6rem, 2.6vw, 2.3rem); line-height: 1.08; letter-spacing: -0.045em; font-weight: 700; }
+.hero-copy p { margin: 0.7rem 0 0.45rem; font-size: 0.9rem; color: #edeaff; }
+.progress-track { width: min(100%, 230px); height: 7px; border-radius: 999px; background: rgba(255,255,255,0.24); overflow: hidden; }
+.progress-fill { height: 100%; background: #90eec1; border-radius: 999px; transition: width 420ms var(--ease-spring); }
+.hero-actions { display: flex; gap: 0.65rem; flex-wrap: wrap; margin-top: 1.25rem; }
+.hero-cta {
+  display: inline-flex; align-items: center; gap: 9px; min-height: 42px; padding: 0.55rem 1.05rem;
+  border-radius: 10px; border: 0; background: #fff; color: #3c2c94; font: 700 0.88rem var(--sans);
+  cursor: pointer; box-shadow: 0 3px 0 #c5bdfa;
+  transition: transform 170ms var(--ease-spring), box-shadow 170ms var(--ease-spring), background-color 140ms ease;
+}
+.hero-cta .arrow { display: inline-block; transition: transform 180ms var(--ease-spring); }
+.hero-cta:hover { transform: translateY(-2px); box-shadow: 0 5px 0 #c5bdfa; }
+.hero-cta:hover .arrow { transform: translateX(4px); }
+.hero-cta:active { transform: translateY(2px); box-shadow: none; }
+.hero-cta.ghost {
+  background: rgba(255,255,255,0.14); color: #fff; box-shadow: none;
+  border: 1px solid rgba(255,255,255,0.28);
+}
+.hero-cta.ghost:hover { background: rgba(255,255,255,0.22); box-shadow: none; }
+
+/* Authentic Tempo Stacked Folder with Unfile & 3D Pocket Hover */
+.story-folder {
+  position: relative; justify-self: center; width: min(100%, 238px); height: 164px;
+  filter: drop-shadow(0 12px 12px rgba(39,22,100,0.28)); cursor: pointer;
+}
+.story-folder::before, .story-folder::after {
+  position: absolute; inset: 4px 10px 14px; border-radius: 12px; content: "";
+  transition: transform 260ms var(--ease-spring);
+}
+.story-folder::before {
+  background: #b3a5ff; transform: rotate(-12deg) translate(-5px, -3px);
+  animation: unfile-back 460ms var(--ease-spring) both;
+}
+.story-folder::after {
+  background: #ddd6ff; transform: rotate(7deg) translate(4px, -2px);
+  animation: unfile-middle 380ms var(--ease-spring) both;
+}
+@keyframes unfile-back { from { transform: translateY(6px) rotate(-1deg); } to { transform: rotate(-12deg) translate(-5px, -3px); } }
+@keyframes unfile-middle { from { transform: translateY(6px) rotate(1deg); } to { transform: rotate(7deg) translate(4px, -2px); } }
+.folder-sheet {
+  position: absolute; inset: 4px 10px 44px; border-radius: 12px; z-index: 1;
+  background: #fffdfb; padding: 12px 14px; overflow: hidden;
+  box-shadow: 0 2px 6px rgba(40,32,94,0.22);
+  transition: transform 240ms var(--ease-spring), box-shadow 240ms ease;
+}
+.hero-launch:hover .folder-sheet { transform: translateY(-8px); box-shadow: 0 8px 18px rgba(40,32,94,0.28); }
+.hero-launch:hover .story-folder::before { transform: rotate(-16deg) translate(-8px, -5px); }
+.hero-launch:hover .story-folder::after { transform: rotate(10deg) translate(7px, -4px); }
+.folder-period {
+  font: 700 0.68rem/1.3 var(--sans); color: #625197; text-transform: uppercase;
+  letter-spacing: 0.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.folder-title {
+  margin-top: 6px; color: #2b2454; font: 700 0.96rem/1.22 var(--sans); letter-spacing: -0.025em;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.folder-pocket {
+  position: absolute; z-index: 2; bottom: -2px; left: 0; right: 0; height: 46px;
+  background: linear-gradient(140deg, #dacfff, #a998fc 65%, #a28df1);
+  border-radius: 5px 7px 13px 13px; border-bottom: 3px solid #9580e2;
+  box-shadow: inset 0 1px #eee7ff;
+  transform-origin: 50% 100%;
+  transition: transform 220ms var(--ease-spring);
+}
+.hero-launch:hover .folder-pocket { transform: perspective(180px) rotateX(-11deg); }
+.folder-pocket::before {
+  content: ""; position: absolute; left: 0; top: -7px; width: 34%; height: 10px;
+  background: #d9ceff; border-radius: 6px 8px 0 0; transform: skewX(14deg); transform-origin: 0 100%;
+}
+
+/* Context Library Side Card */
+.library-card {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 18px;
+  padding: 1.2rem 1.35rem; box-shadow: var(--raised);
+  display: flex; flex-direction: column; justify-content: center;
+}
+.library-card h3 { margin: 0 0 0.45rem; font-size: 1.18rem; font-weight: 700; letter-spacing: -0.03em; }
+.lib-row {
+  display: grid; grid-template-columns: 32px 1fr auto 14px; gap: 10px; align-items: center;
+  padding: 0.62rem 0.5rem; margin: 0 -0.5rem; border-top: 1px solid var(--line); border-radius: 10px;
+  cursor: pointer; background: transparent; border-left: 0; border-right: 0; border-bottom: 0;
+  text-align: left; color: var(--ink); font: 600 0.87rem var(--sans);
+  transition: background-color 150ms ease, transform 150ms var(--ease-spring);
+}
+.lib-row:first-of-type { border-top: 0; }
+.lib-row:hover { background: var(--wash); }
+.lib-row:hover strong { color: var(--accent); }
+.lib-row:hover .lib-icon { transform: scale(1.08); background: var(--accent-soft); }
+.lib-row:hover .chev { transform: translateX(4px); color: var(--accent); }
+.lib-icon {
+  width: 30px; height: 30px; border-radius: 8px; background: var(--wash); color: var(--accent);
+  display: grid; place-items: center; font-size: 0.82rem; font-weight: 700;
+  transition: transform 180ms var(--ease-spring), background-color 150ms ease;
+}
+.lib-row strong { font-variant-numeric: tabular-nums; font-size: 0.98rem; transition: color 150ms ease; }
+.lib-row .chev { color: var(--muted); transition: transform 180ms var(--ease-spring), color 150ms ease; }
+
+/* Flagship Story Preview Cards */
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin: 0.4rem 0 0.95rem; }
+.section-head h3 { margin: 0; font-size: 1.22rem; font-weight: 700; letter-spacing: -0.03em; }
+.story-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; margin-bottom: 1.8rem; }
+.story-card {
+  position: relative; display: flex; flex-direction: column;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
+  padding: 1.25rem 1.35rem 1.15rem; box-shadow: var(--raised); cursor: pointer;
+  transition: transform 220ms var(--ease-spring), border-color 180ms ease, box-shadow 220ms var(--ease-spring);
+}
+.story-card:hover {
+  border-color: #9c8ee4; transform: translateY(-4px); box-shadow: var(--raised-hover);
+}
+.story-card:active { transform: translateY(-1px); }
+.story-card .period {
+  font-size: 0.76rem; font-weight: 650; color: var(--muted); margin-bottom: 0.45rem;
+  display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;
+}
+.story-card .period > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.story-card .period .pill { flex-shrink: 0; }
+.story-card h4 { margin: 0 0 0.45rem; font-size: 1.08rem; font-weight: 680; letter-spacing: -0.025em; line-height: 1.26; }
+.story-card p { margin: 0; font-size: 0.87rem; color: var(--muted); line-height: 1.52; flex: 1; }
+.story-card-foot {
+  margin-top: 0.85rem; padding-top: 0.65rem; border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.78rem; font-weight: 650; color: var(--muted);
+}
+.story-card-foot .go {
+  color: var(--accent); display: inline-flex; align-items: center; gap: 4px;
+  transition: transform 180ms var(--ease-spring);
+}
+.story-card:hover .story-card-foot .go { transform: translateX(4px); }
+
+/* Editorial Folded-Corner Portrait Card */
+.portrait-card {
+  display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(280px, 1fr);
+  border-radius: 18px; border: 1px solid #d3d5ed; overflow: hidden; box-shadow: var(--raised);
+  background: var(--paper); margin-bottom: 1.6rem;
+}
+body.dark .portrait-card { border-color: var(--line); }
+.portrait-intro {
+  position: relative; padding: clamp(22px, 2.8vw, 34px);
+  background: radial-gradient(ellipse at 100% 15%, #dbd8ff, transparent 68%), linear-gradient(115deg, #f3f1ff, #eae7ff);
+  box-shadow: inset 6px 0 #6c58cd;
+}
+body.dark .portrait-intro { background: linear-gradient(115deg, #1d1b38, #191e30); box-shadow: inset 6px 0 var(--accent); }
+.portrait-intro::before {
+  content: ""; position: absolute; right: 0; top: 0; width: 26px; height: 26px;
+  background: linear-gradient(45deg, #c3b8ff 8%, #9887e2 49%, var(--paper) 51%);
+  border-bottom-left-radius: 5px; box-shadow: -2px 2px 4px rgba(87,71,152,0.18);
+}
+.portrait-name { margin: 0.55rem 0 0.25rem; font-size: clamp(1.4rem, 2.2vw, 1.85rem); font-weight: 720; letter-spacing: -0.04em; line-height: 1.15; }
+.portrait-headline { margin: 0 0 0.85rem; font-size: 0.98rem; font-weight: 600; color: var(--accent); line-height: 1.4; }
+.portrait-overview { margin: 0; font-size: 0.92rem; line-height: 1.62; color: var(--ink); opacity: 0.9; }
+.portrait-side { padding: clamp(18px, 2.4vw, 30px); }
+
+/* Hover-reveal secondary buttons inside editorial lists */
+.hover-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 0.65rem;
+  padding: 0.52rem 0.55rem; margin: 0 -0.55rem; border-bottom: 1px solid var(--line); border-radius: 10px;
+  transition: background-color 150ms ease;
+}
+.hover-row:last-child { border-bottom: 0; }
+.hover-row:hover { background: var(--wash); }
+.hover-row .hover-action { opacity: 0; transition: opacity 150ms ease, transform 150ms var(--ease-spring); transform: translateX(4px); }
+.hover-row:hover .hover-action, .hover-row:focus-within .hover-action { opacity: 1; transform: none; }
+
+/* Master-Detail Workbench (My Stories L1, Share & Tiers, Vault) */
+.workbench {
+  display: grid; grid-template-columns: minmax(275px, 0.42fr) minmax(0, 1fr);
+  gap: 20px; align-items: start;
+}
+.index-panel {
+  position: sticky; top: 72px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
+  padding: 1rem; box-shadow: var(--raised);
+  max-height: calc(100vh - 96px); display: flex; flex-direction: column;
+}
+.index-controls { margin-bottom: 0.7rem; }
+.index-scroll { overflow-y: auto; margin: 0 -0.4rem; padding: 0 0.4rem; flex: 1; }
+.index-item {
+  position: relative; width: 100%; text-align: left; border: 0; border-top: 1px solid var(--line);
+  background: transparent; color: var(--ink); padding: 0.72rem 1.6rem 0.72rem 0.75rem;
+  border-radius: 10px; cursor: pointer; font: inherit;
+  transition: background-color 150ms ease, transform 150ms var(--ease-spring), box-shadow 180ms ease;
+}
+.index-item:first-child { border-top: 0; }
+.index-item:hover { background: var(--wash); }
+.index-item.active {
+  background: var(--wash);
+  box-shadow: inset 3.5px 0 var(--accent);
+}
+.index-item::after {
+  content: "›"; position: absolute; right: 10px; top: 50%; transform: translateY(-50%) translateX(-3px);
+  color: var(--accent); font-size: 1.15rem; font-weight: 700; opacity: 0;
+  transition: opacity 160ms ease, transform 180ms var(--ease-spring);
+}
+.index-item:hover::after { opacity: 0.65; transform: translateY(-50%); }
+.index-item.active::after { opacity: 1; transform: translateY(-50%) translateX(2px); }
+.index-title { font-weight: 650; font-size: 0.9rem; line-height: 1.3; margin-bottom: 0.25rem; }
+.index-sub { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; font-size: 0.74rem; color: var(--muted); }
+
+/* Right-Hand Focused Detail Sheet */
+.sheet-panel {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 18px;
+  padding: clamp(20px, 2.5vw, 32px); box-shadow: var(--raised); min-width: 0;
+}
+.sheet-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 1rem; flex-wrap: wrap; padding-bottom: 1rem; margin-bottom: 1.2rem;
+  border-bottom: 1px solid var(--line);
+}
+.sheet-head h3 { margin: 0; font-size: clamp(1.3rem, 2vw, 1.75rem); font-weight: 720; letter-spacing: -0.035em; line-height: 1.18; }
+
+/* Tempo Sliding Segmented Control (Filters, Modes, Story Level) */
+.seg-control {
+  position: relative; isolation: isolate; display: inline-grid;
+  grid-auto-flow: column; grid-auto-columns: 1fr;
+  padding: 3px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line);
+}
+.seg-control.full { display: grid; width: 100%; }
+.seg-thumb {
+  position: absolute; top: 3px; bottom: 3px; left: 0; z-index: 0;
+  border-radius: 7px; background: var(--paper);
+  box-shadow: 0 1px 3px rgba(27, 37, 84, 0.14);
+  transition: transform 230ms var(--ease-spring), width 230ms var(--ease-spring);
+  pointer-events: none;
+}
+.seg-control.mint .seg-thumb { background: var(--mint-bg); box-shadow: inset 0 -2.5px var(--mint-bar); }
+.seg-control button {
+  position: relative; z-index: 1; border: 0; background: transparent; color: var(--muted);
+  padding: 0.38rem 0.72rem; border-radius: 7px; cursor: pointer;
+  font: 600 0.78rem/1.2 var(--sans); white-space: nowrap;
+  transition: color 150ms ease;
+}
+.seg-control button:hover { color: var(--ink); }
+.seg-control button.active { color: var(--accent); }
+.seg-control.mint button.active { color: var(--mint); font-weight: 700; }
+
+/* Reading-mode editorial blocks inside Story Sheet */
+.story-lead { font-size: 1.01rem; line-height: 1.66; margin: 0 0 1.25rem; color: var(--ink); }
+.decisions-list { list-style: none; padding: 0; margin: 0.45rem 0 1.2rem; }
+.decisions-list li {
+  padding: 0.35rem 0 0.35rem 0.9rem; border-left: 3px solid #b5abfc;
+  margin-bottom: 0.5rem; font-size: 0.92rem; line-height: 1.5;
+  transition: border-color 150ms ease, transform 150ms var(--ease-spring);
+}
+.decisions-list li:hover { border-left-color: var(--accent); transform: translateX(3px); }
+.callout-strip {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.9rem;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 13px;
+  padding: 0.95rem 1.1rem; margin: 1rem 0;
+}
+.callout-strip strong { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 0.2rem; }
+
+/* Lavender Reference Box for L1 inside Sharing Studio */
+.l1-ref-box {
+  position: relative; border-radius: 14px; padding: 1rem 1.15rem; margin-bottom: 1.15rem;
+  background: linear-gradient(115deg, #f3f1ff, #ece9ff);
+  border: 1px solid #d7d2f7; box-shadow: inset 4px 0 var(--accent);
+}
+body.dark .l1-ref-box { background: linear-gradient(115deg, #1d1b38, #191e30); border-color: var(--line); }
+
+/* General layout & tactile cards */
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.2rem; align-items: start; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; align-items: start; }
+.card {
+  background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 1.25rem 1.4rem; margin-bottom: 1rem; box-shadow: var(--raised);
+}
+.card h3 { margin: 0 0 0.35rem; font-size: 1.08rem; font-weight: 680; letter-spacing: -0.025em; }
+.meta { font-size: 0.83rem; color: var(--muted); }
+
+/* Pills & Status Dots */
+.pill {
+  display: inline-flex; align-items: center; gap: 0.28rem;
+  font-size: 0.72rem; font-weight: 650; padding: 0.18rem 0.6rem;
+  border-radius: 999px; background: var(--wash); color: var(--accent);
+  border: 1px solid transparent; transition: transform 150ms var(--ease-spring), background-color 150ms ease;
+}
+.pill.ok { background: var(--mint-bg); color: var(--mint); }
+.pill.warn { background: var(--amber-bg); color: var(--amber); }
+.pill.danger { background: var(--danger-bg); color: var(--danger); }
+.pill.clickable { cursor: pointer; }
+.pill.clickable:hover { transform: translateY(-1px); filter: brightness(0.96); }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--line-strong); }
+.dot.ok { background: var(--mint-bar); }
+.dot.warn { background: #d97706; }
+.dot.danger { background: var(--danger); }
+
+/* Form Inputs — Refined Tempo Feel */
+input, textarea, select {
+  width: 100%; background: var(--paper); color: var(--ink);
+  border: 1.5px solid var(--line-strong); border-radius: 10px;
+  padding: 0.56rem 0.82rem; font: inherit; font-size: 0.9rem;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+select { height: 42px; white-space: nowrap; text-overflow: ellipsis; }
+input:not(.title-input):not([type="checkbox"]) { min-height: 42px; }
+body.dark input, body.dark textarea, body.dark select { background: var(--surface); border-color: var(--line); }
+input:hover, textarea:hover, select:hover { border-color: #9e93e4; }
+input:focus, textarea:focus, select:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3.5px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+input.title-input { font-size: 1.15rem; font-weight: 680; letter-spacing: -0.02em; padding: 0.68rem 0.9rem; }
+textarea { min-height: 98px; resize: vertical; line-height: 1.55; }
+label {
+  display: block; font-size: 0.72rem; color: var(--muted);
+  margin: 0.75rem 0 0.28rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.8rem; }
+
+/* Tactile Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  min-height: 38px; padding: 0.48rem 0.98rem; border-radius: 10px; border: 1px solid var(--accent);
+  background: var(--accent); color: #fff; font: 650 0.83rem var(--sans); cursor: pointer;
+  text-decoration: none; box-shadow: var(--raised-accent); white-space: nowrap;
+  transition: transform 150ms var(--ease-spring), box-shadow 150ms var(--ease-spring), background-color 140ms ease, border-color 140ms ease;
+}
+.btn:hover { background: var(--accent-hover); transform: translateY(-1.5px); box-shadow: 0 4.5px 0 #362986; }
+.btn:active { transform: translateY(2px); box-shadow: none; }
+.btn.secondary {
+  background: var(--paper); color: var(--ink); border-color: var(--line);
+  box-shadow: 0 2px 0 var(--line);
+}
+.btn.secondary:hover {
+  background: var(--wash); border-color: #a69ce3; color: var(--accent);
+  box-shadow: 0 3.5px 0 #d0caf2;
+}
+.btn.danger { background: var(--danger-bg); color: var(--danger); border-color: transparent; box-shadow: none; }
+.btn.danger:hover { filter: brightness(0.95); transform: translateY(-1px); box-shadow: none; }
+.btn.sm { min-height: 30px; padding: 0.25rem 0.65rem; font-size: 0.76rem; border-radius: 8px; }
+.row { display: flex; gap: 0.55rem; align-items: center; flex-wrap: wrap; }
+.split { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.85rem; flex-wrap: wrap; }
+
+/* Timeline Rail */
+.timeline-item {
+  border-left: 3px solid var(--line); padding: 0.35rem 0.65rem 0.35rem 1rem;
+  margin-bottom: 0.6rem; border-radius: 0 10px 10px 0;
+  transition: background-color 150ms ease, border-left-width 150ms ease, transform 150ms var(--ease-spring);
+}
+.timeline-item.clickable { cursor: pointer; }
+.timeline-item.clickable:hover { background: var(--wash); transform: translateX(3px); }
+.timeline-item.role { border-color: var(--accent); }
+.timeline-item.episode { border-color: var(--mint-bar); }
+.timeline-item.unlinked_source { border-color: #d97706; }
+
+/* Upload dropzone & visual artifacts */
+.dropzone {
+  border: 2px dashed #b9b1e8; border-radius: 14px; padding: 1.3rem; text-align: center;
+  background: var(--wash); cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 180ms var(--ease-spring);
+}
+.dropzone:hover, .dropzone.over { border-color: var(--accent); background: var(--accent-soft); transform: translateY(-2px); }
+.thumb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(195px, 1fr)); gap: 0.85rem; margin-top: 0.9rem; }
+.thumb {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 0.55rem;
+  transition: transform 180ms var(--ease-spring), border-color 150ms ease, box-shadow 180ms ease;
+}
+.thumb:hover { transform: translateY(-3px); border-color: #9c8ee4; box-shadow: var(--raised-hover); }
+.thumb-img-wrap { overflow: hidden; border-radius: 8px; margin-bottom: 0.45rem; cursor: zoom-in; }
+.thumb img {
+  width: 100%; height: 120px; object-fit: cover; display: block;
+  transition: transform 260ms var(--ease-spring);
+}
+.thumb:hover img { transform: scale(1.05); }
+pre {
+  white-space: pre-wrap; word-break: break-word; background: var(--surface);
+  border: 1px solid var(--line); padding: 1rem; border-radius: 12px;
+  font: 0.84rem/1.55 var(--mono); max-height: 58vh; overflow: auto;
+}
+
+/* Smooth Animated Dialogs (Export Preview & Image Lightbox) */
+dialog { border: 0; padding: 0; background: transparent; }
+dialog[open] {
+  display: flex; flex-direction: column; width: min(980px, 92vw); height: 88vh;
+  background: var(--paper); color: var(--ink); border: 1px solid var(--line);
+  border-radius: 18px; overflow: hidden; box-shadow: 0 28px 70px rgba(24,38,67,0.34);
+  animation: dialog-in 210ms var(--ease-spring) both;
+}
+dialog#lightbox-dialog[open] { width: min(900px, 92vw); height: auto; max-height: 90vh; }
+dialog::backdrop {
+  background: rgba(24, 38, 67, 0.52); backdrop-filter: blur(4px);
+  animation: backdrop-in 180ms ease both;
+}
+@keyframes dialog-in { from { opacity: 0; transform: translateY(12px) scale(0.985); } to { opacity: 1; transform: none; } }
+@keyframes backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+.modal-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.75rem 1.15rem; border-bottom: 1px solid var(--line); flex-shrink: 0;
+}
+.modal-frame { width: 100%; flex: 1; border: 0; background: #f7f8fc; }
+
+/* Animated Toast */
+.toast {
+  position: fixed; bottom: 1.35rem; right: 1.35rem; background: var(--ink); color: var(--paper);
+  padding: 0.72rem 1.15rem; border-radius: 12px; font: 600 0.85rem var(--sans);
+  z-index: 120; max-width: 460px; box-shadow: 0 14px 34px rgba(24,38,67,0.32);
+  opacity: 0; transform: translateY(14px) scale(0.97); pointer-events: none;
+  transition: opacity 200ms ease, transform 240ms var(--ease-spring);
+}
+.toast.show { opacity: 1; transform: none; pointer-events: auto; }
+.hidden { display: none !important; }
+
+@media (max-width: 920px) {
+  .studio-desk, .portrait-card, .workbench { grid-template-columns: 1fr; }
+  .index-panel { position: static; max-height: 320px; }
+  .hero-launch { grid-template-columns: 1fr; }
+  .story-folder { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="brand" onclick="switchTab('timeline')">
+      <span class="workspace-mark" aria-hidden="true"></span>
+      <h1>Career Context</h1>
+    </div>
+    <nav id="main-nav">
+      <div class="nav-glider" id="nav-glider"></div>
+      <button class="active" data-tab="timeline">Studio</button>
+      <button data-tab="episodes">My Stories (L1)</button>
+      <button data-tab="sharing">Share &amp; Tiers (L2/L3)</button>
+      <button data-tab="vault">Vault &amp; Triage (L0)</button>
+      <button data-tab="assistant">Browser AI</button>
+    </nav>
+    <div class="owner-box">
+      <div class="owner-meta">
+        <strong id="owner-name">Career Vault</strong>
+        <span id="owner-sub">Local SQLite · Live Save</span>
+      </div>
+      <button class="theme-btn" id="theme-toggle" title="Toggle light/dark theme">Dark</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- TAB 1: STUDIO OVERVIEW, FLAGSHIPS, EDITORIAL PORTRAIT & TIMELINE -->
+  <section id="tab-timeline" class="tab-view">
+    <div class="page-head">
+      <h2>Career studio</h2>
+      <div class="row">
+        <button class="btn secondary" onclick="switchTab('vault');toggleUploadDrawer(true)">Add sources +</button>
+        <button class="btn" onclick="previewExport('L2')">Preview L2 Overview ↗</button>
+      </div>
+    </div>
+
+    <div class="studio-desk">
+      <div class="hero-launch">
+        <div class="hero-copy">
+          <h3>Your stories, ready at every level</h3>
+          <p id="hero-progress-label">0 of 0 stories ready for confidential-safe sharing</p>
+          <div class="progress-track"><div id="hero-progress-fill" class="progress-fill" style="width:0%"></div></div>
+          <div class="hero-actions">
+            <button class="hero-cta" onclick="switchTab('sharing')">Open sharing studio <span class="arrow">→</span></button>
+            <button class="hero-cta ghost" onclick="copyResume('L2')">Copy L2 Resume</button>
+          </div>
+        </div>
+        <div class="story-folder" id="hero-folder" title="Open featured flagship story">
+          <div class="folder-sheet">
+            <div class="folder-period" id="folder-period">FLAGSHIP STORY</div>
+            <div class="folder-title" id="folder-title">Your top career story</div>
+          </div>
+          <div class="folder-pocket"></div>
+        </div>
+      </div>
+
+      <div class="library-card">
+        <h3>Context library</h3>
+        <button class="lib-row" onclick="switchTab('episodes')"><span class="lib-icon">E</span><span>Work stories (L1)</span><strong id="lib-episodes">0</strong><span class="chev">›</span></button>
+        <button class="lib-row" onclick="switchTab('vault')"><span class="lib-icon">S</span><span>Saved sources (L0)</span><strong id="lib-sources">0</strong><span class="chev">›</span></button>
+        <button class="lib-row" onclick="switchTab('vault');document.getElementById('triage-btn').click()"><span class="lib-icon">I</span><span>Unlinked inbox</span><strong id="lib-unlinked">0</strong><span class="chev">›</span></button>
+        <button class="lib-row" onclick="switchTab('episodes')"><span class="lib-icon">V</span><span>Visual artifacts</span><strong id="lib-visuals">0</strong><span class="chev">›</span></button>
+        <button class="lib-row" onclick="switchTab('sharing')"><span class="lib-icon">L2</span><span>Shareable L2 / L3</span><strong id="lib-tiers">0/0</strong><span class="chev">›</span></button>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <h3>Flagship stories to lead with</h3>
+      <button class="btn secondary sm" onclick="switchTab('episodes')">All stories →</button>
+    </div>
+    <div id="flagship-grid" class="story-grid"></div>
+
+    <!-- Editorial Portrait Card (Read-First with Smooth Inline Edit Switch) -->
+    <div class="portrait-card">
+      <div class="portrait-intro">
+        <div class="split" style="align-items:center">
+          <span class="pill">Private Overview (L1)</span>
+          <button class="btn secondary sm" id="toggle-profile-edit">Edit profile</button>
+        </div>
+        <div id="profile-read-view">
+          <h3 class="portrait-name" id="p-name-view">Career Vault</h3>
+          <div class="portrait-headline" id="p-headline-view"></div>
+          <p class="portrait-overview" id="p-l1-view"></p>
+        </div>
+        <div id="profile-edit-view" class="hidden sheet-animate">
+          <label>Name</label><input id="p-name">
+          <label>Headline</label><textarea id="p-headline" style="min-height:54px"></textarea>
+          <label>Private L1 Overview</label><textarea id="p-l1" style="min-height:115px"></textarea>
+          <div class="row" style="margin-top:0.85rem">
+            <button class="btn" id="save-person">Save profile</button>
+            <button class="btn secondary" id="cancel-profile-edit">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="portrait-side">
+        <div class="split" style="align-items:center;margin-bottom:0.65rem">
+          <h3 style="margin:0">Roles &amp; experience</h3>
+          <button class="btn secondary sm" id="toggle-role-form">+ Add role</button>
+        </div>
+        <div id="role-form" class="hidden sheet-animate" style="padding:0.8rem;margin-bottom:0.8rem;background:var(--surface);border:1px solid var(--line);border-radius:12px">
+          <div class="form-row">
+            <div><label style="margin-top:0">Role title</label><input id="r-title" placeholder="e.g. Staff Engineer or VP Product"></div>
+            <div><label style="margin-top:0">Organization</label><input id="r-org" placeholder="e.g. Acme Labs"></div>
+          </div>
+          <div class="form-row" style="margin-top:0.45rem">
+            <div><label style="margin-top:0">Start (YYYY-MM)</label><input id="r-start" placeholder="2023-01"></div>
+            <div><label style="margin-top:0">End (blank if current)</label><input id="r-end" placeholder="2026-01"></div>
+          </div>
+          <div class="row" style="margin-top:0.65rem;justify-content:space-between">
+            <label style="margin:0;display:flex;align-items:center;gap:0.35rem;text-transform:none;letter-spacing:0"><input id="r-curr" type="checkbox" style="width:auto"> Current role</label>
+            <div class="row">
+              <button class="btn secondary sm" id="cancel-role-form">Cancel</button>
+              <button class="btn sm" id="save-role">Save role</button>
+            </div>
+          </div>
+        </div>
+        <div id="roles-list"></div>
+      </div>
+    </div>
+
+    <!-- Live Deepening Radar ("What Else Have I Missed?") -->
+    <div class="card" id="deepening-radar" style="margin-bottom:1.5rem">
+      <div class="split" style="align-items:center;margin-bottom:0.75rem">
+        <div>
+          <div class="row" style="margin-bottom:0.2rem">
+            <h3 style="margin:0">Deepening radar · what else have you missed?</h3>
+            <span class="pill ok" id="depth-score-pill">Depth 0/100</span>
+          </div>
+          <p class="meta" style="margin:0">Deterministic audit of uncovered roles, unlinked long docs, thin stories, voice quality, and sharing safety.</p>
+        </div>
+        <div class="row">
+          <button class="btn secondary sm" id="copy-deepening-btn">Copy AI deepening prompt</button>
+          <button class="btn sm" id="send-deepening-ai-btn">Deepen with Browser AI →</button>
+        </div>
+      </div>
+      <div id="depth-pillars" class="row" style="margin-bottom:0.8rem"></div>
+      <div id="gap-actions-list"></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Knowledge &amp; skills graph</h3>
+        <p class="meta">Capabilities, recurring themes, and key decisions aggregated across your stories.</p>
+        <div id="knowledge-graph"></div>
+      </div>
+      <div class="card">
+        <h3>Dynamic career timeline</h3>
+        <p class="meta">Chronological view across Roles, Stories, and unlinked dated sources. Click any story to open it.</p>
+        <div id="timeline-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 2: MY STORIES (L1) — TEMPO MASTER-DETAIL WORKBENCH -->
+  <section id="tab-episodes" class="tab-view hidden">
+    <div class="page-head">
+      <h2>My stories (L1 private)</h2>
+      <div class="row">
+        <button class="btn" id="new-story-btn">+ New story</button>
+      </div>
+    </div>
+
+    <div class="workbench">
+      <aside class="index-panel">
+        <div class="index-controls">
+          <input id="story-filter-q" placeholder="Filter stories..." style="margin-bottom:0.55rem">
+          <div class="seg-control full" id="story-filter-seg">
+            <div class="seg-thumb"></div>
+            <button class="active" data-filter="all">All</button>
+            <button data-filter="3">Flagship</button>
+            <button data-filter="2">Core</button>
+            <button data-filter="other">Other</button>
+          </div>
+        </div>
+        <div id="story-index-list" class="index-scroll"></div>
+      </aside>
+
+      <div id="story-sheet" class="sheet-panel"></div>
+    </div>
+  </section>
+
+  <!-- TAB 3: SHARE & TIERS (L2/L3) — FOCUSED TIER STUDIO -->
+  <section id="tab-sharing" class="tab-view hidden">
+    <div class="page-head">
+      <h2>Granularity &amp; sharing (L2 / L3)</h2>
+      <div class="row">
+        <button class="btn secondary" onclick="previewExport('L2')">Preview L2 ↗</button>
+        <button class="btn secondary" onclick="previewExport('L3')">Preview L3 ↗</button>
+        <button class="btn" onclick="copyResume('L2')">Copy L2 Resume</button>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:1.15rem">
+      <div class="card" style="margin-bottom:0">
+        <div class="split">
+          <div>
+            <h3>Sensitive terms registry</h3>
+            <p class="meta" style="margin:0.2rem 0 0">Blocks confidential names, metrics, and internal terms from L2/L3 exports &amp; MCP.</p>
+          </div>
+          <button class="btn secondary sm" id="st-suggest-btn">Scan &amp; suggest</button>
+        </div>
+        <div class="row" style="margin-top:0.75rem">
+          <input id="st-term" placeholder="Confidential term..." style="flex:2;min-width:140px">
+          <input id="st-repl" placeholder="Safe replacement..." style="flex:2;min-width:140px">
+          <select id="st-cat" style="flex:1;min-width:110px"><option>customer</option><option>metric</option><option>proprietary</option><option>person</option><option>internal_id</option><option>other</option></select>
+          <button class="btn sm" id="st-add">Add</button>
+        </div>
+        <div id="suggested-terms" style="margin-top:0.65rem"></div>
+        <div id="sensitive-list" style="margin-top:0.65rem;max-height:190px;overflow-y:auto"></div>
+      </div>
+
+      <div class="card" style="margin-bottom:0">
+        <div class="split" style="align-items:center">
+          <div>
+            <h3>Overviews &amp; clean static exports</h3>
+            <p class="meta" style="margin:0.2rem 0 0">Zero JS, strict CSP, deterministically leak-checked.</p>
+          </div>
+          <div class="row">
+            <button class="btn secondary sm" onclick="batchSanitize('L2')">Auto-Sanitize L2</button>
+            <button class="btn secondary sm" onclick="batchSanitize('L3')">Auto-Sanitize L3</button>
+          </div>
+        </div>
+        <div class="row" style="margin-top:0.85rem">
+          <a class="btn secondary sm" href="/api/export?tier=L2&format=html">L2 HTML ↓</a>
+          <a class="btn secondary sm" href="/api/export?tier=L3&format=html">L3 HTML ↓</a>
+          <a class="btn secondary sm" href="/api/export?tier=L2&format=resume">L2 Resume ↓</a>
+          <a class="btn secondary sm" href="/api/export?tier=L2&format=markdown">L2 Markdown ↓</a>
+          <a class="btn secondary sm" href="/api/export?tier=L3&format=json">L3 JSON ↓</a>
+        </div>
+        <details style="margin-top:0.85rem">
+          <summary class="meta" style="cursor:pointer;font-weight:650;color:var(--accent)">Edit L2 &amp; L3 top-level overviews</summary>
+          <label>L2 Confidential-Safe Overview (Hiring Managers)</label><textarea id="p-l2" style="min-height:76px"></textarea>
+          <label>L3 Public Overview</label><textarea id="p-l3" style="min-height:76px"></textarea>
+          <button class="btn sm" id="save-overviews" style="margin-top:0.6rem">Save overviews</button>
+        </details>
+      </div>
+    </div>
+
+    <div class="workbench">
+      <aside class="index-panel">
+        <div class="index-controls">
+          <div class="seg-control full" id="tier-filter-seg">
+            <div class="seg-thumb"></div>
+            <button class="active" data-tfilter="all">All</button>
+            <button data-tfilter="flagship">Flagship</button>
+            <button data-tfilter="needs">Needs work</button>
+          </div>
+        </div>
+        <div id="tier-index-list" class="index-scroll"></div>
+      </aside>
+
+      <div id="tier-sheet" class="sheet-panel"></div>
+    </div>
+  </section>
+
+  <!-- TAB 4: RAW VAULT & TRIAGE (L0) -->
+  <section id="tab-vault" class="tab-view hidden">
+    <div class="page-head">
+      <h2>Raw vault &amp; triage (L0)</h2>
+      <div class="row">
+        <button class="btn secondary" id="toggle-upload-btn">+ Upload / Capture</button>
+        <button class="btn secondary" id="triage-btn">Triage unlinked inbox</button>
+        <button class="btn secondary" id="sync-emb-btn">Sync semantic cache</button>
+      </div>
+    </div>
+
+    <!-- Collapsible Upload + Quick Capture Drawer -->
+    <div id="upload-drawer" class="grid-2 hidden sheet-animate" style="margin-bottom:1.1rem">
+      <div class="card" style="margin-bottom:0">
+        <h3>Drop any career file to ingest</h3>
+        <div id="dropzone" class="dropzone">
+          <div><strong>Drop files here or click to browse</strong></div>
+          <div class="meta">Auto-detects .docx, .md, .txt, LinkedIn CSVs, X tweets.js, Substack XML, Slack/GitHub JSON, or v1 HTML</div>
+          <input id="file-input" type="file" multiple style="display:none">
+        </div>
+        <div class="row" style="margin-top:0.65rem">
+          <select id="up-channel" style="flex:1"><option value="auto">Auto-detect channel</option><option value="doc">Doc / Resume</option><option value="slack">Slack JSON</option><option value="notion">Notion</option><option value="github">GitHub JSON</option><option value="linkedin">LinkedIn CSV</option><option value="x">X tweets.js</option><option value="substack">Substack RSS</option><option value="v1">Migrate v1 HTML/JSON</option></select>
+          <select id="up-sens" style="width:110px"><option>L0</option><option>L1</option><option>L2</option><option>L3</option></select>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <h3>Quick capture into L0 vault</h3>
+        <label style="margin-top:0.25rem">Title</label><input id="cap-title" placeholder="e.g. Postmortem note or voice memo">
+        <div class="form-row">
+          <div><label>Channel</label><select id="cap-channel"><option>voice_note</option><option>doc</option><option>slack</option><option>github</option><option>notion</option><option>x</option><option>linkedin</option><option>substack</option><option>resume</option></select></div>
+          <div><label>Event Date</label><input id="cap-date" placeholder="YYYY-MM-DD"></div>
+          <div><label>Sensitivity</label><select id="cap-sens"><option>L0</option><option>L1</option><option>L2</option><option>L3</option></select></div>
+        </div>
+        <label>Raw Text</label><textarea id="cap-text" style="min-height:74px" placeholder="Paste raw notes, threads, transcripts..."></textarea>
+        <div class="row" style="margin-top:0.65rem"><button class="btn sm" id="cap-save">Ingest immediately</button></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <input id="search-input" placeholder="Search across Slack, GitHub, Notion, X, Substack, DOCX, docs..." style="flex:1;min-width:240px">
+        <select id="search-mode" style="width:185px">
+          <option value="auto">Auto (Hybrid / FTS5)</option>
+          <option value="fts5">FTS5 Instant</option>
+        </select>
+        <button class="btn" id="search-btn">Search</button>
+        <button class="btn secondary" id="search-clear">Clear</button>
+      </div>
+      <div id="search-results" style="margin-top:0.9rem"></div>
+      <div id="triage-results" style="margin-top:0.9rem"></div>
+    </div>
+
+    <div class="workbench">
+      <aside class="index-panel">
+        <div class="index-controls">
+          <div class="row" style="justify-content:space-between;margin-bottom:0.45rem">
+            <strong style="font-size:0.88rem">Ingested sources</strong>
+            <select id="source-channel-filter" style="width:auto;padding:0.25rem 0.5rem;font-size:0.78rem">
+              <option value="all">All channels</option>
+              <option value="unlinked">Unlinked inbox</option>
+            </select>
+          </div>
+        </div>
+        <div id="sources-list" class="index-scroll"></div>
+      </aside>
+
+      <div id="source-reader" class="sheet-panel">
+        <div class="meta" style="text-align:center;padding:3rem 1rem">Select any source on the left (or from Search) to inspect its full verified raw text here.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 5: BROWSER BYO-API ASSISTANT -->
+  <section id="tab-assistant" class="tab-view hidden">
+    <div class="page-head">
+      <h2>Browser AI (BYO-API)</h2>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Connect your own LLM API</h3>
+        <p class="meta">Keys stay strictly in browser <code>sessionStorage</code> — never written to SQLite.</p>
+        <div class="form-row">
+          <div>
+            <label>Provider</label>
+            <select id="llm-provider">
+              <option value="openai">OpenAI-compatible</option>
+              <option value="anthropic">Anthropic Claude</option>
+              <option value="gemini">Google Gemini</option>
+            </select>
+          </div>
+          <div><label>Model</label><input id="llm-model" value="gpt-4o-mini"></div>
+        </div>
+        <label>Optional Custom Base URL</label>
+        <input id="llm-url" placeholder="e.g. http://localhost:11434/v1/chat/completions">
+        <label>API Key (sessionStorage only)</label>
+        <input id="llm-key" type="password" placeholder="sk-... / sk-ant-... / AIza...">
+        <div class="row" style="margin-top:0.85rem">
+          <button class="btn" id="llm-save-cfg">Save for this tab</button>
+          <button class="btn danger" id="llm-clear-cfg">Clear key</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Ask your career vault (local RAG)</h3>
+        <p class="meta">Retrieves only the top matching local excerpts and runs them against your own API.</p>
+        <div class="row" style="margin:0.5rem 0 0.2rem">
+          <span class="pill ok clickable" onclick="loadDeepeningPrompt()">Deepen what I missed</span>
+          <span class="pill clickable" onclick="setAiPrompt('Summarize the recurring leadership and systems patterns across my career stories.')">Recurring patterns</span>
+          <span class="pill clickable" onclick="setAiPrompt('Draft a crisp 60-second executive intro grounded in my Flagship stories.')">60s Executive intro</span>
+          <span class="pill clickable" onclick="setAiPrompt('Spot contradictions or unverified claims between my resume and internal notes.')">Spot contradictions</span>
+        </div>
+        <label>Question or drafting request</label>
+        <textarea id="llm-prompt" placeholder="Ask anything across your saved sources and career stories..."></textarea>
+        <div class="row" style="margin-top:0.8rem">
+          <button class="btn" id="llm-ask">Retrieve &amp; run via my API</button>
+        </div>
+        <div id="llm-output" style="margin-top:1rem"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<dialog id="preview-dialog">
+  <div class="modal-head">
+    <strong id="preview-title">Static Export Preview</strong>
+    <button class="btn secondary sm" onclick="document.getElementById('preview-dialog').close()">Close</button>
+  </div>
+  <iframe id="preview-frame" class="modal-frame" sandbox=""></iframe>
+</dialog>
+
+<dialog id="lightbox-dialog">
+  <div class="modal-head">
+    <strong id="lightbox-title">Visual Artifact</strong>
+    <button class="btn secondary sm" onclick="document.getElementById('lightbox-dialog').close()">Close</button>
+  </div>
+  <div style="padding:1rem;background:var(--surface);text-align:center;overflow:auto">
+    <img id="lightbox-img" style="max-width:100%;max-height:74vh;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.18)">
+  </div>
+</dialog>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const CSRF = "@@CSRF_TOKEN@@";
+let STATE = null;
+let LAST_TRIAGE = null;
+let ACTIVE_STORY_ID = null;
+let STORY_MODE = "read"; // "read" | "edit" | "new" | "claim"
+let STORY_FILTER = "all";
+let ACTIVE_TIER_ID = null;
+let TIER_FILTER = "all";
+let ACTIVE_SOURCE_ID = null;
+let TOAST_TIMER = null;
+
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(TOAST_TIMER);
+  TOAST_TIMER = setTimeout(() => el.classList.remove("show"), 3200);
+}
+
+async function api(path, body = null, extraHeaders = {}) {
+  const opts = body ? {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Career-Token": CSRF, ...extraHeaders },
+    body: JSON.stringify(body),
+  } : { headers: extraHeaders };
+  const res = await fetch(path, opts);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Request failed");
+  return data;
+}
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]));
+}
+
+function cleanSnippet(s, maxLen = 180) {
+  let t = String(s || "").replace(/<[^>]*>/g, " ").replace(/<[^\s>]*$/g, " ").replace(/\s+/g, " ").trim();
+  return t.length > maxLen ? t.slice(0, maxLen) + "…" : t;
+}
+
+function shortPeriod(p) {
+  return (p || "Undated").split("·")[0].trim();
+}
+
+function levelLabel(imp) {
+  return imp >= 3 ? "Flagship" : imp === 2 ? "Core" : imp === 1 ? "Proof Point" : "Background";
+}
+
+function levelPill(imp) {
+  if (imp >= 3) return '<span class="pill ok">Flagship</span>';
+  if (imp === 2) return '<span class="pill">Core</span>';
+  if (imp === 1) return '<span class="pill" style="opacity:0.8">Proof</span>';
+  return '<span class="pill" style="opacity:0.65">Background</span>';
+}
+
+/* Sliding indicator helpers */
+function positionGlider(container, activeBtn, gliderEl) {
+  if (!container || !activeBtn || !gliderEl) return;
+  const cRect = container.getBoundingClientRect();
+  const bRect = activeBtn.getBoundingClientRect();
+  if (!bRect.width) return;
+  gliderEl.style.width = bRect.width + "px";
+  gliderEl.style.transform = `translateX(${bRect.left - cRect.left}px)`;
+  gliderEl.style.opacity = "1";
+}
+
+function syncNavGlider() {
+  const nav = document.getElementById("main-nav");
+  positionGlider(nav, nav.querySelector("button.active"), document.getElementById("nav-glider"));
+}
+
+function syncSegControl(segEl) {
+  if (!segEl) return;
+  positionGlider(segEl, segEl.querySelector("button.active"), segEl.querySelector(".seg-thumb"));
+}
+
+window.addEventListener("resize", () => {
+  syncNavGlider();
+  document.querySelectorAll(".seg-control").forEach(syncSegControl);
+});
+
+/* Theme toggle */
+function applyTheme(dark) {
+  document.body.classList.toggle("dark", dark);
+  document.getElementById("theme-toggle").textContent = dark ? "Light" : "Dark";
+  localStorage.setItem("cc_theme", dark ? "dark" : "light");
+}
+applyTheme(localStorage.getItem("cc_theme") === "dark");
+document.getElementById("theme-toggle").onclick = () => applyTheme(!document.body.classList.contains("dark"));
+
+/* Tab switching */
+function switchTab(tab) {
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+  document.querySelectorAll("main > section").forEach(s => s.classList.toggle("hidden", s.id !== "tab-" + tab));
+  window.scrollTo({ top: 0, behavior: "instant" });
+  requestAnimationFrame(() => {
+    syncNavGlider();
+    document.querySelectorAll(".seg-control").forEach(syncSegControl);
+  });
+}
+document.querySelectorAll("nav button").forEach(btn => { btn.onclick = () => switchTab(btn.dataset.tab); });
+
+function toggleUploadDrawer(forceOpen = null) {
+  const el = document.getElementById("upload-drawer");
+  const show = forceOpen === null ? el.classList.contains("hidden") : forceOpen;
+  el.classList.toggle("hidden", !show);
+  document.getElementById("toggle-upload-btn").textContent = show ? "Close upload ×" : "+ Upload / Capture";
+}
+document.getElementById("toggle-upload-btn").onclick = () => toggleUploadDrawer();
+
+/* Profile inline edit switch */
+function setProfileEditing(editing) {
+  document.getElementById("profile-read-view").classList.toggle("hidden", editing);
+  document.getElementById("profile-edit-view").classList.toggle("hidden", !editing);
+  document.getElementById("toggle-profile-edit").classList.toggle("hidden", editing);
+}
+document.getElementById("toggle-profile-edit").onclick = () => setProfileEditing(true);
+document.getElementById("cancel-profile-edit").onclick = () => setProfileEditing(false);
+
+/* Role form toggle */
+function setRoleFormOpen(open) {
+  document.getElementById("role-form").classList.toggle("hidden", !open);
+}
+document.getElementById("toggle-role-form").onclick = () => setRoleFormOpen(document.getElementById("role-form").classList.contains("hidden"));
+document.getElementById("cancel-role-form").onclick = () => setRoleFormOpen(false);
+
+/* Segmented controls wiring */
+document.querySelectorAll("#story-filter-seg button").forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll("#story-filter-seg button").forEach(x => x.classList.toggle("active", x === b));
+    STORY_FILTER = b.dataset.filter;
+    syncSegControl(document.getElementById("story-filter-seg"));
+    renderStoriesIndex();
+  };
+});
+document.getElementById("story-filter-q").oninput = () => renderStoriesIndex();
+
+document.querySelectorAll("#tier-filter-seg button").forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll("#tier-filter-seg button").forEach(x => x.classList.toggle("active", x === b));
+    TIER_FILTER = b.dataset.tfilter;
+    syncSegControl(document.getElementById("tier-filter-seg"));
+    renderTierWorkbench();
+  };
+});
+
+document.getElementById("source-channel-filter").onchange = () => renderSourcesList();
+
+/* Load & render full state */
+async function refresh() {
+  STATE = await api("/api/state");
+  const { person, status, roles, episodes, sources, sensitive_terms, timeline, knowledge } = STATE;
+
+  if (!ACTIVE_STORY_ID && episodes.length) ACTIVE_STORY_ID = episodes[0].id;
+  if (ACTIVE_STORY_ID && !episodes.some(e => e.id === ACTIVE_STORY_ID)) ACTIVE_STORY_ID = episodes[0]?.id || null;
+  if (!ACTIVE_TIER_ID && episodes.length) ACTIVE_TIER_ID = episodes[0].id;
+  if (ACTIVE_TIER_ID && !episodes.some(e => e.id === ACTIVE_TIER_ID)) ACTIVE_TIER_ID = episodes[0]?.id || null;
+
+  // Header & Portrait
+  document.getElementById("owner-name").textContent = person.name || "Career Vault";
+  document.getElementById("owner-sub").textContent = `${status.counts.sources} sources · Local SQLite`;
+  document.getElementById("p-name").value = person.name || "";
+  document.getElementById("p-headline").value = person.headline || "";
+  document.getElementById("p-l1").value = person.overview_l1 || "";
+  document.getElementById("p-l2").value = person.overview_l2 || "";
+  document.getElementById("p-l3").value = person.overview_l3 || "";
+  document.getElementById("p-name-view").textContent = person.name || "Career Vault";
+  document.getElementById("p-headline-view").textContent = person.headline || "Add your headline...";
+  document.getElementById("p-l1-view").textContent = person.overview_l1 || "Add your private L1 overview to anchor your career narrative.";
+
+  // Hero + Context library
+  const c = status.counts, g = status.granularity;
+  document.getElementById("lib-episodes").textContent = c.episodes;
+  document.getElementById("lib-sources").textContent = c.sources;
+  document.getElementById("lib-unlinked").textContent = c.unlinked_sources;
+  document.getElementById("lib-visuals").textContent = c.artifacts || 0;
+  document.getElementById("lib-tiers").textContent = `${g.L2.ready}/${g.L3.ready}`;
+  const pct = g.L2.total ? Math.round((g.L2.ready / g.L2.total) * 100) : 0;
+  document.getElementById("hero-progress-label").textContent = `${g.L2.ready} of ${g.L2.total} stories ready for confidential-safe L2 sharing (${g.L3.ready} public L3)`;
+  document.getElementById("hero-progress-fill").style.width = `${pct}%`;
+
+  const topEp = episodes[0];
+  if (topEp) {
+    document.getElementById("folder-period").textContent = shortPeriod(topEp.period_label);
+    document.getElementById("folder-title").textContent = topEp.tiers?.L2?.title || topEp.title;
+    document.getElementById("hero-folder").onclick = () => openStory(topEp.id, "read");
+  }
+
+  // Flagship cards on Studio
+  const leadEps = episodes.filter(e => e.importance >= 3).slice(0, 6);
+  const showEps = leadEps.length ? leadEps : episodes.slice(0, 3);
+  document.getElementById("flagship-grid").innerHTML = showEps.map(ep => {
+    const l2 = ep.tiers?.L2;
+    return `
+    <div class="story-card" onclick="openStory('${esc(ep.id)}','read')">
+      <div class="period"><span title="${esc(ep.period_label || 'Undated')}">${esc(shortPeriod(ep.period_label))}</span>${levelPill(ep.importance)}</div>
+      <h4>${esc(l2?.title || ep.title)}</h4>
+      <p>${esc(cleanSnippet(l2?.summary || ep.summary_l1, 155))}</p>
+      <div class="story-card-foot">
+        <span>${ep.source_refs.length} sources · ${(ep.artifacts||[]).length} visuals</span>
+        <span class="go">Open story →</span>
+      </div>
+    </div>`;
+  }).join("") || '<p class="meta">No stories yet.</p>';
+
+  // Roles list (hover-reveal Remove)
+  document.getElementById("roles-list").innerHTML = roles.map(r => `
+    <div class="hover-row">
+      <div style="min-width:0;flex:1">
+        <strong>${esc(r.title)}</strong>${r.organization ? ` · ${esc(r.organization)}` : ''}
+        <div class="meta">${esc(r.period_label || 'undated')}</div>
+      </div>
+      <button class="btn danger sm hover-action" onclick="delRole('${esc(r.id)}')">Remove</button>
+    </div>
+  `).join("") || '<p class="meta">No roles added yet.</p>';
+
+  // Deepening Radar ("What Else Have I Missed?")
+  const gaps = STATE.gaps || { depth_score: 0, breakdown: {}, next_actions: [], deepening_prompt: "" };
+  const ds = gaps.depth_score || 0;
+  const dsPill = document.getElementById("depth-score-pill");
+  dsPill.textContent = `Depth ${ds}/100`;
+  dsPill.className = `pill ${ds >= 80 ? 'ok' : (ds >= 55 ? 'warn' : 'danger')}`;
+  const b = gaps.breakdown || {};
+  document.getElementById("depth-pillars").innerHTML = `
+    <span class="pill">Coverage ${b.coverage ?? 0}/25</span>
+    <span class="pill">Story depth ${b.depth ?? 0}/30</span>
+    <span class="pill">Narrative &amp; voice ${b.narrative ?? 0}/20</span>
+    <span class="pill">Sharing safety ${b.sharing ?? 0}/25</span>`;
+  document.getElementById("gap-actions-list").innerHTML = (gaps.next_actions || []).slice(0, 6).map(a => {
+    const sevCls = a.severity === "high" ? "danger" : (a.severity === "medium" ? "warn" : "");
+    const jumpFn = a.episode_id
+      ? (a.target_tab === "sharing" ? `openInSharing('${esc(a.episode_id)}')` : `openStory('${esc(a.episode_id)}','edit')`)
+      : `switchTab('${esc(a.target_tab || 'vault')}')`;
+    return `
+    <div class="hover-row">
+      <div style="min-width:0;flex:1">
+        <div class="row" style="gap:0.4rem;margin-bottom:0.15rem">
+          <span class="pill ${sevCls}" style="text-transform:uppercase;font-size:0.66rem">${esc(a.severity)}</span>
+          <strong>${esc(a.title)}</strong>
+        </div>
+        <div class="meta">${esc(a.detail)}</div>
+      </div>
+      <button class="btn secondary sm" style="flex-shrink:0" onclick="${jumpFn}">Go fix →</button>
+    </div>`;
+  }).join("") || '<p class="meta" style="margin:0">No major gaps detected — your career vault has strong coverage, depth, and leak-free sharing readiness.</p>';
+
+  // Knowledge graph
+  const kg = knowledge || { capabilities: [], themes: [], decisions: [] };
+  document.getElementById("knowledge-graph").innerHTML = `
+    <div style="margin-bottom:0.65rem">${kg.capabilities.slice(0, 18).map(cp => `<span class="pill ok" style="margin:0.18rem">${esc(cp.name)} (${cp.episodes.length})</span>`).join("") || '<span class="meta">No capabilities indexed yet.</span>'}</div>
+    <div style="margin-bottom:0.65rem">${kg.themes.slice(0, 18).map(th => `<span class="pill" style="margin:0.18rem">#${esc(th.tag)} (${th.count})</span>`).join("")}</div>
+    <details><summary class="meta" style="cursor:pointer;font-weight:650;color:var(--accent)">Key decisions log (${kg.decisions.length})</summary>
+      <ul style="margin-top:0.5rem;padding-left:1.1rem">${kg.decisions.slice(0, 30).map(d => `<li class="meta" style="margin-bottom:0.3rem"><strong>${esc(d.episode_title)}:</strong> ${esc(d.decision)}</li>`).join("")}</ul>
+    </details>
+  `;
+
+  // Dynamic timeline
+  document.getElementById("timeline-list").innerHTML = timeline.slice(0, 45).map(ev => {
+    const click = ev.kind === "episode" ? `onclick="openStory('${esc(ev.id)}','read')"` : "";
+    return `
+    <div class="timeline-item ${esc(ev.kind)} ${ev.kind === 'episode' ? 'clickable' : ''}" ${click}>
+      <div class="row"><span class="pill">${esc(ev.kind)}</span><span class="meta">${esc(shortPeriod(ev.period))}</span></div>
+      <strong>${esc(ev.title)}</strong>
+      <div class="meta">${esc(cleanSnippet(ev.summary, 150))}</div>
+    </div>`;
+  }).join("") || '<p class="meta">No timeline events yet.</p>';
+
+  // Sensitive terms (hover-reveal Remove)
+  document.getElementById("sensitive-list").innerHTML = sensitive_terms.map(t => `
+    <div class="hover-row">
+      <div style="min-width:0;flex:1"><code>${esc(t.term)}</code> → <strong>${esc(t.replacement)}</strong> <span class="pill">${esc(t.category)}</span></div>
+      <button class="btn danger sm hover-action" onclick="delTerm(${t.id})">Remove</button>
+    </div>
+  `).join("") || '<p class="meta">No sensitive terms registered yet. Click "Scan &amp; suggest" above.</p>';
+
+  // Populate Vault channel filter dynamically
+  const chSel = document.getElementById("source-channel-filter");
+  const curCh = chSel.value;
+  const channels = [...new Set(sources.map(s => s.channel))].sort();
+  chSel.innerHTML = '<option value="all">All channels (' + sources.length + ')</option><option value="unlinked">Unlinked inbox</option>' +
+    channels.map(ch => `<option value="${esc(ch)}">${esc(ch)}</option>`).join("");
+  if ([...chSel.options].some(o => o.value === curCh)) chSel.value = curCh;
+
+  renderStoriesIndex();
+  renderStorySheet();
+  renderTierWorkbench();
+  renderSourcesList();
+
+  requestAnimationFrame(() => {
+    syncNavGlider();
+    document.querySelectorAll(".seg-control").forEach(syncSegControl);
+  });
+}
+
+/* ===== TAB 2: MY STORIES (L1) MASTER-DETAIL WORKBENCH ===== */
+window.openStory = (id, mode = "read") => {
+  ACTIVE_STORY_ID = id;
+  STORY_MODE = mode;
+  switchTab("episodes");
+  renderStoriesIndex();
+  renderStorySheet();
+};
+
+document.getElementById("new-story-btn").onclick = () => {
+  STORY_MODE = "new";
+  window.PENDING_CLUSTER_SOURCES = [];
+  renderStoriesIndex();
+  renderStorySheet();
+};
+
+function getFilteredStories() {
+  if (!STATE) return [];
+  const q = (document.getElementById("story-filter-q").value || "").trim().toLowerCase();
+  return STATE.episodes.filter(ep => {
+    if (STORY_FILTER === "3" && ep.importance < 3) return false;
+    if (STORY_FILTER === "2" && ep.importance !== 2) return false;
+    if (STORY_FILTER === "other" && ep.importance >= 2) return false;
+    if (q && !(ep.title + " " + ep.summary_l1 + " " + (ep.tags || []).join(" ")).toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function renderStoriesIndex() {
+  const list = getFilteredStories();
+  document.getElementById("story-index-list").innerHTML = list.map(ep => {
+    const active = STORY_MODE !== "new" && ep.id === ACTIVE_STORY_ID;
+    const l2ok = ep.tiers?.L2 && !ep.tiers.L2.stale && !(ep.tiers.L2.leaks || []).length;
+    const l3ok = ep.tiers?.L3 && !ep.tiers.L3.stale && !(ep.tiers.L3.leaks || []).length;
+    return `
+    <button class="index-item ${active ? 'active' : ''}" onclick="selectStory('${esc(ep.id)}')">
+      <div class="index-title">${esc(ep.title)}</div>
+      <div class="index-sub">
+        ${levelPill(ep.importance)}
+        <span>${esc(shortPeriod(ep.period_label))}</span>
+        <span style="margin-left:auto;display:inline-flex;gap:4px;align-items:center" title="L2 / L3 readiness">
+          <span class="dot ${l2ok ? 'ok' : (ep.tiers?.L2 ? 'warn' : '')}"></span>
+          <span class="dot ${l3ok ? 'ok' : (ep.tiers?.L3 ? 'warn' : '')}"></span>
+        </span>
+      </div>
+    </button>`;
+  }).join("") || '<p class="meta" style="padding:1rem">No matching stories.</p>';
+}
+
+window.selectStory = (id) => {
+  ACTIVE_STORY_ID = id;
+  if (STORY_MODE === "new") STORY_MODE = "read";
+  renderStoriesIndex();
+  renderStorySheet();
+};
+
+window.setStoryMode = (mode) => {
+  STORY_MODE = mode;
+  renderStorySheet();
+};
+
+function renderStorySheet() {
+  const host = document.getElementById("story-sheet");
+  if (!STATE) return;
+  const ep = STATE.episodes.find(e => e.id === ACTIVE_STORY_ID);
+
+  if (STORY_MODE === "new") {
+    host.innerHTML = buildStoryFormHTML(null);
+    wireStoryForm(null);
+    return;
+  }
+  if (!ep) {
+    host.innerHTML = '<div class="meta" style="text-align:center;padding:3rem 1rem">No story selected. Click <strong>+ New story</strong> to create one.</div>';
+    return;
+  }
+
+  const headerHtml = `
+    <div class="sheet-head">
+      <div style="min-width:0;flex:1">
+        <div class="row" style="margin-bottom:0.4rem">
+          ${levelPill(ep.importance)}
+          <span class="pill">${esc(ep.status)}</span>
+          <span class="meta">${esc(shortPeriod(ep.period_label))} · ${ep.source_refs.length} sources · ${(ep.artifacts||[]).length} visuals · ${ep.claims.length} claims</span>
+        </div>
+        <h3>${esc(ep.title)}</h3>
+      </div>
+      <div class="seg-control" id="sheet-mode-seg">
+        <div class="seg-thumb"></div>
+        <button class="${STORY_MODE === 'read' ? 'active' : ''}" onclick="setStoryMode('read')">Overview</button>
+        <button class="${STORY_MODE === 'edit' ? 'active' : ''}" onclick="setStoryMode('edit')">Edit Story</button>
+        <button class="${STORY_MODE === 'claim' ? 'active' : ''}" onclick="setStoryMode('claim')">+ Claim</button>
+      </div>
+    </div>`;
+
+  if (STORY_MODE === "edit") {
+    host.innerHTML = `<div class="sheet-animate">${headerHtml}${buildStoryFormHTML(ep)}</div>`;
+    wireStoryForm(ep);
+    requestAnimationFrame(() => document.querySelectorAll("#story-sheet .seg-control").forEach(syncSegControl));
+    return;
+  }
+
+  if (STORY_MODE === "claim") {
+    host.innerHTML = `
+      <div class="sheet-animate">
+        ${headerHtml}
+        <h4 style="margin:0 0 0.25rem">Anchor a verifiable claim or correction to this story</h4>
+        <p class="meta" style="margin-top:0">Provide a source ID and exact verbatim quote to let Python auto-compute character offsets and SHA-256 verification.</p>
+        <label>Statement</label>
+        <input id="cl-stmt" placeholder="Exact factual claim, qualification, or correction">
+        <div class="form-row">
+          <div><label>Kind</label><select id="cl-kind"><option>fact</option><option>self_report</option><option>interpretation</option><option>hypothesis</option><option>correction</option></select></div>
+          <div><label>Status</label><select id="cl-status"><option>supported</option><option>qualified</option><option>candidate</option><option>disputed</option><option>rejected</option></select></div>
+        </div>
+        <div class="form-row">
+          <div><label>Optional Source ID</label><input id="cl-src" placeholder="source_id" value="${esc(ep.source_refs[0] || '')}"></div>
+          <div><label>Exact Verbatim Quote</label><input id="cl-quote" placeholder="Exact snippet copied from source"></div>
+        </div>
+        <div class="row" style="margin-top:1rem">
+          <button class="btn" id="save-claim-btn">Save anchored claim</button>
+          <button class="btn secondary" onclick="setStoryMode('read')">Cancel</button>
+        </div>
+      </div>`;
+    document.getElementById("save-claim-btn").onclick = async () => {
+      try {
+        const src = document.getElementById("cl-src").value.trim(), quote = document.getElementById("cl-quote").value.trim();
+        await api("/api/claims", {
+          statement: document.getElementById("cl-stmt").value,
+          episode_id: ep.id,
+          kind: document.getElementById("cl-kind").value,
+          status: document.getElementById("cl-status").value,
+          evidence_quotes: (src && quote) ? [{ source_id: src, quote }] : [],
+        });
+        toast("Saved anchored claim");
+        STORY_MODE = "read";
+        await refresh();
+      } catch (err) { toast("Error: " + err.message); }
+    };
+    requestAnimationFrame(() => syncSegControl(document.getElementById("sheet-mode-seg")));
+    return;
+  }
+
+  // READ MODE
+  host.innerHTML = `
+    <div class="sheet-animate">
+      ${headerHtml}
+      <p class="story-lead">${esc(ep.summary_l1)}</p>
+      ${ep.decisions.length ? `
+        <div class="meta" style="font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Key decisions</div>
+        <ul class="decisions-list">${ep.decisions.map(d => `<li>${esc(d)}</li>`).join("")}</ul>` : ""}
+      ${(ep.shared_credit_l1 || ep.outcome_l1) ? `
+        <div class="callout-strip">
+          ${ep.outcome_l1 ? `<div><strong>Outcome</strong><div>${esc(ep.outcome_l1)}</div></div>` : ""}
+          ${ep.shared_credit_l1 ? `<div><strong>Shared credit</strong><div>${esc(ep.shared_credit_l1)}</div></div>` : ""}
+        </div>` : ""}
+      ${(ep.tags || []).length ? `<div class="row" style="margin:0.85rem 0">${ep.tags.map(t => `<span class="pill">#${esc(t)}</span>`).join("")}</div>` : ""}
+      ${ep.claims.length ? `
+        <div style="margin-top:1rem">
+          <div class="meta" style="font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem">Evidence-anchored claims (${ep.claims.length})</div>
+          <div class="row">${ep.claims.map(cl => `<span class="pill ${cl.status === 'rejected' || cl.status === 'disputed' ? 'danger' : 'ok'}">${esc(cl.kind)}/${esc(cl.status)}: ${esc(cl.statement.slice(0, 95))}</span>`).join("")}</div>
+        </div>` : ""}
+      ${(ep.artifacts || []).length ? `
+        <div style="margin-top:1.25rem">
+          <div class="meta" style="font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Visual artifacts (${ep.artifacts.length})</div>
+          <div class="thumb-grid">${ep.artifacts.map(a => `
+            <div class="thumb">
+              <div class="thumb-img-wrap" onclick="openLightbox('/api/artifact/${esc(a.sha256)}','${esc(a.title || 'Visual')}')">
+                <img src="/api/artifact/${esc(a.sha256)}" alt="${esc(a.title)}">
+              </div>
+              <div class="meta"><strong>${esc(a.title || 'Visual')}</strong></div>
+              <div class="row" style="margin-top:0.35rem">
+                <label style="margin:0;display:flex;align-items:center;gap:0.25rem;text-transform:none"><input type="checkbox" style="width:auto" ${a.share_l2 ? 'checked' : ''} onchange="toggleArt('${esc(a.id)}', this.checked, null)"> L2</label>
+                <label style="margin:0;display:flex;align-items:center;gap:0.25rem;text-transform:none"><input type="checkbox" style="width:auto" ${a.share_l3 ? 'checked' : ''} onchange="toggleArt('${esc(a.id)}', null, this.checked)"> L3</label>
+              </div>
+            </div>`).join("")}
+          </div>
+        </div>` : ""}
+      <div class="split" style="margin-top:1.4rem;padding-top:1rem;border-top:1px solid var(--line);align-items:center">
+        <div class="row">
+          <span class="pill ${ep.tiers.L2 ? (ep.tiers.L2.stale ? 'warn' : 'ok') : ''}">L2 ${ep.tiers.L2 ? (ep.tiers.L2.stale ? 'stale' : 'ready') : 'missing'}</span>
+          <span class="pill ${ep.tiers.L3 ? (ep.tiers.L3.stale ? 'warn' : 'ok') : ''}">L3 ${ep.tiers.L3 ? (ep.tiers.L3.stale ? 'stale' : 'ready') : 'missing'}</span>
+        </div>
+        <button class="btn secondary sm" onclick="openInSharing('${esc(ep.id)}')">Edit L2 / L3 sharing version →</button>
+      </div>
+    </div>`;
+  requestAnimationFrame(() => syncSegControl(document.getElementById("sheet-mode-seg")));
+}
+
+function buildStoryFormHTML(ep) {
+  const isNew = !ep;
+  const imp = ep ? (ep.importance ?? 1) : 2;
+  const roleOpts = '<option value="">(Unassigned)</option>' +
+    STATE.roles.map(r => `<option value="${esc(r.id)}" ${ep?.role_id === r.id ? 'selected' : ''}>${esc(r.title)}${r.organization ? ' @ ' + esc(r.organization) : ''}</option>`).join("");
+  const statuses = ["shipped", "pilot", "prototype", "shelved", "ongoing", "reflection"];
+  const statusOpts = statuses.map(st => `<option value="${st}" ${(ep?.status || "shipped") === st ? 'selected' : ''}>${st}</option>`).join("");
+
+  return `
+    ${isNew ? `<div class="sheet-head"><div><span class="pill ok" style="margin-bottom:0.35rem">New L1 Story</span><h3>Create a private career story</h3></div><button class="btn secondary sm" onclick="cancelNewStory()">Cancel</button></div>` : ''}
+    <label style="margin-top:0">Story Title</label>
+    <input id="ep-title" class="title-input" value="${esc(ep?.title || '')}" placeholder="Concrete project, decision, or turning point">
+
+    <label>Story Level (controls prominence in your L2 &amp; L3 views)</label>
+    <div class="seg-control full mint" id="ep-imp-seg" style="margin-bottom:0.2rem">
+      <div class="seg-thumb"></div>
+      <button type="button" class="${imp >= 3 ? 'active' : ''}" data-imp="3">Flagship</button>
+      <button type="button" class="${imp === 2 ? 'active' : ''}" data-imp="2">Core Delivery</button>
+      <button type="button" class="${imp === 1 ? 'active' : ''}" data-imp="1">Proof Point</button>
+      <button type="button" class="${imp <= 0 ? 'active' : ''}" data-imp="0">Background</button>
+    </div>
+    <input id="ep-imp" type="hidden" value="${imp}">
+
+    <div class="form-row">
+      <div><label>Role</label><select id="ep-role">${roleOpts}</select></div>
+      <div><label>Period</label><input id="ep-period" value="${esc(ep?.period_label || '')}" placeholder="e.g. Jan–Jun 2026"></div>
+      <div><label>Status</label><select id="ep-status">${statusOpts}</select></div>
+    </div>
+
+    <label>L1 Private Summary (full honest context — never shared directly)</label>
+    <textarea id="ep-summary" style="min-height:130px" placeholder="What were the stakes, the tension, your move, and the honest result?">${esc(ep?.summary_l1 || '')}</textarea>
+
+    <label>Key Decisions (one per line)</label>
+    <textarea id="ep-decisions" style="min-height:92px" placeholder="One concrete judgment call or tradeoff per line...">${esc((ep?.decisions || []).join("\n"))}</textarea>
+
+    <div class="form-row">
+      <div><label>Shared Credit</label><textarea id="ep-credit" style="min-height:66px" placeholder="Who partnered with you?">${esc(ep?.shared_credit_l1 || '')}</textarea></div>
+      <div><label>Outcome</label><textarea id="ep-outcome" style="min-height:66px" placeholder="Measured result or honest stopping point">${esc(ep?.outcome_l1 || '')}</textarea></div>
+    </div>
+
+    <label>Tags (comma-separated)</label>
+    <input id="ep-tags" value="${esc((ep?.tags || []).join(', '))}" placeholder="hiring, ai-tooling, leadership">
+
+    <div class="row" style="margin-top:1.15rem;padding-top:1rem;border-top:1px solid var(--line)">
+      <button class="btn" id="save-episode-btn">${isNew ? 'Create L1 story' : 'Save changes'}</button>
+      <button class="btn secondary" onclick="${isNew ? 'cancelNewStory()' : "setStoryMode('read')"}">Cancel</button>
+    </div>`;
+}
+
+function wireStoryForm(ep) {
+  const impSeg = document.getElementById("ep-imp-seg");
+  if (impSeg) {
+    impSeg.querySelectorAll("button").forEach(btn => {
+      btn.onclick = () => {
+        impSeg.querySelectorAll("button").forEach(b => b.classList.toggle("active", b === btn));
+        document.getElementById("ep-imp").value = btn.dataset.imp;
+        syncSegControl(impSeg);
+      };
+    });
+    requestAnimationFrame(() => syncSegControl(impSeg));
+  }
+  document.getElementById("save-episode-btn").onclick = async () => {
+    const title = document.getElementById("ep-title").value.trim();
+    if (!title) { toast("Please enter a story title"); return; }
+    const payload = {
+      title,
+      role_id: document.getElementById("ep-role").value || null,
+      period_label: document.getElementById("ep-period").value,
+      status: document.getElementById("ep-status").value,
+      importance: Number(document.getElementById("ep-imp").value || 0),
+      summary_l1: document.getElementById("ep-summary").value,
+      decisions: document.getElementById("ep-decisions").value.split("\n").map(x => x.trim()).filter(Boolean),
+      shared_credit_l1: document.getElementById("ep-credit").value,
+      outcome_l1: document.getElementById("ep-outcome").value,
+      tags: document.getElementById("ep-tags").value.split(",").map(t => t.trim()).filter(Boolean),
+    };
+    if (ep) {
+      payload.episode_id = ep.id;
+      payload.source_refs = ep.source_refs;
+    } else if (window.PENDING_CLUSTER_SOURCES?.length) {
+      payload.source_refs = window.PENDING_CLUSTER_SOURCES;
+      window.PENDING_CLUSTER_SOURCES = [];
+    }
+    const saved = await api("/api/episodes", payload);
+    ACTIVE_STORY_ID = saved.id || ep?.id || ACTIVE_STORY_ID;
+    STORY_MODE = "read";
+    toast(ep ? "Saved L1 story changes" : "Created new L1 story");
+    await refresh();
+  };
+}
+
+window.cancelNewStory = () => {
+  STORY_MODE = "read";
+  renderStoriesIndex();
+  renderStorySheet();
+};
+
+/* ===== TAB 3: SHARE & TIERS WORKBENCH ===== */
+window.openInSharing = (id) => {
+  ACTIVE_TIER_ID = id;
+  switchTab("sharing");
+  renderTierWorkbench();
+};
+
+function getFilteredTierStories() {
+  if (!STATE) return [];
+  return STATE.episodes.filter(ep => {
+    if (TIER_FILTER === "flagship") return ep.importance >= 3;
+    if (TIER_FILTER === "needs") {
+      const l2 = ep.tiers?.L2, l3 = ep.tiers?.L3;
+      return !l2 || l2.stale || (l2.leaks || []).length || !l3 || l3.stale || (l3.leaks || []).length;
+    }
+    return true;
+  });
+}
+
+function renderTierWorkbench() {
+  if (!STATE) return;
+  const list = getFilteredTierStories();
+  if (list.length && !list.some(e => e.id === ACTIVE_TIER_ID)) ACTIVE_TIER_ID = list[0].id;
+
+  document.getElementById("tier-index-list").innerHTML = list.map(ep => {
+    const active = ep.id === ACTIVE_TIER_ID;
+    const l2 = ep.tiers?.L2, l3 = ep.tiers?.L3;
+    const l2cls = !l2 ? "" : (l2.leaks?.length ? "danger" : (l2.stale ? "warn" : "ok"));
+    const l3cls = !l3 ? "" : (l3.leaks?.length ? "danger" : (l3.stale ? "warn" : "ok"));
+    return `
+    <button class="index-item ${active ? 'active' : ''}" onclick="selectTierStory('${esc(ep.id)}')">
+      <div class="index-title">${esc(ep.title)}</div>
+      <div class="index-sub">
+        <span class="pill ${l2cls}" style="padding:0.1rem 0.45rem">L2</span>
+        <span class="pill ${l3cls}" style="padding:0.1rem 0.45rem">L3</span>
+        ${ep.importance >= 3 ? '<span class="meta">Flagship</span>' : ''}
+      </div>
+    </button>`;
+  }).join("") || '<p class="meta" style="padding:1rem">All stories are clean and up to date.</p>';
+
+  const idx = list.findIndex(e => e.id === ACTIVE_TIER_ID);
+  const ep = list[idx] || STATE.episodes.find(e => e.id === ACTIVE_TIER_ID);
+  const host = document.getElementById("tier-sheet");
+  if (!ep) {
+    host.innerHTML = '<div class="meta" style="text-align:center;padding:3rem 1rem">Select a story to polish its L2 and L3 shareable tiers.</div>';
+    return;
+  }
+  const l2 = ep.tiers.L2 || { title: "", summary: "", leaks: [], stale: false };
+  const l3 = ep.tiers.L3 || { title: "", summary: "", leaks: [], stale: false };
+  const prevId = idx > 0 ? list[idx - 1].id : null;
+  const nextId = idx >= 0 && idx < list.length - 1 ? list[idx + 1].id : null;
+
+  host.innerHTML = `
+    <div class="sheet-animate">
+      <div class="sheet-head">
+        <div style="min-width:0;flex:1">
+          <div class="row" style="margin-bottom:0.35rem">${levelPill(ep.importance)} <span class="meta">${esc(shortPeriod(ep.period_label))}</span></div>
+          <h3>${esc(ep.title)}</h3>
+        </div>
+        <div class="row">
+          <button class="btn secondary sm" ${prevId ? `onclick="selectTierStory('${esc(prevId)}')"` : 'disabled style="opacity:0.4;cursor:default"'}>← Prev</button>
+          <button class="btn secondary sm" ${nextId ? `onclick="selectTierStory('${esc(nextId)}')"` : 'disabled style="opacity:0.4;cursor:default"'}>Next →</button>
+        </div>
+      </div>
+
+      <div class="l1-ref-box">
+        <div class="split" style="align-items:center;margin-bottom:0.35rem">
+          <span class="pill">L1 Private Source of Truth (Reference)</span>
+          <div class="row">
+            <button class="btn secondary sm" onclick="autoDraft('${esc(ep.id)}','L2')">Auto-Sanitize L2</button>
+            <button class="btn secondary sm" onclick="autoDraft('${esc(ep.id)}','L3')">Auto-Sanitize L3</button>
+            <button class="btn secondary sm" onclick="aiDraftTier('${esc(ep.id)}','L2')">AI Polish L2</button>
+            <button class="btn secondary sm" onclick="aiDraftTier('${esc(ep.id)}','L3')">AI Polish L3</button>
+          </div>
+        </div>
+        <p class="meta" style="margin:0;color:var(--ink);opacity:0.88">${esc(ep.summary_l1)}</p>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="row" style="margin-bottom:0.4rem">
+            <span class="pill ${l2.leaks.length ? 'danger' : (ep.tiers.L2 ? 'ok' : '')}">L2 Confidential-Safe (Hiring Managers)</span>
+            ${l2.stale ? '<span class="pill warn">stale</span>' : ''}
+            ${l2.leaks.length ? `<span class="pill danger">${l2.leaks.length} leak(s)</span>` : ''}
+          </div>
+          <label style="margin-top:0.35rem">L2 Title</label>
+          <input id="l2-t-${esc(ep.id)}" value="${esc(l2.title)}">
+          <label>L2 Story</label>
+          <textarea id="l2-s-${esc(ep.id)}" style="min-height:165px">${esc(l2.summary)}</textarea>
+          <button class="btn" style="margin-top:0.75rem" onclick="saveTier('${esc(ep.id)}','L2')">Save L2</button>
+        </div>
+        <div>
+          <div class="row" style="margin-bottom:0.4rem">
+            <span class="pill ${l3.leaks.length ? 'danger' : (ep.tiers.L3 ? 'ok' : '')}">L3 Public Highlight</span>
+            ${l3.stale ? '<span class="pill warn">stale</span>' : ''}
+            ${l3.leaks.length ? `<span class="pill danger">${l3.leaks.length} leak(s)</span>` : ''}
+          </div>
+          <label style="margin-top:0.35rem">L3 Title</label>
+          <input id="l3-t-${esc(ep.id)}" value="${esc(l3.title)}">
+          <label>L3 Highlight</label>
+          <textarea id="l3-s-${esc(ep.id)}" style="min-height:165px">${esc(l3.summary)}</textarea>
+          <button class="btn" style="margin-top:0.75rem" onclick="saveTier('${esc(ep.id)}','L3')">Save L3</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+window.selectTierStory = (id) => {
+  ACTIVE_TIER_ID = id;
+  renderTierWorkbench();
+};
+
+/* ===== TAB 4: VAULT SOURCES LIST & READER ===== */
+function renderSourcesList() {
+  if (!STATE) return;
+  const f = document.getElementById("source-channel-filter").value;
+  const list = STATE.sources.filter(s => {
+    if (f === "unlinked") return !s.linked;
+    if (f !== "all" && s.channel !== f) return false;
+    return true;
+  }).slice(0, 120);
+
+  document.getElementById("sources-list").innerHTML = list.map(s => `
+    <button class="index-item ${s.id === ACTIVE_SOURCE_ID ? 'active' : ''}" onclick="openSource('${esc(s.id)}')">
+      <div class="index-title">${esc(s.title)}</div>
+      <div class="index-sub">
+        <span class="pill" style="padding:0.1rem 0.45rem">${esc(s.channel)}</span>
+        <span class="pill ${s.linked ? 'ok' : 'warn'}" style="padding:0.1rem 0.45rem">${s.linked ? 'linked' : 'inbox'}</span>
+        <span>${esc(s.event_date || 'undated')}</span>
+      </div>
+    </button>
+  `).join("") || '<p class="meta" style="padding:1rem">No sources match this filter.</p>';
+}
+
+window.openSource = async (id) => {
+  ACTIVE_SOURCE_ID = id;
+  renderSourcesList();
+  const s = await api("/api/source/" + encodeURIComponent(id));
+  document.getElementById("source-reader").innerHTML = `
+    <div class="sheet-animate">
+      <div class="sheet-head" style="margin-bottom:0.9rem">
+        <div>
+          <div class="row" style="margin-bottom:0.35rem">
+            <span class="pill">${esc(s.channel)}</span>
+            <span class="pill">${esc(s.sensitivity)}</span>
+            <span class="meta">${esc(s.event_date || 'undated')} · sha256:${esc(s.content_sha256.slice(0, 12))}</span>
+          </div>
+          <h3>${esc(s.title)}</h3>
+          <div class="meta">Source ID: <code>${esc(s.id)}</code></div>
+        </div>
+      </div>
+      <pre>${esc(s.raw_text)}</pre>
+    </div>`;
+};
+
+/* ===== ACTIONS, DIALOGS, API CALLS ===== */
+window.openLightbox = (src, title) => {
+  document.getElementById("lightbox-title").textContent = title;
+  document.getElementById("lightbox-img").src = src;
+  document.getElementById("lightbox-dialog").showModal();
+};
+
+window.previewExport = (tier) => {
+  document.getElementById("preview-title").textContent = `${tier} Clean Static Export Preview (Zero JS, Leak-Checked)`;
+  document.getElementById("preview-frame").src = `/api/export?tier=${encodeURIComponent(tier)}&format=html&inline=true&ts=${Date.now()}`;
+  document.getElementById("preview-dialog").showModal();
+};
+
+window.setAiPrompt = (txt) => {
+  document.getElementById("llm-prompt").value = txt;
+  document.getElementById("llm-prompt").focus();
+};
+
+window.loadDeepeningPrompt = () => {
+  const txt = STATE?.gaps?.deepening_prompt || "Audit my career vault and tell me what roles, unlinked evidence, or thin stories I should deepen next.";
+  switchTab("assistant");
+  setAiPrompt(txt);
+};
+
+document.getElementById("copy-deepening-btn").onclick = async () => {
+  const txt = STATE?.gaps?.deepening_prompt || "";
+  if (!txt) return;
+  try {
+    await navigator.clipboard.writeText(txt);
+    toast("Copied vault deepening prompt — paste into Claude, GPT, or Gemini");
+  } catch (err) { toast("Copy failed: " + err.message); }
+};
+document.getElementById("send-deepening-ai-btn").onclick = () => loadDeepeningPrompt();
+
+window.linkSource = async (episode_id, source_id) => {
+  await api("/api/episodes/link", { episode_id, source_ids: [source_id] });
+  toast(`Linked source to ${episode_id}`);
+  await refresh();
+  document.getElementById("triage-btn").click();
+};
+
+window.batchLinkTop = async () => {
+  if (!LAST_TRIAGE || !(LAST_TRIAGE.attach_candidates || []).length) return;
+  const links = LAST_TRIAGE.attach_candidates.slice(0, 25).map(a => ({ episode_id: a.suggested_episode_id, source_id: a.source_id }));
+  const res = await api("/api/episodes/batch-link", { links });
+  toast(`Linked ${res.sources_linked} sources across ${res.episodes_updated} stories`);
+  await refresh();
+  document.getElementById("triage-btn").click();
+};
+
+window.batchSanitize = async (tier) => {
+  const res = await api("/api/tier/batch-sanitize", { tier });
+  toast(`${tier} batch sanitize: ${res.saved.length} drafted, ${res.skipped.length} already fresh, ${res.blocked.length} blocked`);
+  await refresh();
+};
+
+window.delRole = async (id) => { await api("/api/roles/delete", { id }); toast("Removed role"); await refresh(); };
+
+window.copyResume = async (tier) => {
+  try {
+    const res = await fetch(`/api/export?tier=${encodeURIComponent(tier)}&format=resume&inline=true`);
+    if (!res.ok) throw new Error((await res.json()).error || "Export failed");
+    const text = await res.text();
+    await navigator.clipboard.writeText(text);
+    toast(`Copied leak-checked ${tier} Resume Markdown (${text.length} chars)`);
+  } catch (err) { toast("Copy failed: " + err.message); }
+};
+
+window.draftFromCluster = (clusterIdx) => {
+  const c = (LAST_TRIAGE?.potential_new_clusters || [])[clusterIdx];
+  if (!c) return;
+  STORY_MODE = "new";
+  window.PENDING_CLUSTER_SOURCES = c.sources.map(s => s.source_id);
+  switchTab("episodes");
+  renderStoriesIndex();
+  renderStorySheet();
+  document.getElementById("ep-title").value = `Work cluster: ${c.cluster}`;
+  document.getElementById("ep-period").value = c.cluster.split("·")[1]?.trim() || "";
+  document.getElementById("ep-summary").value = c.sources.map(s => `- ${s.title}: ${cleanSnippet(s.preview, 120)}`).join("\n");
+  toast(`Prefilled new story with ${c.sources.length} source(s)`);
+};
+
+window.toggleArt = async (id, l2, l3) => {
+  const body = { id };
+  if (l2 !== null) body.share_l2 = l2;
+  if (l3 !== null) body.share_l3 = l3;
+  await api("/api/artifact/share", body);
+  toast("Updated visual sharing tier in SQLite");
+};
+
+window.delTerm = async (id) => { await api("/api/sensitive/delete", { id }); toast("Removed sensitive term"); await refresh(); };
+
+window.registerSuggestion = async (term, replacement, category) => {
+  await api("/api/sensitive", { term, replacement, category });
+  toast(`Registered sensitive term: ${term}`);
+  await refresh();
+  document.getElementById("st-suggest-btn").click();
+};
+
+window.autoDraft = async (episode_id, tier) => {
+  const d = await api("/api/tier/draft", { episode_id, tier });
+  const p = tier.toLowerCase();
+  document.getElementById(`${p}-t-${episode_id}`).value = d.title;
+  document.getElementById(`${p}-s-${episode_id}`).value = d.summary;
+  toast(`Drafted sanitized ${tier} (${d.remaining_leaks.length} remaining findings)`);
+};
+
+window.saveTier = async (episode_id, tier) => {
+  const p = tier.toLowerCase();
+  try {
+    await api("/api/tier", {
+      episode_id, tier,
+      title: document.getElementById(`${p}-t-${episode_id}`).value,
+      summary: document.getElementById(`${p}-s-${episode_id}`).value,
+      approved: true,
+    });
+    toast(`Saved leak-checked ${tier} projection`);
+    await refresh();
+  } catch (err) { toast("BLOCKED: " + err.message); }
+};
+
+async function callUserLLM(system_prompt, user_prompt) {
+  const provider = sessionStorage.getItem("cc_llm_provider") || document.getElementById("llm-provider").value;
+  const base_url = sessionStorage.getItem("cc_llm_url") || document.getElementById("llm-url").value.trim();
+  const model = sessionStorage.getItem("cc_llm_model") || document.getElementById("llm-model").value.trim();
+  const key = sessionStorage.getItem("cc_llm_key") || document.getElementById("llm-key").value.trim();
+  if (!key && !base_url.includes("localhost") && !base_url.includes("127.0.0.1")) {
+    throw new Error("Add your API key in the Browser AI tab first.");
+  }
+  const res = await api("/api/llm/proxy", { provider, model, base_url, system_prompt, user_prompt }, { "X-LLM-Key": key });
+  return res.text || "";
+}
+
+window.aiDraftTier = async (episode_id, tier) => {
+  try {
+    const ep = STATE.episodes.find(e => e.id === episode_id);
+    const terms = STATE.sensitive_terms.map(t => `${t.term} -> ${t.replacement}`).join("; ");
+    toast(`Calling your browser API to polish ${tier}...`);
+    const style = tier === "L3"
+      ? "Write a crisp, compelling 2-sentence public highlight. Lead with stakes, action, and concrete proof. Sound like a confident human operator, NOT a legal disclaimer. Never invent metrics or overclaim."
+      : "Write a sharp, high-signal confidential-safe narrative for a hiring manager using Stakes -> Key Decision -> Concrete Result. Keep scope honest and preserve shared credit, WITHOUT robotic courtroom caveats. Replace all sensitive terms.";
+    const text = await callUserLLM(
+      `${style} Never invent metrics. Replace all sensitive terms.`,
+      `Sensitive replacements: ${terms || 'none'}\nTitle: ${ep.title}\nSummary: ${ep.summary_l1}\nDecisions: ${ep.decisions.join(' | ')}\nOutcome: ${ep.outcome_l1}\n\nReturn ONLY the rewritten summary paragraph.`
+    );
+    document.getElementById(`${tier.toLowerCase()}-t-${episode_id}`).value = ep.title;
+    document.getElementById(`${tier.toLowerCase()}-s-${episode_id}`).value = text.trim();
+    toast(`AI ${tier} draft ready — review and click Save`);
+  } catch (err) { toast(err.message); }
+};
+
+/* Upload Dropzone */
+const dz = document.getElementById("dropzone"), fi = document.getElementById("file-input");
+dz.onclick = () => fi.click();
+dz.ondragover = (e) => { e.preventDefault(); dz.classList.add("over"); };
+dz.ondragleave = () => dz.classList.remove("over");
+dz.ondrop = (e) => { e.preventDefault(); dz.classList.remove("over"); uploadFiles(e.dataTransfer.files); };
+fi.onchange = () => uploadFiles(fi.files);
+
+async function uploadFiles(fileList) {
+  for (const file of fileList) {
+    const buf = await file.arrayBuffer();
+    let binary = "";
+    const bytes = new Uint8Array(buf);
+    for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    const res = await api("/api/ingest/upload", {
+      filename: file.name, content_base64: btoa(binary),
+      channel_hint: document.getElementById("up-channel").value,
+      sensitivity: document.getElementById("up-sens").value,
+    });
+    toast(`Ingested ${file.name} via ${res.importer} (${res.count || res.sources_imported || 1} item(s))`);
+  }
+  await refresh();
+}
+
+document.getElementById("triage-btn").onclick = async () => {
+  const res = await api("/api/inbox/triage");
+  LAST_TRIAGE = res;
+  const att = res.attach_candidates || [], clu = res.potential_new_clusters || [];
+  document.getElementById("triage-results").innerHTML = `
+    <div class="card sheet-animate" style="background:var(--surface);box-shadow:none;margin-bottom:0">
+      <div class="split">
+        <div><strong>Inbox triage (${esc(res.method)})</strong> <span class="meta">${res.unlinked_examined} unlinked · ${att.length} likely matches · ${clu.length} unwritten clusters</span></div>
+        ${att.length ? `<button class="btn secondary sm" onclick="batchLinkTop()">Link top ${Math.min(25, att.length)} matches</button>` : ''}
+      </div>
+      ${att.slice(0, 10).map(a => `
+        <div class="hover-row">
+          <div class="meta"><span class="pill">${esc(a.channel)}</span> <strong>${esc(a.title)}</strong> → <em>${esc(a.suggested_episode_title)}</em> (${a.similarity || a.score})</div>
+          <button class="btn secondary sm" onclick="linkSource('${esc(a.suggested_episode_id)}','${esc(a.source_id)}')">+ Link</button>
+        </div>
+      `).join("")}
+      ${clu.length ? `<details style="margin-top:0.65rem"><summary class="meta" style="cursor:pointer;font-weight:650;color:var(--accent)">Potential unwritten stories (${clu.length} clusters)</summary>${clu.slice(0, 12).map((c, idx) => `
+        <div class="hover-row">
+          <div class="meta"><strong>${esc(c.cluster)}</strong> (${c.count} sources) — ${esc(c.sources.slice(0,2).map(s => s.title).join("; "))}</div>
+          <button class="btn secondary sm" onclick="draftFromCluster(${idx})">Start story</button>
+        </div>
+      `).join("")}</details>` : ''}
+    </div>`;
+};
+
+document.getElementById("sync-emb-btn").onclick = async () => {
+  try {
+    toast("Syncing local float16 semantic cache...");
+    const r = await api("/api/embeddings/sync", {});
+    toast(`Semantic cache synced: ${r.newly_embedded} new, ${r.cached} cached (${r.elapsed_ms} ms)`);
+  } catch (err) { toast(err.message); }
+};
+
+document.getElementById("st-suggest-btn").onclick = async () => {
+  const res = await api("/api/sensitive/suggest?limit=15");
+  document.getElementById("suggested-terms").innerHTML = res.suggestions.length
+    ? '<div class="meta" style="margin-bottom:0.35rem">Suggested confidential candidates from L1:</div>' +
+      res.suggestions.map(s => `<span class="pill warn clickable" style="margin:0.2rem" onclick="registerSuggestion('${esc(s.term)}','${esc(s.suggested_replacement)}','${esc(s.category)}')">+ ${esc(s.term)} (${s.episode_count} ep)</span>`).join("")
+    : '<p class="meta">No unregistered candidates found.</p>';
+};
+
+document.getElementById("save-person").onclick = async () => {
+  await api("/api/person", { name: document.getElementById("p-name").value, headline: document.getElementById("p-headline").value, overview_l1: document.getElementById("p-l1").value });
+  setProfileEditing(false);
+  toast("Saved profile to SQLite"); await refresh();
+};
+document.getElementById("save-role").onclick = async () => {
+  await api("/api/roles", { title: document.getElementById("r-title").value, organization: document.getElementById("r-org").value, start_date: document.getElementById("r-start").value, end_date: document.getElementById("r-end").value, is_current: document.getElementById("r-curr").checked });
+  document.getElementById("r-title").value = ""; document.getElementById("r-org").value = "";
+  setRoleFormOpen(false);
+  toast("Saved role"); await refresh();
+};
+document.getElementById("save-overviews").onclick = async () => {
+  await api("/api/person", { overview_l2: document.getElementById("p-l2").value, overview_l3: document.getElementById("p-l3").value });
+  toast("Saved L2 & L3 overviews");
+};
+document.getElementById("cap-save").onclick = async () => {
+  try {
+    await api("/api/sources", { title: document.getElementById("cap-title").value || "Untitled capture", channel: document.getElementById("cap-channel").value, event_date: document.getElementById("cap-date").value, sensitivity: document.getElementById("cap-sens").value, raw_text: document.getElementById("cap-text").value });
+    document.getElementById("cap-title").value = ""; document.getElementById("cap-text").value = "";
+    toast("Ingested into L0 vault & indexed in FTS5"); await refresh();
+  } catch (err) { toast("Error: " + err.message); }
+};
+document.getElementById("st-add").onclick = async () => {
+  try {
+    await api("/api/sensitive", { term: document.getElementById("st-term").value, replacement: document.getElementById("st-repl").value || "[redacted]", category: document.getElementById("st-cat").value });
+    document.getElementById("st-term").value = ""; document.getElementById("st-repl").value = "";
+    toast("Registered sensitive term"); await refresh();
+  } catch (err) { toast("Error: " + err.message); }
+};
+document.getElementById("search-btn").onclick = async () => {
+  const q = document.getElementById("search-input").value.trim();
+  if (!q) return;
+  const mode = document.getElementById("search-mode").value;
+  const r = await api(`/api/search?q=${encodeURIComponent(q)}&mode=${encodeURIComponent(mode)}`);
+  document.getElementById("search-results").innerHTML =
+    `<p class="meta">Method: <code>${esc(r.method)}</code> · ${r.episodes.length} story hit(s), ${r.sources.length} source(s)${r.total_ms ? ` in ${r.total_ms} ms` : ''}</p>` +
+    r.episodes.slice(0, 5).map(e => `<div class="hover-row"><div class="meta"><span class="pill ok">story</span> <strong>${esc(e.title)}</strong>${e.similarity ? ` (sim ${e.similarity})` : ''}</div><button class="btn secondary sm" onclick="openStory('${esc(e.episode_id || e.id)}','read')">Open</button></div>`).join("") +
+    r.sources.slice(0, 8).map(h => `<div class="hover-row"><div class="meta"><span class="pill">${esc(h.channel)}</span> <strong>${esc(h.title)}</strong> — ${esc(cleanSnippet(h.snippet, 190))}</div><button class="btn secondary sm" onclick="openSource('${esc(h.source_id)}')">Read</button></div>`).join("");
+};
+document.getElementById("search-input").addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("search-btn").click(); });
+document.getElementById("search-clear").onclick = () => {
+  document.getElementById("search-input").value = "";
+  document.getElementById("search-results").innerHTML = "";
+  document.getElementById("triage-results").innerHTML = "";
+};
+document.getElementById("llm-save-cfg").onclick = () => {
+  sessionStorage.setItem("cc_llm_provider", document.getElementById("llm-provider").value);
+  sessionStorage.setItem("cc_llm_url", document.getElementById("llm-url").value.trim());
+  sessionStorage.setItem("cc_llm_model", document.getElementById("llm-model").value.trim());
+  sessionStorage.setItem("cc_llm_key", document.getElementById("llm-key").value.trim());
+  toast("Saved API config in tab sessionStorage");
+};
+document.getElementById("llm-clear-cfg").onclick = () => {
+  sessionStorage.removeItem("cc_llm_key"); document.getElementById("llm-key").value = "";
+  toast("Cleared API key");
+};
+document.getElementById("llm-ask").onclick = async () => {
+  try {
+    const q = document.getElementById("llm-prompt").value.trim();
+    if (!q) return;
+    const hits = await api(`/api/search?q=${encodeURIComponent(q)}&mode=auto`);
+    const ctx = [
+      ...hits.episodes.slice(0, 5).map(e => `[Story: ${e.title}] ${e.snippet}`),
+      ...hits.sources.slice(0, 6).map(s => `[Source ${s.channel}: ${s.title}] ${s.snippet}`),
+    ].join("\n\n");
+    document.getElementById("llm-output").innerHTML = '<p class="meta">Calling your API via stateless local proxy...</p>';
+    const ans = await callUserLLM(
+      "You are the user's private career context assistant. Ground every statement in the retrieved local career evidence below; preserve shared credit, honesty, and a confident human tone without courtroom legalese.",
+      `Question: ${q}\n\nRetrieved local career evidence:\n${ctx}`
+    );
+    document.getElementById("llm-output").innerHTML = `<pre class="sheet-animate">${esc(ans)}</pre>`;
+  } catch (err) {
+    document.getElementById("llm-output").innerHTML = `<p class="pill danger">${esc(err.message)}</p>`;
+  }
+};
+
+refresh();
+</script>
+</body>
+</html>
