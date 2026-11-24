@@ -149,6 +149,7 @@ class StudioApp:
                         "sources": self.vault.list_sources(limit=400),
                         "claims": self.vault.list_claims(),
                         "sensitive_terms": self.vault.list_sensitive_terms(),
+                        "channel_scans": self.vault.list_channel_scans(),
                         "semantic_available": bool(self.model_dir and (self.model_dir / "model.onnx").is_file()),
                         "audit": {
                             "L2": self.vault.audit_tier_leaks("L2"),
@@ -227,6 +228,8 @@ class StudioApp:
 
                 if parsed.path == "/api/person":
                     return self._json(self.vault.update_person(**body))
+                if parsed.path == "/api/channels":
+                    return self._json(self.vault.upsert_channel_scan(**body))
                 if parsed.path == "/api/roles":
                     return self._json(self.vault.upsert_role(**body))
                 if parsed.path == "/api/roles/delete":

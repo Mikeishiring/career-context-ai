@@ -157,6 +157,19 @@ CREATE TABLE IF NOT EXISTS artifacts (
     created_at TEXT NOT NULL
 );
 
+-- Channel & MCP Scan Ledger (tracks what channels the user works on & what has been scanned)
+CREATE TABLE IF NOT EXISTS channel_scans (
+    channel TEXT PRIMARY KEY,
+    label TEXT NOT NULL DEFAULT '',
+    access_method TEXT NOT NULL DEFAULT 'mcp',      -- mcp | connector | export | manual
+    status TEXT NOT NULL DEFAULT 'declared',        -- declared | scanning | scanned | skipped
+    date_range_covered TEXT NOT NULL DEFAULT '',
+    queries_run_json TEXT NOT NULL DEFAULT '[]',
+    items_ingested INTEGER NOT NULL DEFAULT 0,
+    remaining_notes TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL
+);
+
 -- Layer 1: Private canonical knowledge graph
 CREATE TABLE IF NOT EXISTS roles (
     id TEXT PRIMARY KEY,
@@ -1662,6 +1675,104 @@ class CareerVault:
             },
         }
 
+    # ── Channel & MCP Scan Ledger ────────────────────────────────────────────
+
+    def _ensure_channel_scans_table(self) -> None:
+        if self.readonly:
+            return
+        self.conn.execute(
+            """CREATE TABLE IF NOT EXISTS channel_scans (
+                channel TEXT PRIMARY KEY,
+                label TEXT NOT NULL DEFAULT '',
+                access_method TEXT NOT NULL DEFAULT 'mcp',
+                status TEXT NOT NULL DEFAULT 'declared',
+                date_range_covered TEXT NOT NULL DEFAULT '',
+                queries_run_json TEXT NOT NULL DEFAULT '[]',
+                items_ingested INTEGER NOT NULL DEFAULT 0,
+                remaining_notes TEXT NOT NULL DEFAULT '',
+                updated_at TEXT NOT NULL
+            )"""
+        )
+
+    def upsert_channel_scan(
+        self,
+        *,
+        channel: str,
+        label: str = "",
+        access_method: str = "mcp",
+        status: str = "declared",
+        date_range_covered: str = "",
+        queries_run: list[str] | None = None,
+        items_ingested: int | None = None,
+        remaining_notes: str = "",
+    ) -> dict[str, Any]:
+        """Record a work/communication channel and its MCP or export scan progress."""
+        if self.readonly:
+            raise PermissionError("Cannot update channel_scans on a read-only vault")
+        ch = channel.strip().lower()
+        if not ch:
+            raise ValueError("channel is required")
+        if status not in ("declared", "scanning", "scanned", "skipped"):
+            raise ValueError("status must be one of: declared, scanning, scanned, skipped")
+        if access_method not in ("mcp", "connector", "export", "manual"):
+            raise ValueError("access_method must be one of: mcp, connector, export, manual")
+        self._ensure_channel_scans_table()
+        existing = self.conn.execute("SELECT * FROM channel_scans WHERE channel = ?", (ch,)).fetchone()
+        prev_queries = json.loads(existing["queries_run_json"]) if existing else []
+        merged_queries = list(dict.fromkeys([*prev_queries, *(q.strip() for q in (queries_run or []) if q.strip())]))
+        if items_ingested is None:
+            row = self.conn.execute("SELECT COUNT(*) AS n FROM sources WHERE channel = ?", (ch,)).fetchone()
+            ingested = int(row["n"]) if row else 0
+        else:
+            ingested = int(items_ingested)
+        ts = now_iso()
+        with self.conn:
+            self.conn.execute(
+                """INSERT INTO channel_scans(
+                     channel, label, access_method, status, date_range_covered,
+                     queries_run_json, items_ingested, remaining_notes, updated_at
+                   ) VALUES (?,?,?,?,?,?,?,?,?)
+                   ON CONFLICT(channel) DO UPDATE SET
+                     label=CASE WHEN excluded.label != '' THEN excluded.label ELSE channel_scans.label END,
+                     access_method=excluded.access_method,
+                     status=excluded.status,
+                     date_range_covered=CASE WHEN excluded.date_range_covered != '' THEN excluded.date_range_covered ELSE channel_scans.date_range_covered END,
+                     queries_run_json=excluded.queries_run_json,
+                     items_ingested=excluded.items_ingested,
+                     remaining_notes=excluded.remaining_notes,
+                     updated_at=excluded.updated_at""",
+                (ch, label.strip() or ch.title(), access_method, status, date_range_covered.strip(),
+                 json.dumps(merged_queries, ensure_ascii=False), ingested, remaining_notes.strip(), ts),
+            )
+            self._log("upsert_channel_scan", {"channel": ch, "status": status, "items_ingested": ingested})
+        return [c for c in self.list_channel_scans() if c["channel"] == ch][0]
+
+    def list_channel_scans(self) -> list[dict[str, Any]]:
+        has_tbl = self.conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='channel_scans'"
+        ).fetchone()
+        if not has_tbl:
+            return []
+        counts = {
+            r["channel"]: int(r["n"])
+            for r in self.conn.execute("SELECT channel, COUNT(*) AS n FROM sources GROUP BY channel")
+        }
+        rows = self.conn.execute("SELECT * FROM channel_scans ORDER BY status ASC, channel ASC").fetchall()
+        out = []
+        for r in rows:
+            out.append({
+                "channel": r["channel"],
+                "label": r["label"] or r["channel"].title(),
+                "access_method": r["access_method"],
+                "status": r["status"],
+                "date_range_covered": r["date_range_covered"],
+                "queries_run": json.loads(r["queries_run_json"]),
+                "items_ingested": max(int(r["items_ingested"]), counts.get(r["channel"], 0)),
+                "remaining_notes": r["remaining_notes"],
+                "updated_at": r["updated_at"],
+            })
+        return out
+
     # ── Deterministic Deepening & Coverage Audit ("What Did I Miss?") ────────
 
     _LEGALESE_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
@@ -1737,7 +1848,12 @@ class CareerVault:
                 })
         thin_episodes.sort(key=lambda x: (-x["importance"], -len(x["missing"])))
 
-        # 4. Channel blindspots
+        # 4. Channel blindspots & MCP scan ledger
+        channel_scans = self.list_channel_scans()
+        unscanned_channels = [
+            c for c in channel_scans
+            if c["status"] in ("declared", "scanning")
+        ]
         present_channels = {s["channel"] for s in sources}
         channel_groups = {
             "docs_or_resume": bool(present_channels & {"doc", "resume", "gdoc", "note"}),
@@ -1836,6 +1952,19 @@ class CareerVault:
 
         # 7. Prioritized Next Actions (What's Missing?)
         next_actions: list[dict[str, Any]] = []
+        if unscanned_channels:
+            ch_desc = ", ".join(
+                f"{c['label']} ({c['status']}{': ' + c['remaining_notes'] if c['remaining_notes'] else ''})"
+                for c in unscanned_channels[:4]
+            )
+            next_actions.append({
+                "id": "unscanned_channels",
+                "severity": "high",
+                "category": "coverage",
+                "title": f"{len(unscanned_channels)} declared work channel(s) not fully scanned yet",
+                "detail": f"Finish sweeping via your agent's MCP connectors: {ch_desc}.",
+                "target_tab": "vault",
+            })
         if not roles and sources:
             next_actions.append({
                 "id": "add_roles",
@@ -1966,7 +2095,10 @@ class CareerVault:
                 "attach_candidates_count": len(triage["attach_candidates"]),
                 "legalese_hits_count": len(legalese_hits),
                 "unregistered_sensitive_count": len(unregistered_sensitive),
+                "unscanned_channels_count": len(unscanned_channels),
             },
+            "channel_scans": channel_scans,
+            "unscanned_channels": unscanned_channels,
             "role_gaps": empty_roles[:max_examples],
             "substantive_unlinked": [
                 {"source_id": s["id"], "title": s["title"], "channel": s["channel"], "event_date": s["event_date"], "chars": s["chars"]}

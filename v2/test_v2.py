@@ -547,7 +547,14 @@ class TestCareerVaultV2(unittest.TestCase):
         self.assertEqual(extract_provider_text("openai", {"choices": [{"message": {"content": "oa"}}]}), "oa")
 
     def test_deterministic_gap_audit_and_self_deepening_signals(self) -> None:
-        # 1. Create 2 roles (1 empty!), 1 long unlinked doc, and 1 thin episode with legalese in L2
+        # 1. Declare 2 MCP work channels (1 unscanned!) + 2 roles (1 empty!), 1 long unlinked doc, and 1 thin episode with legalese in L2
+        self.vault.upsert_channel_scan(
+            channel="slack", label="Slack", access_method="mcp", status="scanning",
+            date_range_covered="2025-2026", queries_run=["from:@me"], remaining_notes="Still need 2023-2024 threads",
+        )
+        self.vault.upsert_channel_scan(
+            channel="notion", label="Notion", access_method="mcp", status="declared",
+        )
         r1 = self.vault.upsert_role(role_id="r-curr", title="Staff Engineer", organization="ClearLedger", start_date="2023-07", is_current=True)
         self.vault.upsert_role(role_id="r-prev", title="Senior Engineer", organization="RelayGrid", start_date="2020-01", end_date="2023-06")
         self.vault.ingest_source(
@@ -572,6 +579,8 @@ class TestCareerVaultV2(unittest.TestCase):
         )
 
         gaps = self.vault.audit_gaps()
+        self.assertEqual(gaps["summary"]["unscanned_channels_count"], 2)
+        self.assertEqual(gaps["next_actions"][0]["id"], "unscanned_channels")
         self.assertEqual(gaps["summary"]["empty_roles_count"], 1)
         self.assertEqual(gaps["role_gaps"][0]["id"], "r-prev")
         self.assertEqual(gaps["summary"]["substantive_unlinked_count"], 1)
@@ -583,12 +592,18 @@ class TestCareerVaultV2(unittest.TestCase):
         self.assertTrue(gaps["deepening_prompt"])
         initial_score = gaps["depth_score"]
 
-        # 2. Verify Studio /api/gaps and MCP career_audit_gaps expose the same engine
+        # 2. Verify Studio /api/gaps + /api/channels and MCP career_audit_gaps + career_log_channel_scan
         app = StudioApp(self.db_path)
         try:
             st, _, body = app.dispatch("GET", "/api/gaps")
             self.assertEqual(st, 200)
             self.assertEqual(json.loads(body)["depth_score"], initial_score)
+            st, _, body = app.dispatch(
+                "POST", "/api/channels", {"Content-Type": "application/json", "X-Career-Token": app.token},
+                json.dumps({"channel": "github", "label": "GitHub", "access_method": "mcp", "status": "scanned"}).encode(),
+            )
+            self.assertEqual(st, 200)
+            self.assertEqual(json.loads(body)["status"], "scanned")
         finally:
             app.close()
 
@@ -599,6 +614,11 @@ class TestCareerVaultV2(unittest.TestCase):
                 "params": {"name": "career_audit_gaps", "arguments": {}},
             })
             self.assertEqual(resp["result"]["structuredContent"]["depth_score"], initial_score)
+            resp_ch = mcp_l1.handle_request({
+                "jsonrpc": "2.0", "id": 10, "method": "tools/call",
+                "params": {"name": "career_list_channels", "arguments": {}},
+            })
+            self.assertEqual(len(resp_ch["result"]["structuredContent"]["channels"]), 3)
         finally:
             mcp_l1.close()
 

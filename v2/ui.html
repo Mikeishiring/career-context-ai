@@ -888,6 +888,33 @@ dialog::backdrop {
       </div>
     </div>
 
+    <!-- Connected Work Channels & MCP Scan Ledger -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="split" style="align-items:center;margin-bottom:0.55rem">
+        <div>
+          <h3 style="margin:0">Work channels &amp; MCP scan ledger</h3>
+          <p class="meta" style="margin:0.15rem 0 0">Your AI agent connects to your own MCP servers (Slack, Notion, Google Docs, GitHub, Linear, Gmail, etc.) to scan authorized work directly into this vault. Declare every channel you work on so <strong>Deepening Radar</strong> tracks what's still unscanned.</p>
+        </div>
+        <button class="btn secondary sm" id="toggle-ch-form">+ Declare channel</button>
+      </div>
+      <div id="ch-form" class="hidden sheet-animate" style="padding:0.75rem;margin-bottom:0.75rem;background:var(--surface);border:1px solid var(--line);border-radius:12px">
+        <div class="form-row">
+          <div><label style="margin-top:0">Channel</label><select id="ch-name"><option value="slack">Slack</option><option value="notion">Notion</option><option value="gdoc">Google Docs / Drive</option><option value="github">GitHub</option><option value="linear">Linear / Jira</option><option value="gmail">Gmail / Email</option><option value="calendar">Calendar</option><option value="linkedin">LinkedIn</option><option value="x">X / Twitter</option><option value="substack">Substack / Blog</option><option value="doc">Local Docs / Folder</option></select></div>
+          <div><label style="margin-top:0">Access method</label><select id="ch-method"><option value="mcp">MCP connector</option><option value="connector">Live connector</option><option value="export">Export / file upload</option><option value="manual">Manual notes</option></select></div>
+          <div><label style="margin-top:0">Scan status</label><select id="ch-status"><option value="declared">Declared (not scanned yet)</option><option value="scanning">Scanning (partial)</option><option value="scanned">Scanned</option><option value="skipped">Skipped</option></select></div>
+        </div>
+        <div class="form-row" style="margin-top:0.45rem">
+          <div><label style="margin-top:0">Date range covered</label><input id="ch-dates" placeholder="e.g. 2023–2026"></div>
+          <div><label style="margin-top:0">Remaining / notes</label><input id="ch-notes" placeholder="e.g. Still need 2022–2023 threads"></div>
+        </div>
+        <div class="row" style="margin-top:0.65rem">
+          <button class="btn sm" id="save-ch-btn">Save channel</button>
+          <button class="btn secondary sm" id="cancel-ch-btn">Cancel</button>
+        </div>
+      </div>
+      <div id="channels-ledger" class="row"></div>
+    </div>
+
     <div class="card">
       <div class="row">
         <input id="search-input" placeholder="Search across Slack, GitHub, Notion, X, Substack, DOCX, docs..." style="flex:1;min-width:240px">
@@ -930,7 +957,7 @@ dialog::backdrop {
     <div class="grid-2">
       <div class="card">
         <h3>Connect your own LLM API</h3>
-        <p class="meta">Keys stay strictly in browser <code>sessionStorage</code> — never written to SQLite.</p>
+        <p class="meta">Use an LLM provider and plan you trust — ideally with <strong>model training disabled / zero-data-retention</strong> — before sending work context. Keys stay strictly in browser <code>sessionStorage</code> and are never written to SQLite.</p>
         <div class="form-row">
           <div>
             <label>Provider</label>
@@ -1266,6 +1293,23 @@ async function refresh() {
       <button class="btn danger sm hover-action" onclick="delTerm(${t.id})">Remove</button>
     </div>
   `).join("") || '<p class="meta">No sensitive terms registered yet. Click "Scan &amp; suggest" above.</p>';
+
+  // Work channels & MCP scan ledger
+  const scans = STATE.channel_scans || [];
+  const countsByCh = {};
+  sources.forEach(s => { countsByCh[s.channel] = (countsByCh[s.channel] || 0) + 1; });
+  const ledgerEl = document.getElementById("channels-ledger");
+  if (scans.length) {
+    ledgerEl.innerHTML = scans.map(ch => {
+      const cls = ch.status === "scanned" ? "ok" : (ch.status === "skipped" ? "" : "warn");
+      return `<span class="pill ${cls}" title="${esc((ch.date_range_covered ? 'Covered: ' + ch.date_range_covered + ' · ' : '') + (ch.remaining_notes || ''))}">${esc(ch.label)} · ${esc(ch.access_method.toUpperCase())} · ${esc(ch.status)} (${ch.items_ingested})</span>`;
+    }).join("");
+  } else {
+    const inferred = Object.entries(countsByCh);
+    ledgerEl.innerHTML = inferred.length
+      ? inferred.map(([ch, n]) => `<span class="pill">${esc(ch)} (${n} saved)</span>`).join("") + '<span class="meta" style="margin-left:0.3rem">Click "+ Declare channel" (or let your MCP agent log channels) to track unscanned work tools.</span>'
+      : '<span class="meta">No work channels declared yet. Click <strong>+ Declare channel</strong> or start your agent session with <code>v2/SKILL.md</code> to map &amp; scan your MCP channels.</span>';
+  }
 
   // Populate Vault channel filter dynamically
   const chSel = document.getElementById("source-channel-filter");
@@ -1939,6 +1983,25 @@ document.getElementById("st-suggest-btn").onclick = async () => {
     ? '<div class="meta" style="margin-bottom:0.35rem">Suggested confidential candidates from L1:</div>' +
       res.suggestions.map(s => `<span class="pill warn clickable" style="margin:0.2rem" onclick="registerSuggestion('${esc(s.term)}','${esc(s.suggested_replacement)}','${esc(s.category)}')">+ ${esc(s.term)} (${s.episode_count} ep)</span>`).join("")
     : '<p class="meta">No unregistered candidates found.</p>';
+};
+
+document.getElementById("toggle-ch-form").onclick = () => document.getElementById("ch-form").classList.toggle("hidden");
+document.getElementById("cancel-ch-btn").onclick = () => document.getElementById("ch-form").classList.add("hidden");
+document.getElementById("save-ch-btn").onclick = async () => {
+  const sel = document.getElementById("ch-name");
+  await api("/api/channels", {
+    channel: sel.value,
+    label: sel.options[sel.selectedIndex].textContent,
+    access_method: document.getElementById("ch-method").value,
+    status: document.getElementById("ch-status").value,
+    date_range_covered: document.getElementById("ch-dates").value,
+    remaining_notes: document.getElementById("ch-notes").value,
+  });
+  document.getElementById("ch-form").classList.add("hidden");
+  document.getElementById("ch-dates").value = "";
+  document.getElementById("ch-notes").value = "";
+  toast("Updated work channel scan ledger");
+  await refresh();
 };
 
 document.getElementById("save-person").onclick = async () => {

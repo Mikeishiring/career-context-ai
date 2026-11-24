@@ -170,6 +170,17 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("db")
     s.add_argument("--max-examples", type=int, default=8)
 
+    s = sub.add_parser("channels", help="Track work/communication channels and MCP scan progress")
+    s.add_argument("action", choices=["list", "set"])
+    s.add_argument("db")
+    s.add_argument("--channel", default="")
+    s.add_argument("--label", default="")
+    s.add_argument("--method", default="mcp", choices=["mcp", "connector", "export", "manual"])
+    s.add_argument("--status", default="declared", choices=["declared", "scanning", "scanned", "skipped"])
+    s.add_argument("--dates", default="")
+    s.add_argument("--query", action="append", default=[])
+    s.add_argument("--remaining", default="")
+
     # draft-tier / set-tier / leak-check
     s = sub.add_parser("draft-tier", help="Generate deterministic sanitized L2/L3 draft from L1")
     s.add_argument("db")
@@ -323,6 +334,19 @@ def main(argv: list[str] | None = None) -> int:
                     _print(vault.triage_unlinked_sources())
             elif args.cmd == "audit-gaps":
                 _print(vault.audit_gaps(max_examples=args.max_examples))
+            elif args.cmd == "channels":
+                if args.action == "list":
+                    _print(vault.list_channel_scans())
+                else:
+                    _print(vault.upsert_channel_scan(
+                        channel=args.channel,
+                        label=args.label,
+                        access_method=args.method,
+                        status=args.status,
+                        date_range_covered=args.dates,
+                        queries_run=args.query,
+                        remaining_notes=args.remaining,
+                    ))
             elif args.cmd == "draft-tier":
                 _print(vault.draft_sanitized_projection(args.episode_id, args.tier))
             elif args.cmd == "set-tier":

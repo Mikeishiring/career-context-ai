@@ -131,6 +131,16 @@ PRIVATE_RW_TOOLS = [
     _tool_def("career_triage_unlinked", "Cluster unlinked L0 inbox sources into likely episode matches vs potential unwritten stories.", {
         "limit": {"type": "integer"},
     }),
+    _tool_def("career_list_channels", "List all declared work/communication channels (Slack, Notion, Google Docs, GitHub, etc.) and their MCP scan progress.", {}),
+    _tool_def("career_log_channel_scan", "Declare a work/communication channel or update its MCP scan progress (date range covered, queries run, remaining gaps).", {
+        "channel": {"type": "string"},
+        "label": {"type": "string"},
+        "access_method": {"type": "string", "enum": ["mcp", "connector", "export", "manual"]},
+        "status": {"type": "string", "enum": ["declared", "scanning", "scanned", "skipped"]},
+        "date_range_covered": {"type": "string"},
+        "queries_run": {"type": "array", "items": {"type": "string"}},
+        "remaining_notes": {"type": "string"},
+    }, ["channel"]),
 ]
 
 
@@ -213,6 +223,10 @@ class CareerMCPServer:
             return v.audit_gaps(max_examples=int(args.get("max_examples", 8)))
         if name == "career_triage_unlinked":
             return v.triage_unlinked_sources(limit=int(args.get("limit", 80)))
+        if name == "career_list_channels":
+            return {"channels": v.list_channel_scans()}
+        if name == "career_log_channel_scan":
+            return v.upsert_channel_scan(**args)
         raise ValueError(f"Unknown tool: {name}")
 
     def handle_request(self, req: dict[str, Any]) -> dict[str, Any] | None:
