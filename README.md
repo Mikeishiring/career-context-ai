@@ -1,43 +1,89 @@
 # Career Context AI
 
-**[Open Career studio](CAREER-CONTEXT.html)** — the fictional product example. Your private HTML opens the same workspace with your own drafts, work examples and stories.
+**Build your own local career database with your own AI—then export a clean brief for humans or an exhaustive, leak-checked Context Pack for someone else's AI.**
 
-Build your own local database of the work you've done: the records, decisions, shared contributions and unfinished attempts behind a resume.
+A standard resume squeezes years of decisions, projects, and trade-offs into twenty bullets. Career Context AI gives you a local SQLite vault, a dual-mode MCP server, and a clean browser front end so you can organize your own career history on your own machine—without connecting to our servers or paying for a hosted service.
 
-Use it to recall your experience, reflect on your choices, find examples for guiding others, or prepare for an interview. It builds an account from the context you supply; it does not rate your performance or establish how other people felt about you. Recorded feedback stays attributed to its source and circumstances.
+---
 
-This is an early project: an agent skill with Python tools for keeping a searchable archive and a readable HTML file. Your chosen agent gathers and interprets the material. You review it, keep it and decide how to use it.
+## Security & Privacy (Plain English)
 
-## Three principles
+- **Self-hosted & Bring Your Own AI:** Everything runs locally on your machine. Nothing connects to our servers, anyone else's career vault, or anyone else's API key. You use your own AI assistant (Claude, ChatGPT/Codex, Cursor, Gemini, Antigravity, or local Ollama) and your own workspace tools.
+- **Local storage vs. LLM inference:** Your SQLite file (`career.sqlite`) stays strictly on your disk (`.gitignore` blocks `*.sqlite*`, `private/`, `sources/`, `.env`). However, whatever your assistant reads from Slack, Notion, or Docs is sent to your chosen LLM provider during the session—so **use an LLM provider and plan you trust with model training disabled / zero-data-retention**, and only scan channels you are authorized to read.
+- **Hard local leak blocking on `L2` and `L3`:** Before any `L2` or `L3` projection is saved, exported, or served over read-only MCP, local Python checks block any registered sensitive term (client names, internal revenue/metrics, coworker names, proprietary rules), emails, `sk-`/`ghp_` tokens, Slack `#channels`, and unapproved screenshots.
+- **Zero-JavaScript static exports:** Exported HTML files ship with `Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; img-src data:;` and contain zero JavaScript.
 
-1. **Collect context first.** Keep the source material before deciding what it means or which story to tell. Gather broadly within the sources you authorize; record what remains unread. You can organize and reinterpret it later.
-2. **Make it fit you.** Adapt the structure, emphasis and writing to your work, purpose and voice. One archive can support different resumes, introductions, interviews or questions.
-3. **Keep it under your control.** Store the archive on your own machine. The project has no hosted account or upload service for your archive. Choose which tools can read it and what, if anything, you share.
+---
 
-Local storage does not make an AI session local: material you give an agent may reach its host or model provider. The files are unencrypted. Use work documents only with an approved model and sources you are allowed to share. [Storage and sharing](docs/PRIVACY.md).
+## Confidentiality Tiers (`L0`–`L3`) + Reader Depth (Succinct vs. Exhaustive)
 
-![Fictional Career studio with prepared stories and a Create draft action](docs/career-context-preview.png)
+Confidentiality (**what is safe to share**) and depth (**human skim vs. AI reader**) are separate choices:
 
-## Start here
+| Tier | What lives here | Exported? |
+|---|---|---|
+| **L0 — Raw Vault** | Verbatim Slack threads, Notion pages, Calendar events, meeting transcripts, Google Docs, GitHub PRs, and emails indexed locally in SQLite. | **Never** |
+| **L1 — Private Working Copy** *(default)* | Your candid roles, stories, real client/coworker names, exact internal figures, shelved prototypes, screenshots, and verbatim quotes. | Private backup only |
+| **L2 — Confidential-Safe** | Real problems, decisions, trade-offs, shared credit, and outcomes—with sensitive names and internal numbers generalized and leak-checked. | **Hard leak-checked** |
+| **L3 — Public (Open Web)** | Short public summaries and links you are comfortable posting openly. | **Hard leak-checked** |
 
-Give your assistant **[START-HERE.md](START-HERE.md)** and this project. If you already have career context, supply the latest saved private file too:
+When exporting **`L2`** or **`L3`**, choose the format for who is reading it:
+- **For Humans (Succinct):** `L2 Visual Brief (HTML)`, `L3 Public Page (HTML)`, or `1-Page Resume (MD)`.
+- **For Someone Else's AI (Exhaustive, Leak-Checked):** **`L2 AI Context Pack (Markdown or JSON)`**—built specifically to hand directly to a recruiter's or hiring manager's AI (or expose via a read-only `L2` MCP server). Unlike a 1-page resume, an AI reader benefits from complete, well-structured detail across all leak-checked stories, decisions, shared credit, roles, and skills so it can answer nuanced questions without guessing or hallucinating.
 
-> Follow the career-context starter. Reuse what I've already supplied, check what you can read and save, and build one useful account from material I authorize. Preserve shared credit, uncertainty and my corrections. Save progress so we can continue later.
+---
 
-The assistant checks its capabilities, starts from selected material and handles the tools. A missing connector, target role or complete career history does not prevent a first draft. File-capable hosts use Python 3.11+ with no extra packages for the core archive. Other hosts can provide a provisional draft and continuation in chat; they must not claim to have saved an archive. [Setup and supported fallbacks](docs/GETTING-STARTED.md).
+## The 5 Stages
 
-To try the fictional example offline, [download the project](https://github.com/Mikeishiring/career-context-ai/archive/refs/heads/main.zip), extract it and open **[CAREER-CONTEXT.html](CAREER-CONTEXT.html)** in a browser. The sheet supports reading, corrections and private saves; it has no embedded AI connection.
+1. **Scan Channels (`L0`):** Connect your own AI assistant and MCP servers (**Slack, Notion, Google Calendar, Meeting Transcripts like Granola/Gong/Fireflies/Zoom, Google Docs, GitHub, Linear/Jira, Gmail, LinkedIn, X, Substack**) and pull authorized history into local `career.sqlite`.
+2. **Roles & Private Stories (`L1`):** Group raw material under your actual roles and write private `L1` stories with concrete decisions, who helped, honest outcomes, visuals, and verbatim source quotes.
+3. **Check Gaps (`audit-gaps`):** Run the local gap check (`python -m v2.career audit-gaps` or MCP `career_audit_gaps`) to see half-scanned channels, roles with zero stories, long unlinked docs, and thin stories—so you don't have to keep asking your AI *"what else did I miss?"*.
+4. **Set `L2` / `L3` & Block Sensitive Terms:** Register client names, internal metrics, and coworker names to block; mark your top 4–6 stories as Flagship; write clean `L2` and `L3` versions.
+5. **Export & Hand Off:** Export a succinct brief for a human, download an exhaustive **L2 AI Context Pack** (`.md` / `.json`) to drop into someone else's AI, or run a local read-only `L2` MCP server.
 
-## Use it elsewhere
+---
 
-The archive is the reusable part. Resumes, profiles and interview preparation are selected views of it. A coach or job-search service can use a reviewed selection without needing your whole database.
+## Quick Start
 
-Export a reviewed selection for another agent or tool. The optional local MCP connection exposes only that snapshot, with no archive writes or automatic uploads. [Selected context and local MCP](skills/career-context-sheet/references/selected-context.md).
+Zero mandatory pip packages—**Python 3.11+ stdlib only** (optional local cached `float16` semantic search uses `.semantic-model`).
 
-**Career studio** opens first, with prepared drafts, actual work artifacts and stories. **Review your stories** shows account-specific gaps and lets you flag missing work, judge the emphasis and choose which stories to tell. **Create draft** saves a resume, visual example or story request for your assistant. **My context** keeps a private overview of the person and their work. **Timeline** explores dated records by year, including work spanning several years. **Develop context** holds ongoing review, investigation and writing; an empty archive starts with one account. **Public profile** controls an explicitly requested public draft. Full HTML and JSON remain private working files.
+### 1. Connect Your Own AI Assistant (MCP-First)
+Run your local vault as a private read/write MCP server (keeping `career.sqlite` inside gitignored `private/`):
+```powershell
+python -m v2.career mcp private/career.sqlite --tier L1 --rw
+```
+Give your assistant [`SKILL.md`](SKILL.md) (or [`v2/SKILL.md`](v2/SKILL.md)) alongside your existing Slack / Notion / Calendar / Transcripts / Docs / GitHub MCP servers:
+> *"Follow `SKILL.md`. First ask what channels I work on, check which MCP connectors are active, log them in `career_log_channel_scan`, scan my work into `private/career.sqlite`, and run `career_audit_gaps` to close gaps before stopping."*
 
-The experiments test parts of the research process on fictional cases. They do not establish complete career coverage or better results than other tools.
+### 2. Review, Edit & Export in the Local Front End
+```powershell
+python -m v2.launch private/career.sqlite --open
+```
+Opens **`http://127.0.0.1:8765/`** directly over your local SQLite file:
+- **Overview:** Interactive 5-stage tracker, live `L0 → L3` tier preview, and branded MCP channels dock.
+- **Studio:** Flagship stories, readiness progress, and live Deepening Radar.
+- **Experience:** Editorial profile, Master-Detail Roles workbench (see stories per role and `0`-story gaps), Timeline, and Skills.
+- **Stories:** Master-Detail `L1` workbench (`Overview` / `Edit Story` / `+ Claim`, sliding `Flagship / Core / Proof / Background` selector, visual lightbox).
+- **Share:** Sensitive terms registry, `L2 / L3` Tier Studio, succinct human exports (`HTML` / `Resume`), and exhaustive **AI Context Packs** (`agent_pack` Markdown / `agent_json` + read-only `L2` MCP command).
+- **Vault:** MCP scan ledger, FTS5/hybrid search, inbox triage, source reader, and offline file upload drawer.
+- **AI:** Optional direct BYO-API helper (keys stay strictly in tab `sessionStorage`, never written to disk).
 
-[Guides](docs/README.md) · [Contributing](CONTRIBUTING.md) · [Research experiments](ai-search-mvp/README.md) · [MIT license](LICENSE)
+### 3. CLI Exports & Read-Only External MCP
+```powershell
+# Succinct human brief (zero-JS static HTML)
+python -m v2.career export private/career.sqlite --tier L2 --format html --out career-l2.html
 
-Private [evidence memory](skills/career-context-sheet/references/memory-and-retrieval.md) retains exact claim anchors, hypotheses, corrections and rejected interpretations. Browse and search saved HTML/JSON or SQLite, including optional local semantic retrieval for different wording, then expand a claim to its evidence and counterevidence. Account reviews reopen only when their dependencies change; public and selected-context exports exclude this private memory. Semantic search needs a separately prepared CPU runtime and pinned model; it sends no evidence to a hosted embedding service.
+# Exhaustive leak-checked AI Context Pack for someone else's AI
+python -m v2.career export private/career.sqlite --tier L2 --format agent_pack --out career-l2-ai-pack.md
+
+# Read-only leak-checked MCP server for an external agent
+python -m v2.career mcp private/career.sqlite --tier L2
+```
+
+---
+
+## Verify Locally
+
+```powershell
+python -m unittest v2/test_v2.py -v
+python -m v2.assess
+```

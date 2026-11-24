@@ -94,12 +94,14 @@ Autonomously close **at least one full round of high-severity gaps** before hand
 
 ---
 
-## Live Studio, Exports, & External-Agent MCP
-- **Live Browser Studio (read, edit, Deepening Radar, Channel Ledger, static previews, BYO-API):**
+## Live Studio, Exports (Human Brief vs. Exhaustive AI Pack), & MCP
+- **Live Browser Studio (review, edit, check gaps, preview & export locally):**
   `python -m v2.launch PRIVATE/career.sqlite --open`
-- **Clean static exports (zero JS, strict CSP, leak-checked):**
-  `python -m v2.career export DB --tier L2 --format html|markdown|json|resume --out OUTPUT`
-- **Private read/write MCP endpoint (for your own agent):**
+- **Succinct human exports (zero JS, strict CSP, leak-checked):**
+  `python -m v2.career export DB --tier L2 --format html|resume --out OUTPUT`
+- **Exhaustive AI Context Pack (designed to be dropped straight into someone else's AI—full leak-checked L2 stories, decisions, roles & skills):**
+  `python -m v2.career export DB --tier L2 --format agent_pack|agent_json --out OUTPUT`
+- **Private read/write MCP endpoint (for your own assistant):**
   `python -m v2.career mcp PRIVATE/career.sqlite --tier L1 --rw`
 - **External read-only MCP endpoint (for hiring managers / external agents — leak-checked L2/L3 only):**
   `python -m v2.career mcp PRIVATE/career.sqlite --tier L2`

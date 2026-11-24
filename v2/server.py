@@ -208,13 +208,16 @@ class StudioApp:
                     ct = {
                         "html": "text/html; charset=utf-8",
                         "json": "application/json; charset=utf-8",
+                        "agent_json": "application/json; charset=utf-8",
                         "markdown": "text/markdown; charset=utf-8",
+                        "agent_pack": "text/markdown; charset=utf-8",
                         "resume": "text/markdown; charset=utf-8",
                     }.get(fmt, "text/plain; charset=utf-8")
-                    ext = "md" if fmt in ("markdown", "resume") else fmt
+                    ext = "json" if fmt in ("json", "agent_json") else ("md" if fmt in ("markdown", "resume", "agent_pack") else fmt)
+                    suffix = "-ai-pack" if fmt in ("agent_pack", "agent_json") else ("-resume" if fmt == "resume" else "")
                     resp_hdrs = {"Content-Type": ct, "Cache-Control": "no-store"}
                     if not inline:
-                        resp_hdrs["Content-Disposition"] = f'attachment; filename="career-{tier.lower()}.{ext}"'
+                        resp_hdrs["Content-Disposition"] = f'attachment; filename="career-{tier.lower()}{suffix}.{ext}"'
                     return 200, resp_hdrs, content
 
                 return self._json({"error": "Not found"}, int(HTTPStatus.NOT_FOUND))

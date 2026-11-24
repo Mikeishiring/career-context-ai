@@ -283,6 +283,20 @@ class TestCareerVaultV2(unittest.TestCase):
         self.assertFalse(proj["stale"])
         self.assertEqual(proj["leaks"], [])
 
+        # Exhaustive AI Context Pack exports (Markdown & JSON) include reader instructions, full decisions & block leaks
+        pack_md = export_vault(self.vault, tier="L2", fmt="agent_pack")
+        self.assertTrue(pack_md["leak_checked"])
+        self.assertIn("Instructions for Receiving AI Agents", pack_md["content"])
+        self.assertIn("Key Decisions & Trade-offs", pack_md["content"])
+        self.assertNotIn("AcmeBank", pack_md["content"])
+        self.assertNotIn("$14.2M", pack_md["content"])
+
+        pack_json = export_vault(self.vault, tier="L2", fmt="agent_json")
+        parsed_pack = json.loads(pack_json["content"])
+        self.assertEqual(parsed_pack["export_mode"], "exhaustive_agent_pack")
+        self.assertIn("ai_reader_instructions", parsed_pack)
+        self.assertNotIn("AcmeBank", pack_json["content"])
+
         # Updating L1 automatically marks L2 as STALE without deleting it!
         self.vault.upsert_episode(
             episode_id=ep["id"],

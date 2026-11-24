@@ -203,10 +203,10 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--tier", required=True, choices=["L2", "L3"])
 
     # export
-    s = sub.add_parser("export", help="Export clean static HTML, JSON, Markdown, or Resume for L1/L2/L3")
+    s = sub.add_parser("export", help="Export clean static HTML, Resume (succinct), or exhaustive AI Context Pack (agent_pack/agent_json)")
     s.add_argument("db")
     s.add_argument("--tier", default="L2", choices=["L1", "L2", "L3"])
-    s.add_argument("--format", dest="fmt", default="html", choices=["html", "json", "markdown", "resume"])
+    s.add_argument("--format", dest="fmt", default="html", choices=["html", "json", "markdown", "resume", "agent_pack", "agent_json"])
     s.add_argument("--out", required=True)
     s.add_argument("--approved-only", action="store_true")
 

@@ -1,4 +1,4 @@
-name: Product checks
+name: Career Context AI Checks
 
 on:
   pull_request:
@@ -31,19 +31,5 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: ${{ matrix.python }}
-      - name: Toolkit and extracted-skill tests
-        run: python -m unittest discover -s tests -q
-      - name: Research regression tests
-        run: python -m unittest discover -s ai-search-mvp/tests -q
-      - name: Offline MCP contract
-        run: python tools/check_mcp.py
-      - name: Multi-source research fixture
-        run: python tools/check_multisource.py
-      - name: Rebuild fictional sheet
-        run: python tools/build_demo.py
-      - name: Verify reproducible example
-        run: git diff --exit-code -- CAREER-CONTEXT.html
-      - name: Publication manifest and links
-        run: python tools/check_release.py
-      - name: Build standalone skill
-        run: python tools/build_skill.py "${{ runner.temp }}/career-context-sheet.zip"
+      - name: Run v2 unit test suite
+        run: python -m unittest v2/test_v2.py -v

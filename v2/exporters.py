@@ -241,6 +241,87 @@ def render_static_html(snapshot: dict[str, Any]) -> str:
 """
 
 
+def render_agent_pack_markdown(snapshot: dict[str, Any], knowledge: dict[str, Any] | None = None) -> str:
+    """Exhaustive, leak-checked Markdown context pack built for someone else's AI agent to read."""
+    person = snapshot["person"]
+    tier = snapshot["tier"]
+    all_eps = snapshot.get("episodes", [])
+    roles = snapshot.get("roles", [])
+    lines = [
+        f"# Career Context Pack ({tier} · Exhaustive AI-Reader Format)",
+        "",
+        "## Instructions for Receiving AI Agents",
+        "- This document is a verified, leak-checked career context export prepared by the candidate.",
+        "- Read all sections before answering questions—depth is intentional so you do not have to guess.",
+        "- Keep scope and shared credit exact: distinguish what the person led, co-built, proposed, piloted, or shipped.",
+        "- Do not extrapolate confidential names, exact internal revenue, or metrics that are not stated here.",
+        f"- Privacy tier: `{tier}` — {snapshot['privacy_notice']}",
+        "",
+        "---",
+        "",
+        f"## Profile: {person.get('name') or 'Candidate'}",
+    ]
+    if person.get("headline"):
+        lines.append(f"**Headline:** {person['headline']}")
+    if person.get("overview"):
+        lines.extend(["", person["overview"]])
+
+    if roles:
+        lines.extend(["", "## Chronological Roles & Experience"])
+        for r in roles:
+            org = f" @ {r['organization']}" if r.get("organization") else ""
+            period = f" ({r['period']})" if r.get("period") else ""
+            curr = " [Current]" if r.get("is_current") else ""
+            lines.append(f"- **{r['title']}**{org}{period}{curr}")
+
+    if knowledge:
+        caps = knowledge.get("capabilities") or []
+        themes = knowledge.get("themes") or []
+        if caps:
+            lines.extend(["", "## Capabilities & Tools"])
+            lines.append(", ".join(f"{c['name']} ({len(c.get('episodes', []))})" for c in caps[:40]))
+        if themes:
+            lines.extend(["", "## Recurring Themes"])
+            lines.append(", ".join(f"{t['tag']} ({t['count']})" for t in themes[:30]))
+
+    groups = [
+        ("Flagship Work (Highest Prominence)", [e for e in all_eps if int(e.get("importance") or 0) >= 3]),
+        ("Core Delivery & Operations", [e for e in all_eps if int(e.get("importance") or 0) == 2]),
+        ("Additional Projects, Prototypes & Proof Points", [e for e in all_eps if int(e.get("importance") or 0) < 2]),
+    ]
+    for heading, eps in groups:
+        if not eps:
+            continue
+        lines.extend(["", f"## {heading}"])
+        for ep in eps:
+            meta = " · ".join(x for x in [ep.get("period"), ep.get("status")] if x)
+            lines.extend(["", f"### {ep['title']}"])
+            if meta:
+                lines.append(f"*{meta}*")
+            if ep.get("summary"):
+                lines.extend(["", ep["summary"]])
+            if ep.get("decisions"):
+                lines.extend(["", "**Key Decisions & Trade-offs:**"])
+                for d in ep["decisions"]:
+                    lines.append(f"- {d}")
+            if ep.get("outcome"):
+                lines.append(f"\n**Outcome / Scope:** {ep['outcome']}")
+            if ep.get("shared_credit"):
+                lines.append(f"\n**Collaboration / Shared Credit:** {ep['shared_credit']}")
+            if ep.get("tags"):
+                lines.append(f"\n**Tags:** {', '.join(ep['tags'])}")
+            links = [l for l in (ep.get("public_links") or []) if str(l.get("url", "")).startswith("https://")]
+            if links:
+                lines.append("\n**Public Links:** " + " · ".join(f"[{l['label']}]({l['url']})" for l in links))
+
+    lines.extend([
+        "",
+        "---",
+        f"*Generated {snapshot['generated_at']} · Tier {tier} · {len(all_eps)} leak-checked stories · Raw L0 vault excluded.*",
+    ])
+    return "\n".join(lines).strip() + "\n"
+
+
 def export_vault(
     vault: CareerVault,
     *,
@@ -251,16 +332,50 @@ def export_vault(
     approved_only: bool = False,
     strict_leaks: bool = True,
 ) -> dict[str, Any]:
+    fmt = fmt.lower().strip()
     snapshot = vault.build_tier_snapshot(
         tier=tier,
         episode_ids=episode_ids,
         approved_only=approved_only,
         strict_leaks=strict_leaks,
-        embed_artifacts=(fmt.lower().strip() == "html"),
+        embed_artifacts=(fmt == "html"),
     )
-    fmt = fmt.lower().strip()
     if fmt == "json":
         content = json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n"
+    elif fmt == "agent_json":
+        kg = vault.get_knowledge_graph()
+        # Only include safe aggregated tags/capabilities (never raw L1 decisions which may contain unredacted terms)
+        safe_caps = [{"name": c["name"], "kind": c.get("kind", ""), "story_count": len(c.get("episodes", []))} for c in kg.get("capabilities", [])]
+        safe_themes = [t for t in kg.get("themes", []) if "confidential" not in str(t.get("tag", ""))]
+        pack = {
+            **snapshot,
+            "export_mode": "exhaustive_agent_pack",
+            "ai_reader_instructions": (
+                "Leak-checked exhaustive career context pack. Preserve exact scope, shared credit, "
+                "and honest stopping points; do not infer redacted client names or internal metrics."
+            ),
+            "capabilities": safe_caps,
+            "themes": safe_themes,
+        }
+        # Re-verify entire JSON payload is leak-free on L2/L3
+        if tier in ("L2", "L3") and strict_leaks:
+            leaks = vault.scan_leaks(json.dumps(pack, ensure_ascii=False))
+            if leaks:
+                matched = sorted({f["matched"] for f in leaks})
+                raise ValueError(f"Blocked {tier} agent_json export: contains sensitive terms: {matched}")
+        content = json.dumps(pack, indent=2, ensure_ascii=False) + "\n"
+    elif fmt == "agent_pack":
+        kg = vault.get_knowledge_graph()
+        safe_kg = {
+            "capabilities": kg.get("capabilities", []),
+            "themes": [t for t in kg.get("themes", []) if "confidential" not in str(t.get("tag", ""))],
+        }
+        content = render_agent_pack_markdown(snapshot, safe_kg)
+        if tier in ("L2", "L3") and strict_leaks:
+            leaks = vault.scan_leaks(content)
+            if leaks:
+                matched = sorted({f["matched"] for f in leaks})
+                raise ValueError(f"Blocked {tier} agent_pack export: contains sensitive terms: {matched}")
     elif fmt == "markdown" or fmt == "md":
         content = render_markdown(snapshot)
     elif fmt == "resume":

@@ -781,18 +781,20 @@ dialog::backdrop {
     <!-- Chapter 1: Asymmetric Hero + Authored MCP Convergence Diagram -->
     <div class="landing-hero">
       <div>
-        <span class="pill" style="background:rgba(255,255,255,0.18);color:#fff">Local SQLite Vault + MCP Server</span>
-        <h2>Turn scattered work into a living career vault</h2>
-        <p>Your trusted AI assistant connects to your work tools via MCP, builds one private local database, and lets you share clean, leak-checked views at any depth.</p>
+        <span class="pill" style="background:rgba(255,255,255,0.18);color:#fff">Self-Hosted Local Vault · Bring Your Own AI</span>
+        <h2>Build your own local career database</h2>
+        <p>Run this on your own machine with your own AI assistant and MCP tools—nothing connects to our servers or anyone else's account. Organize your work in this local front end, then export a clean brief for humans or an exhaustive, leak-checked file for someone else's AI.</p>
         <div class="hero-actions">
           <button class="hero-cta" onclick="switchTab('studio')">Open Studio <span class="arrow">→</span></button>
           <button class="hero-cta ghost" onclick="switchTab('experience')">Roles &amp; Experience</button>
           <button class="hero-cta ghost" onclick="previewExport('L2')">Preview L2 ↗</button>
         </div>
         <div class="hero-trust-note">
-          <span>🔒 Local SQLite on your machine</span>
+          <span>🔒 Stored locally in SQLite</span>
           <span>·</span>
-          <span>Use a trusted LLM with model training disabled</span>
+          <span>Use your own AI (turn model training off)</span>
+          <span>·</span>
+          <span>Leak-checked before export</span>
         </div>
       </div>
 
@@ -1116,19 +1118,28 @@ dialog::backdrop {
 
       <div class="split-pane">
         <div class="split" style="align-items:center">
-          <h3>Exports &amp; read-only MCP</h3>
+          <h3>Export for humans or another AI</h3>
           <div class="row">
             <button class="btn secondary sm" onclick="batchSanitize('L2')">Auto-Sanitize L2</button>
             <button class="btn secondary sm" onclick="batchSanitize('L3')">Auto-Sanitize L3</button>
           </div>
         </div>
-        <div class="row" style="margin-top:0.75rem">
-          <a class="btn secondary sm" href="/api/export?tier=L2&format=html">L2 HTML ↓</a>
-          <a class="btn secondary sm" href="/api/export?tier=L3&format=html">L3 HTML ↓</a>
-          <a class="btn secondary sm" href="/api/export?tier=L2&format=resume">Resume ↓</a>
-          <a class="btn secondary sm" href="/api/export?tier=L2&format=markdown">Markdown ↓</a>
-          <a class="btn secondary sm" href="/api/export?tier=L3&format=json">JSON ↓</a>
-          <button class="btn secondary sm" onclick="copyShareMcp()">Copy L2 MCP</button>
+        <div style="margin-top:0.7rem">
+          <div class="meta" style="font-weight:700;text-transform:uppercase;letter-spacing:0.04em;font-size:0.69rem;margin-bottom:0.35rem">For Humans (Succinct · Zero JS)</div>
+          <div class="row">
+            <a class="btn secondary sm" href="/api/export?tier=L2&format=html">L2 Visual Brief (HTML) ↓</a>
+            <a class="btn secondary sm" href="/api/export?tier=L3&format=html">L3 Public Page (HTML) ↓</a>
+            <a class="btn secondary sm" href="/api/export?tier=L2&format=resume">1-Page Resume (MD) ↓</a>
+          </div>
+        </div>
+        <div style="margin-top:0.75rem">
+          <div class="meta" style="font-weight:700;text-transform:uppercase;letter-spacing:0.04em;font-size:0.69rem;margin-bottom:0.35rem">For Someone Else's AI (Exhaustive · Leak-Checked)</div>
+          <div class="row">
+            <a class="btn sm" href="/api/export?tier=L2&format=agent_pack">L2 AI Context Pack (MD) ↓</a>
+            <a class="btn secondary sm" href="/api/export?tier=L2&format=agent_json">L2 AI Pack (JSON) ↓</a>
+            <button class="btn secondary sm" onclick="copyAgentPack('L2')">Copy L2 Pack</button>
+            <button class="btn secondary sm" onclick="copyShareMcp()">Copy L2 MCP</button>
+          </div>
         </div>
         <details style="margin-top:0.85rem">
           <summary class="meta" style="cursor:pointer;font-weight:650;color:var(--accent)">Edit L2 &amp; L3 top-level overviews</summary>
@@ -1695,38 +1706,38 @@ const TIER_APERTURE_EXAMPLES = {
   L0: {
     badge: "L0 · Raw Vault",
     pillCls: "",
-    audience: "Only you & your local vault · Never exported",
-    title: "Verbatim scanned record (Slack #risk-checkout)",
+    audience: "Local disk only · Never exported",
+    title: "Raw scanned record (Slack #risk-checkout)",
     raw: true,
     body: `[Slack <span class="mark-secret">#risk-checkout</span> · 2024-09-18 · @maya]<br><span class="mark-secret">AcmeBank</span> (<span class="mark-secret">$14.2M ARR</span> prospect) hit 11.4% false declines under our <span class="mark-secret">&gt;4 retries/10m per BIN</span> rule. Paired with <span class="mark-secret">Devon</span> on a shadow-mode evaluator; EU cohort false declines dropped 38% over 6 weeks.`,
-    note: "Raw messages, transcripts, and docs stay verbatim in SQLite for instant search and quote verification. L0 is strictly never exported.",
+    note: "Raw Slack threads, Notion pages, transcripts, and docs stay on your disk for search and quote lookup. L0 never leaves your vault in any export or read-only MCP.",
   },
   L1: {
-    badge: "L1 · Private Synthesis (Default)",
+    badge: "L1 · Private Working Copy",
     pillCls: "ok",
-    audience: "Your private career database · Full candor",
+    audience: "Private default · Full unedited detail",
     title: "Shadow-mode risk evaluator for AcmeBank checkout",
     raw: false,
-    body: `<strong>Private summary:</strong> When <span class="mark-secret">AcmeBank</span> (<span class="mark-secret">$14.2M ARR</span>) suffered 11.4% false declines from our <span class="mark-secret">&gt;4 retries/10m per BIN</span> velocity check, I prototyped a shadow-mode rule evaluator alongside <span class="mark-secret">Devon</span> (Risk Eng).<br><strong>Honest outcome:</strong> Cut EU cohort false declines 38% over 6 weeks before full rollout.`,
-    note: "This is the default layer as you build your vault. Keep real names, exact internal metrics, shared credit, and unfinished prototypes without self-censoring.",
+    body: `<strong>Private summary:</strong> When <span class="mark-secret">AcmeBank</span> (<span class="mark-secret">$14.2M ARR</span>) hit 11.4% false declines from our <span class="mark-secret">&gt;4 retries/10m per BIN</span> velocity check, I built a shadow-mode evaluator with <span class="mark-secret">Devon</span> (Risk Eng).<br><strong>Outcome:</strong> Cut EU cohort false declines 38% over 6 weeks before rollout.`,
+    note: "Default layer while building your vault. Keep real client names, exact internal figures, who helped, and shelved prototypes without censoring your own notes.",
   },
   L2: {
-    badge: "L2 · Confidential-Safe Overview",
+    badge: "L2 · Confidential-Safe (Hiring / External AI)",
     pillCls: "warn",
-    audience: "Hiring managers, advisors & read-only MCP agents",
+    audience: "Hiring managers & someone else's AI · Hard leak-checked",
     title: "Shadow-mode checkout risk evaluator for enterprise banking",
     raw: false,
-    body: `When false declines threatened <span class="mark-safe">an eight-figure enterprise deal</span> with <span class="mark-safe">a Tier-1 European bank</span>, I replaced blind rule launches under <span class="mark-safe">legacy velocity thresholds</span> with a shadow-mode evaluator built alongside <span class="mark-safe">Risk Engineering</span>—cutting European cohort false declines by 38% over six weeks.`,
-    note: "✓ 0 confidential leaks detected · All registered client names, ARR figures, internal rules, and coworker identities are deterministically verified before saving or sharing.",
+    body: `When false declines threatened <span class="mark-safe">an eight-figure enterprise deal</span> with <span class="mark-safe">a Tier-1 European bank</span>, I replaced blind rule launches under <span class="mark-safe">legacy velocity thresholds</span> with a shadow-mode evaluator built with <span class="mark-safe">Risk Engineering</span>—cutting European cohort false declines by 38% over six weeks.`,
+    note: "✓ Blocked locally if any registered term, email, API key, or #channel remains. Export as a succinct brief for humans OR an exhaustive AI Context Pack (.md / .json) for someone else's AI.",
   },
   L3: {
-    badge: "L3 · Public Highlight",
+    badge: "L3 · Public (Open Web)",
     pillCls: "",
-    audience: "Public profile, resume summary & intro bio",
+    audience: "Public bio, website, or LinkedIn · Hard leak-checked",
     title: "Enterprise checkout risk modernization",
     raw: false,
-    body: `Designed a shadow-mode risk evaluation pipeline that let product and risk teams validate checkout rules on live traffic before gating customers—cutting false declines by 38% in a flagship European rollout.`,
-    note: "✓ Zero JavaScript · Crisp two-sentence public highlight with approved public links only.",
+    body: `Built a shadow-mode risk evaluator so product and risk teams could test checkout rules on live traffic before gating customers—cutting false declines 38% across a European rollout.`,
+    note: "✓ Safe for the open web · Short summary plus only the public links you explicitly approve. Exported HTML contains zero JavaScript.",
   },
 };
 
@@ -1812,6 +1823,16 @@ window.copyShareMcp = async () => {
   try {
     await navigator.clipboard.writeText(cmd);
     toast("Copied read-only leak-checked L2 MCP server command");
+  } catch (err) { toast("Copy failed: " + err.message); }
+};
+
+window.copyAgentPack = async (tier) => {
+  try {
+    const res = await fetch(`/api/export?tier=${encodeURIComponent(tier)}&format=agent_pack&inline=true`);
+    if (!res.ok) throw new Error((await res.json()).error || "Export failed");
+    const text = await res.text();
+    await navigator.clipboard.writeText(text);
+    toast(`Copied exhaustive leak-checked ${tier} AI Context Pack (${text.length} chars)`);
   } catch (err) { toast("Copy failed: " + err.message); }
 };
 

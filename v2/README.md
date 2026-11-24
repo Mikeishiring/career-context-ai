@@ -1,88 +1,83 @@
-# Career Context AI v2
+# Career Context AI
 
-**Replace the low-throughput resume bottleneck with a local-first career knowledge database built by your own AI agent across your live work channels.**
+**Build your own local career database with your own AI—then export a clean brief for humans or an exhaustive, leak-checked Context Pack for someone else's AI.**
 
-Resumes compress years of real decisions, trade-offs, prototypes, and cross-functional work into 20 generic bullets—losing almost all signal while still making it awkward to share context without leaking confidential company details.
-
-**Career Context AI v2** is designed around how people actually work today:
-1. **Map your real work channels & scan via your own MCP connectors:** Connect your AI agent (Claude, ChatGPT/Codex, Cursor, Antigravity, etc.) to the MCP servers for the channels where your work actually lives—**Slack, Notion, Google Docs/Drive, GitHub, Linear/Jira, Gmail, Calendar**, plus **LinkedIn, X, Substack**, and local files. Your agent maps every channel you work on into a **Channel Scan Ledger**, runs systematic time-sliced sweeps into a local SQLite vault (`L0`/`L1`), and tracks what date ranges and channels remain unscanned. *(Manual drag-and-drop file upload in the browser Studio is included as an offline fallback for resumes and local exports.)*
-2. **Drive depth automatically (`audit-gaps`) instead of nagging your AI *"what else did I miss?"*:** A deterministic coverage & quality engine scores your vault (`0–100`) and flags unscanned MCP channels, empty career roles, long unlinked docs, unwritten evidence clusters, thin stories, flat story hierarchies, and courtroom-style AI phrasing—feeding an explicit self-deepening loop back to both you and your agent.
-3. **Share at the exact granularity you choose (`L2` / `L3`):** Keep your full candid reality privately in `L0`/`L1`, and project **confidential-safe overviews (`L2`)** or **public summaries (`L3`)** that are deterministically leak-checked against your sensitive terms registry, exported as tiny zero-JS static HTML/Markdown/Resume/JSON files, or exposed to another agent via a read-only MCP endpoint.
+A standard resume squeezes years of decisions, projects, and trade-offs into twenty bullets. Career Context AI gives you a local SQLite vault, a dual-mode MCP server, and a clean browser front end so you can organize your own career history on your own machine—without connecting to our servers or paying for a hosted service.
 
 ---
 
-## Trust & Privacy Model (Read Before Connecting Work Channels)
+## Security & Privacy (Plain English)
 
-- **100% local vault, BYO-LLM inference:** Your SQLite database (`career.sqlite`) stays strictly on your own machine—there are zero hosted Career Context servers and zero telemetry. However, **local storage does not make an LLM session local**: whatever your agent reads from Slack/Notion/Docs is sent to your chosen LLM provider during the session.
-- **Use an LLM you trust with training disabled:** Ideally run Career Context AI with an LLM provider and plan that **does not train on your data** (e.g., zero-data-retention API, Team/Enterprise plans with training turned off, or local models), and only connect channels and workspaces you are authorized to access.
-- **Hard deterministic leak protection on sharing:** Every `L2`/`L3` save, static export, and read-only MCP call is deterministically checked for registered sensitive terms (exact + case variants), emails, `sk-`/`ghp_` tokens, Slack `#channels`, and unapproved visuals. Exported static HTML contains **zero JavaScript** and enforces `Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; img-src data:;`.
+- **Self-hosted & Bring Your Own AI:** Everything runs locally on your machine. Nothing connects to our servers, anyone else's career vault, or anyone else's API key. You use your own AI assistant (Claude, ChatGPT/Codex, Cursor, Gemini, Antigravity, or local Ollama) and your own workspace tools.
+- **Local storage vs. LLM inference:** Your SQLite file (`career.sqlite`) stays strictly on your disk (`.gitignore` blocks `*.sqlite*`, `private/`, `sources/`, `.env`). However, whatever your assistant reads from Slack, Notion, or Docs is sent to your chosen LLM provider during the session—so **use an LLM provider and plan you trust with model training disabled / zero-data-retention**, and only scan channels you are authorized to read.
+- **Hard local leak blocking on `L2` and `L3`:** Before any `L2` or `L3` projection is saved, exported, or served over read-only MCP, local Python checks block any registered sensitive term (client names, internal revenue/metrics, coworker names, proprietary rules), emails, `sk-`/`ghp_` tokens, Slack `#channels`, and unapproved screenshots.
+- **Zero-JavaScript static exports:** Exported HTML files ship with `Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; img-src data:;` and contain zero JavaScript.
 
 ---
 
-## How the 5 Stages Work End-to-End
+## Confidentiality Tiers (`L0`–`L3`) + Reader Depth (Succinct vs. Exhaustive)
 
-| Stage | Goal | What Happens |
+Confidentiality (**what is safe to share**) and depth (**human skim vs. AI reader**) are separate choices:
+
+| Tier | What lives here | Exported? |
 |---|---|---|
-| **Stage 1 · Map & Scan Channels (`L0`)** | Build a complete raw vault | Ask *"What are all the channels you communicate & work on?"* — map **Slack, Notion, Google Docs, Calendar, Meeting Transcripts (Granola/Gong/Fireflies/Zoom), GitHub, Linear/Jira, Gmail, Slides/Figma, LinkedIn, X, Substack**, log them in the **Channel Scan Ledger**, and sweep time-sliced history via MCP into local `career.sqlite`. |
-| **Stage 2 · Roles & Private Stories (`L1`)** | Capture your real career graph | Organize Roles & Experience, chronological Timeline, candid private stories, key decisions, shared credit, outcomes, visual artifacts, and verbatim evidence-anchored claims. |
-| **Stage 3 · Deepen & Close Gaps** | Eliminate shallow AI stopping | Run **`audit-gaps`** (CLI, MCP, or Studio **Deepening Radar**) to surface unscanned channels, empty roles, long unlinked docs, unwritten clusters, and thin stories automatically. |
-| **Stage 4 · Rank & Sanitize (`L2` / `L3`)** | Turn raw truth into great stories | Register confidential terms, rank 4–6 **Flagship** arcs, and write crisp, human-voiced `L2` (confidential-safe) and `L3` (public) narratives free of robotic legal disclaimers. |
-| **Stage 5 · Share & Connect Agents** | High-throughput sharing | Export tiny zero-JS static HTML / Resume / Markdown / JSON or connect external hiring/coaching agents via a read-only, leak-checked `L2` MCP server. |
+| **L0 — Raw Vault** | Verbatim Slack threads, Notion pages, Calendar events, meeting transcripts, Google Docs, GitHub PRs, and emails indexed locally in SQLite. | **Never** |
+| **L1 — Private Working Copy** *(default)* | Your candid roles, stories, real client/coworker names, exact internal figures, shelved prototypes, screenshots, and verbatim quotes. | Private backup only |
+| **L2 — Confidential-Safe** | Real problems, decisions, trade-offs, shared credit, and outcomes—with sensitive names and internal numbers generalized and leak-checked. | **Hard leak-checked** |
+| **L3 — Public (Open Web)** | Short public summaries and links you are comfortable posting openly. | **Hard leak-checked** |
+
+When exporting **`L2`** or **`L3`**, choose the format for who is reading it:
+- **For Humans (Succinct):** `L2 Visual Brief (HTML)`, `L3 Public Page (HTML)`, or `1-Page Resume (MD)`.
+- **For Someone Else's AI (Exhaustive, Leak-Checked):** **`L2 AI Context Pack (Markdown or JSON)`**—built specifically to hand directly to a recruiter's or hiring manager's AI (or expose via a read-only `L2` MCP server). Unlike a 1-page resume, an AI reader benefits from complete, well-structured detail across all leak-checked stories, decisions, shared credit, roles, and skills so it can answer nuanced questions without guessing or hallucinating.
 
 ---
 
-## Plain-English Glossary
+## The 5 Stages
 
-- **L0 / L1 / L2 / L3 (Granularity Tiers):** `L0` = raw verbatim scanned vault (never shared); `L1` = your candid private synthesis (the default); `L2` = confidential-safe overview for hiring managers/advisors/agents (hard leak-checked); `L3` = public summary & approved public links (hard leak-checked).
-- **MCP (Model Context Protocol):** The connector layer that lets your AI agent read directly from your live Slack, Notion, Calendar, Meeting Transcripts, Google Docs, GitHub, and Linear—and lets you expose a read-only `L2` view of your vault to another agent.
-- **BYO-LLM (Bring Your Own LLM):** Zero Career Context cloud or model lock-in. Use Claude, ChatGPT/Codex, Gemini, Cursor, Antigravity, or local Ollama—ideally on a plan with **model training disabled / zero-data-retention**.
-
----
-
-## Granularity Tiers (`L0`–`L3`)
-
-| Tier | Audience | What Lives Here | Exported? |
-|---|---|---|---|
-| **L0 — Raw Vault** | Only you & your private local assistant | Verbatim items scanned via MCP or uploaded offline (Slack threads, Notion pages, Docs, PRs, CSVs, transcripts). | **Never** |
-| **L1 — Private Synthesis** *(default)* | Your private career DB | Candid stories, real customer/coworker names, exact metrics, shelved prototypes, failures, contradictions, screenshots. | Private backup only |
-| **L2 — Confidential-Safe Overview** | Hiring managers, advisors, external AI agents | Concrete problems, trade-offs, decisions, shared credit, generalized scope/metrics, approved visuals. | **Hard leak-checked** |
-| **L3 — Public Summary** | Public profile, resume, intro bio | Crisp public highlights and explicitly approved public links. | **Hard leak-checked** |
+1. **Scan Channels (`L0`):** Connect your own AI assistant and MCP servers (**Slack, Notion, Google Calendar, Meeting Transcripts like Granola/Gong/Fireflies/Zoom, Google Docs, GitHub, Linear/Jira, Gmail, LinkedIn, X, Substack**) and pull authorized history into local `career.sqlite`.
+2. **Roles & Private Stories (`L1`):** Group raw material under your actual roles and write private `L1` stories with concrete decisions, who helped, honest outcomes, visuals, and verbatim source quotes.
+3. **Check Gaps (`audit-gaps`):** Run the local gap check (`python -m v2.career audit-gaps` or MCP `career_audit_gaps`) to see half-scanned channels, roles with zero stories, long unlinked docs, and thin stories—so you don't have to keep asking your AI *"what else did I miss?"*.
+4. **Set `L2` / `L3` & Block Sensitive Terms:** Register client names, internal metrics, and coworker names to block; mark your top 4–6 stories as Flagship; write clean `L2` and `L3` versions.
+5. **Export & Hand Off:** Export a succinct brief for a human, download an exhaustive **L2 AI Context Pack** (`.md` / `.json`) to drop into someone else's AI, or run a local read-only `L2` MCP server.
 
 ---
 
 ## Quick Start
 
-Zero mandatory pip dependencies (Python 3.11+ stdlib only; optional local cached `float16` ONNX semantic search uses `.semantic-model`).
+Zero mandatory pip packages—**Python 3.11+ stdlib only** (optional local cached `float16` semantic search uses `.semantic-model`).
 
-### 1. Run With Your Trusted Agent + Connected MCP Servers (Primary Workflow)
-1. Connect your local Career Context vault as a private read/write MCP server (keeping `career.sqlite` in an untracked folder like `private/`):
-   ```powershell
-   python -m v2.career mcp private/career.sqlite --tier L1 --rw
-   ```
-   *(Or let any shell-capable agent invoke `python -m v2.career ...` directly.)*
-2. Point your agent (alongside your existing Slack / Notion / Google Drive / GitHub / Linear MCP servers) at **[`v2/SKILL.md`](SKILL.md)** and start with:
-   > *"Follow `v2/SKILL.md`. First ask me what channels I communicate and work on, check which MCP connectors we have available, log them in the scan ledger, and systematically scan my work into `private/career.sqlite`—running `audit-gaps` to deepen before stopping."*
+### 1. Connect Your Own AI Assistant (MCP-First)
+Run your local vault as a private read/write MCP server (keeping `career.sqlite` inside gitignored `private/`):
+```powershell
+python -m v2.career mcp private/career.sqlite --tier L1 --rw
+```
+Give your assistant [`SKILL.md`](SKILL.md) (or [`v2/SKILL.md`](v2/SKILL.md)) alongside your existing Slack / Notion / Calendar / Transcripts / Docs / GitHub MCP servers:
+> *"Follow `SKILL.md`. First ask what channels I work on, check which MCP connectors are active, log them in `career_log_channel_scan`, scan my work into `private/career.sqlite`, and run `career_audit_gaps` to close gaps before stopping."*
 
-### 2. Review, Edit & Share in the Local Browser Studio
+### 2. Review, Edit & Export in the Local Front End
 ```powershell
 python -m v2.launch private/career.sqlite --open
 ```
-*(Or with optional local cached semantic search: `.\.venv-semantic\Scripts\python.exe -m v2.launch private/career.sqlite --open`.)*
+Opens **`http://127.0.0.1:8765/`** directly over your local SQLite file:
+- **Overview:** Interactive 5-stage tracker, live `L0 → L3` tier preview, and branded MCP channels dock.
+- **Studio:** Flagship stories, readiness progress, and live Deepening Radar.
+- **Experience:** Editorial profile, Master-Detail Roles workbench (see stories per role and `0`-story gaps), Timeline, and Skills.
+- **Stories:** Master-Detail `L1` workbench (`Overview` / `Edit Story` / `+ Claim`, sliding `Flagship / Core / Proof / Background` selector, visual lightbox).
+- **Share:** Sensitive terms registry, `L2 / L3` Tier Studio, succinct human exports (`HTML` / `Resume`), and exhaustive **AI Context Packs** (`agent_pack` Markdown / `agent_json` + read-only `L2` MCP command).
+- **Vault:** MCP scan ledger, FTS5/hybrid search, inbox triage, source reader, and offline file upload drawer.
+- **AI:** Optional direct BYO-API helper (keys stay strictly in tab `sessionStorage`, never written to disk).
 
-Inside **`http://127.0.0.1:8765/`**:
-- **Overview (Landing Page & Process Guide):** Visual 5-stage progress map, plain-English `L0–L3` / `MCP` / `BYO-LLM` glossary, LLM trust & no-training notice, and an interactive grid of all 10 supported MCP channels (including **Calendar** & **Meeting Transcripts**).
-- **Studio:** Readiness hero deck, Context Library, Flagship story cards, and live **Deepening Radar ("what else have you missed?")**.
-- **Experience:** Dedicated home for your folded-corner editorial Profile, a **Master-Detail Roles & Experience Workbench** (inspect every role's attached stories or spot uncovered eras), Dynamic Career Timeline, and Knowledge & Skills graph.
-- **Stories:** Master-Detail `L1` Story Workbench with live search/filtering, `Overview` / `Edit Story` / `+ Claim` modes, sliding `Flagship / Core / Proof / Background` prominence picker, and lightbox visual artifacts.
-- **Share:** Sensitive terms registry (`Scan & suggest`), Master-Detail Tier Studio (`L1 Reference` → side-by-side `L2` & `L3` with `← Prev / Next →` stepping), inline zero-JS HTML preview, and one-click Resume copy / downloads.
-- **Vault:** **Work Channels & MCP Scan Ledger**, instant FTS5 / cached hybrid search, **Triage Unlinked Inbox**, side-by-side Source Reader, and a collapsible `+ Upload / Capture` drawer for offline files.
-- **AI:** Optional direct browser connection to OpenAI-compatible / Anthropic / Gemini / Ollama APIs (keys stay strictly in tab `sessionStorage`, never written to SQLite) with one-click **`Deepen what I missed`** RAG prompting.
-
-### 3. Share Read-Only With Another Agent via MCP
+### 3. CLI Exports & Read-Only External MCP
 ```powershell
+# Succinct human brief (zero-JS static HTML)
+python -m v2.career export private/career.sqlite --tier L2 --format html --out career-l2.html
+
+# Exhaustive leak-checked AI Context Pack for someone else's AI
+python -m v2.career export private/career.sqlite --tier L2 --format agent_pack --out career-l2-ai-pack.md
+
+# Read-only leak-checked MCP server for an external agent
 python -m v2.career mcp private/career.sqlite --tier L2
 ```
-Exposes **only** `career_overview`, `career_list_episodes`, and `career_search` over strictly leak-checked L2 projections—raw L0 sources and sensitive terms are completely inaccessible.
 
 ---
 
