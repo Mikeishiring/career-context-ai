@@ -134,7 +134,7 @@ nav button.active { color: var(--accent); }
 .theme-btn:active { transform: translateY(1px); box-shadow: none; }
 
 /* Main container & View entrance */
-main { max-width: 1320px; margin: 0 auto; padding: 1.6rem clamp(1rem, 2.5vw, 2.2rem) 4rem; }
+main { max-width: 1320px; margin: 0 auto; padding: 2.25rem clamp(1.25rem, 3vw, 2.75rem) 5.5rem; }
 .tab-view { animation: view-in 240ms var(--ease-out) both; }
 .sheet-animate { animation: sheet-in 220ms var(--ease-out) both; }
 @keyframes view-in {
@@ -148,7 +148,7 @@ main { max-width: 1320px; margin: 0 auto; padding: 1.6rem clamp(1rem, 2.5vw, 2.2
 
 .page-head {
   display: flex; align-items: center; justify-content: space-between;
-  gap: 1rem; flex-wrap: wrap; margin-bottom: 1.35rem;
+  gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem;
 }
 .page-head h2 {
   margin: 0; font-size: clamp(1.7rem, 2.7vw, 2.35rem);
@@ -158,7 +158,7 @@ main { max-width: 1320px; margin: 0 auto; padding: 1.6rem clamp(1rem, 2.5vw, 2.2
 /* Studio Hero Deck + Context Library */
 .studio-desk {
   display: grid; grid-template-columns: minmax(0, 2.15fr) minmax(260px, 1fr);
-  gap: 22px; align-items: stretch; margin-bottom: 2rem;
+  gap: 26px; align-items: stretch; margin-bottom: 3rem;
 }
 .hero-launch {
   position: relative; isolation: isolate; overflow: hidden;
@@ -278,13 +278,13 @@ main { max-width: 1320px; margin: 0 auto; padding: 1.6rem clamp(1rem, 2.5vw, 2.2
 .lib-row .chev { color: var(--muted); transition: transform 180ms var(--ease-spring), color 150ms ease; }
 
 /* Flagship Story Preview Cards */
-.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin: 0.4rem 0 0.95rem; }
-.section-head h3 { margin: 0; font-size: 1.22rem; font-weight: 700; letter-spacing: -0.03em; }
-.story-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; margin-bottom: 1.8rem; }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin: 0 0 1.15rem; }
+.section-head h3 { margin: 0; font-size: 1.24rem; font-weight: 700; letter-spacing: -0.03em; }
+.story-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(295px, 1fr)); gap: 20px; margin-bottom: 3rem; }
 .story-card {
   position: relative; display: flex; flex-direction: column;
   background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
-  padding: 1.25rem 1.35rem 1.15rem; box-shadow: var(--raised); cursor: pointer;
+  padding: 1.4rem 1.5rem 1.25rem; box-shadow: var(--raised); cursor: pointer;
   transition: transform 220ms var(--ease-spring), border-color 180ms ease, box-shadow 220ms var(--ease-spring);
 }
 .story-card:hover {
@@ -314,7 +314,7 @@ main { max-width: 1320px; margin: 0 auto; padding: 1.6rem clamp(1rem, 2.5vw, 2.2
 .portrait-card {
   display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(280px, 1fr);
   border-radius: 18px; border: 1px solid #d3d5ed; overflow: hidden; box-shadow: var(--raised);
-  background: var(--paper); margin-bottom: 1.6rem;
+  background: var(--paper); margin-bottom: 2.5rem;
 }
 body.dark .portrait-card { border-color: var(--line); }
 .portrait-intro {
@@ -335,8 +335,8 @@ body.dark .portrait-intro { background: linear-gradient(115deg, #1d1b38, #191e30
 
 /* Hover-reveal secondary buttons inside editorial lists */
 .hover-row {
-  display: flex; justify-content: space-between; align-items: center; gap: 0.65rem;
-  padding: 0.52rem 0.55rem; margin: 0 -0.55rem; border-bottom: 1px solid var(--line); border-radius: 10px;
+  display: flex; justify-content: space-between; align-items: center; gap: 0.85rem;
+  padding: 0.72rem 0.65rem; margin: 0 -0.65rem; border-bottom: 1px solid var(--line); border-radius: 10px;
   transition: background-color 150ms ease;
 }
 .hover-row:last-child { border-bottom: 0; }
@@ -346,20 +346,20 @@ body.dark .portrait-intro { background: linear-gradient(115deg, #1d1b38, #191e30
 
 /* Master-Detail Workbench (My Stories L1, Share & Tiers, Vault) */
 .workbench {
-  display: grid; grid-template-columns: minmax(275px, 0.42fr) minmax(0, 1fr);
-  gap: 20px; align-items: start;
+  display: grid; grid-template-columns: minmax(280px, 0.42fr) minmax(0, 1fr);
+  gap: 26px; align-items: start;
 }
 .index-panel {
-  position: sticky; top: 72px;
+  position: sticky; top: 76px;
   background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
-  padding: 1rem; box-shadow: var(--raised);
-  max-height: calc(100vh - 96px); display: flex; flex-direction: column;
+  padding: 1.15rem; box-shadow: var(--raised);
+  max-height: calc(100vh - 104px); display: flex; flex-direction: column;
 }
-.index-controls { margin-bottom: 0.7rem; }
+.index-controls { margin-bottom: 0.85rem; }
 .index-scroll { overflow-y: auto; margin: 0 -0.4rem; padding: 0 0.4rem; flex: 1; }
 .index-item {
   position: relative; width: 100%; text-align: left; border: 0; border-top: 1px solid var(--line);
-  background: transparent; color: var(--ink); padding: 0.72rem 1.6rem 0.72rem 0.75rem;
+  background: transparent; color: var(--ink); padding: 0.85rem 1.7rem 0.85rem 0.85rem;
   border-radius: 10px; cursor: pointer; font: inherit;
   transition: background-color 150ms ease, transform 150ms var(--ease-spring), box-shadow 180ms ease;
 }
@@ -382,11 +382,11 @@ body.dark .portrait-intro { background: linear-gradient(115deg, #1d1b38, #191e30
 /* Right-Hand Focused Detail Sheet */
 .sheet-panel {
   background: var(--paper); border: 1px solid var(--line); border-radius: 18px;
-  padding: clamp(20px, 2.5vw, 32px); box-shadow: var(--raised); min-width: 0;
+  padding: clamp(24px, 2.8vw, 36px); box-shadow: var(--raised); min-width: 0;
 }
 .sheet-head {
   display: flex; justify-content: space-between; align-items: flex-start;
-  gap: 1rem; flex-wrap: wrap; padding-bottom: 1rem; margin-bottom: 1.2rem;
+  gap: 1.15rem; flex-wrap: wrap; padding-bottom: 1.15rem; margin-bottom: 1.4rem;
   border-bottom: 1px solid var(--line);
 }
 .sheet-head h3 { margin: 0; font-size: clamp(1.3rem, 2vw, 1.75rem); font-weight: 720; letter-spacing: -0.035em; line-height: 1.18; }
@@ -445,7 +445,7 @@ body.dark .l1-ref-box { background: linear-gradient(115deg, #1d1b38, #191e30); b
 .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; align-items: start; }
 .card {
   background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius);
-  padding: 1.25rem 1.4rem; margin-bottom: 1rem; box-shadow: var(--raised);
+  padding: 1.5rem 1.65rem; margin-bottom: 1.75rem; box-shadow: var(--raised);
 }
 .card h3 { margin: 0 0 0.35rem; font-size: 1.08rem; font-weight: 680; letter-spacing: -0.025em; }
 .meta { font-size: 0.83rem; color: var(--muted); }
@@ -587,8 +587,8 @@ dialog::backdrop {
 .landing-hero {
   position: relative; isolation: isolate; overflow: hidden;
   display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(320px, 0.88fr);
-  align-items: center; gap: clamp(20px, 3vw, 38px);
-  border-radius: 20px; padding: clamp(24px, 3.2vw, 40px); margin-bottom: 2.1rem;
+  align-items: center; gap: clamp(24px, 3.5vw, 44px);
+  border-radius: 20px; padding: clamp(28px, 3.6vw, 44px); margin-bottom: 3.25rem;
   color: #fff;
   background: radial-gradient(ellipse at 94% 110%, #9992ff 0, transparent 58%),
               linear-gradient(115deg, #2d277d 0%, #4e3fb3 50%, #7a68de 100%);
@@ -620,15 +620,15 @@ dialog::backdrop {
 /* Chapter 2: Connected 5-Stage Pipeline Shell */
 .pipeline-shell {
   background: var(--paper); border: 1px solid var(--line); border-radius: 18px;
-  box-shadow: var(--raised); overflow: hidden; margin-bottom: 2.2rem;
+  box-shadow: var(--raised); overflow: hidden; margin-bottom: 3.25rem;
 }
 .pipeline-rail {
   position: relative; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
-  padding: 1.15rem 1rem 0.95rem; background: var(--surface);
-  border-bottom: 1px solid var(--line); gap: 6px;
+  padding: 1.35rem 1.15rem 1.1rem; background: var(--surface);
+  border-bottom: 1px solid var(--line); gap: 8px;
 }
 .pipeline-track {
-  position: absolute; left: 10%; right: 10%; top: 31px; height: 2px;
+  position: absolute; left: 10%; right: 10%; top: 34px; height: 2px;
   background: var(--line-strong); z-index: 0; border-radius: 2px; overflow: hidden;
 }
 .pipeline-track-fill {
@@ -656,28 +656,24 @@ dialog::backdrop {
 .stage-node-state { font-size: 0.7rem; color: var(--muted); font-weight: 600; }
 
 .pipeline-spotlight {
-  display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(240px, 0.65fr);
-  gap: 1.5rem; align-items: center; padding: 1.35rem 1.55rem;
-}
-.spotlight-why {
-  margin-top: 0.65rem; padding-left: 0.8rem; border-left: 3px solid var(--accent-soft);
-  font-size: 0.85rem; color: var(--muted); line-height: 1.5;
+  display: grid; grid-template-columns: minmax(0, 1.38fr) minmax(240px, 0.62fr);
+  gap: 2rem; align-items: center; padding: 1.65rem 1.85rem;
 }
 .spotlight-side {
-  display: flex; flex-direction: column; align-items: flex-end; gap: 0.7rem;
-  padding-left: 1.25rem; border-left: 1px solid var(--line);
+  display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem;
+  padding-left: 1.5rem; border-left: 1px solid var(--line);
 }
 
 /* Chapter 3: Interactive L0->L3 Confidentiality Aperture */
 .aperture-shell {
   display: grid; grid-template-columns: minmax(250px, 0.42fr) minmax(0, 0.58fr);
   background: var(--paper); border: 1px solid var(--line); border-radius: 18px;
-  box-shadow: var(--raised); overflow: hidden; margin-bottom: 2.2rem;
+  box-shadow: var(--raised); overflow: hidden; margin-bottom: 3.25rem;
 }
-.aperture-rail { border-right: 1px solid var(--line); background: var(--surface); padding: 0.6rem; display: flex; flex-direction: column; gap: 4px; }
+.aperture-rail { border-right: 1px solid var(--line); background: var(--surface); padding: 0.75rem; display: flex; flex-direction: column; gap: 6px; }
 .tier-tab {
   position: relative; width: 100%; text-align: left; border: 0; background: transparent;
-  padding: 0.75rem 0.9rem; border-radius: 11px; cursor: pointer; color: var(--ink); font: inherit;
+  padding: 0.85rem 1rem; border-radius: 11px; cursor: pointer; color: var(--ink); font: inherit;
   transition: background-color 150ms ease, box-shadow 180ms ease;
 }
 .tier-tab:hover { background: color-mix(in srgb, var(--paper) 70%, transparent); }
@@ -685,10 +681,10 @@ dialog::backdrop {
 .tier-tab-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.2rem; }
 .tier-tab strong { font-size: 0.9rem; }
 .tier-tab p { margin: 0; font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
-.aperture-stage { padding: 1.4rem 1.6rem; display: flex; flex-direction: column; justify-content: space-between; gap: 0.9rem; }
+.aperture-stage { padding: 1.7rem 1.9rem; display: flex; flex-direction: column; justify-content: space-between; gap: 1.2rem; }
 .aperture-sample {
   background: var(--surface); border: 1px solid var(--line); border-radius: 13px;
-  padding: 1.05rem 1.2rem; font-size: 0.9rem; line-height: 1.62; color: var(--ink);
+  padding: 1.2rem 1.35rem; font-size: 0.91rem; line-height: 1.66; color: var(--ink);
 }
 .aperture-sample.raw { font-family: var(--mono); font-size: 0.82rem; }
 .mark-secret { background: var(--danger-bg); color: var(--danger); padding: 0.05rem 0.38rem; border-radius: 5px; font-weight: 650; }
@@ -698,16 +694,16 @@ dialog::backdrop {
 .split-shell {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
   background: var(--paper); border: 1px solid var(--line); border-radius: 18px;
-  box-shadow: var(--raised); overflow: hidden; margin-bottom: 1.5rem;
+  box-shadow: var(--raised); overflow: hidden; margin-bottom: 2.5rem;
 }
-.split-pane { padding: 1.25rem 1.45rem; border-left: 1px solid var(--line); min-width: 0; }
+.split-pane { padding: 1.55rem 1.75rem; border-left: 1px solid var(--line); min-width: 0; }
 .split-pane:first-child { border-left: 0; }
-.split-pane h3 { margin: 0 0 0.35rem; font-size: 1.06rem; font-weight: 700; letter-spacing: -0.025em; }
+.split-pane h3 { margin: 0 0 0.45rem; font-size: 1.08rem; font-weight: 700; letter-spacing: -0.025em; }
 
 .mcp-dock {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 1.25rem;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 1.5rem;
   background: var(--paper); border: 1px solid var(--line); border-radius: 18px;
-  padding: 1.15rem 1.4rem; box-shadow: var(--raised);
+  padding: 1.45rem 1.7rem; box-shadow: var(--raised);
 }
 .brand-pills-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 0.65rem; }
 .brand-chip {
@@ -1037,7 +1033,7 @@ dialog::backdrop {
     </div>
 
     <!-- Master-Detail Roles & Attached Stories Workbench -->
-    <div class="workbench" style="margin-bottom:1.6rem">
+    <div class="workbench" style="margin-bottom:2.75rem">
       <aside class="index-panel">
         <div class="index-controls">
           <strong style="font-size:0.88rem">Career roles</strong>
@@ -1206,7 +1202,7 @@ dialog::backdrop {
     </div>
 
     <!-- Connected Work Channels & MCP Scan Ledger -->
-    <div class="card" style="margin-bottom:1rem">
+    <div class="card" style="margin-bottom:1.5rem">
       <div class="split" style="align-items:center;margin-bottom:0.55rem">
         <div class="row" style="gap:0.5rem">
           <h3 style="margin:0">Channels &amp; MCP scan ledger</h3>
@@ -1771,13 +1767,12 @@ function renderOverview() {
     const stateLabel = cur.status === "done" ? "Done" : (cur.status === "in_progress" ? "In Progress" : "Up Next");
     document.getElementById("pipeline-spotlight").innerHTML = `
       <div class="sheet-animate">
-        <div class="row" style="margin-bottom:0.45rem">
+        <div class="row" style="margin-bottom:0.55rem">
           <span class="pill ${pillCls}">Stage ${cur.stage} of ${stages.length} · ${stateLabel}</span>
           <span class="meta" style="font-weight:650;color:var(--accent)">${esc(cur.metric)}</span>
         </div>
-        <h4 style="margin:0 0 0.45rem;font-size:1.18rem;font-weight:720;letter-spacing:-0.03em">${esc(cur.title)}</h4>
-        <p style="margin:0;font-size:0.91rem;line-height:1.58">${esc(cur.summary)}</p>
-        ${cur.why ? `<div class="spotlight-why"><strong>Why it matters:</strong> ${esc(cur.why)}</div>` : ''}
+        <h4 style="margin:0 0 0.5rem;font-size:1.2rem;font-weight:720;letter-spacing:-0.03em">${esc(cur.title)}</h4>
+        <p style="margin:0;font-size:0.92rem;line-height:1.62;color:var(--ink)">${esc(cur.summary)}${cur.why ? ` <span style="color:var(--muted)">${esc(cur.why)}</span>` : ''}</p>
       </div>
       <div class="spotlight-side">
         <button class="btn" onclick="switchTab('${esc(cur.target_tab)}')">${esc(cur.cta || 'Open workspace')} →</button>
