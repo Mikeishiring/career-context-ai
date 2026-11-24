@@ -1857,11 +1857,16 @@ class CareerVault:
         present_channels = {s["channel"] for s in sources}
         channel_groups = {
             "docs_or_resume": bool(present_channels & {"doc", "resume", "gdoc", "note"}),
-            "slack_or_chat": bool(present_channels & {"slack", "chat"}),
-            "github_or_code": bool(present_channels & {"github", "git"}),
-            "notion_or_wiki": bool(present_channels & {"notion", "wiki"}),
+            "slack_or_chat": bool(present_channels & {"slack", "chat", "teams", "discord"}),
+            "notion_or_wiki": bool(present_channels & {"notion", "wiki", "confluence"}),
+            "calendar_and_transcripts": bool(present_channels & {
+                "calendar", "transcript", "transcripts", "meeting", "voice_note",
+                "granola", "gong", "fireflies", "otter", "zoom",
+            }),
+            "github_or_code": bool(present_channels & {"github", "git", "linear", "jira"}),
+            "email_or_slides": bool(present_channels & {"gmail", "email", "slides", "figma"}),
             "linkedin": bool(present_channels & {"linkedin"}),
-            "public_writing": bool(present_channels & {"x", "substack", "blog"}),
+            "public_writing": bool(present_channels & {"x", "substack", "blog", "youtube"}),
         }
         missing_channels = [k for k, ok in channel_groups.items() if not ok]
 
@@ -1971,8 +1976,8 @@ class CareerVault:
                 "severity": "high",
                 "category": "coverage",
                 "title": "Add your career roles to anchor the timeline",
-                "detail": "You have saved sources, but 0 roles are recorded yet. Import LinkedIn Positions.csv or add roles on the Studio tab.",
-                "target_tab": "timeline",
+                "detail": "You have saved sources, but 0 roles are recorded yet. Add your roles on the Experience tab or scan LinkedIn.",
+                "target_tab": "experience",
             })
         if empty_roles:
             names = ", ".join(f"{r['title']} ({r['organization'] or r['period']})" for r in empty_roles[:3])
@@ -1982,7 +1987,7 @@ class CareerVault:
                 "category": "coverage",
                 "title": f"{len(empty_roles)} career role(s) have zero stories yet",
                 "detail": f"Unexplored eras: {names}{'...' if len(empty_roles) > 3 else ''}. Mine docs/notes or interview yourself for 1-2 defining arcs per role.",
-                "target_tab": "episodes",
+                "target_tab": "experience",
             })
         if substantive_unlinked:
             top_titles = "; ".join(s["title"] for s in substantive_unlinked[:3])
@@ -2078,9 +2083,67 @@ class CareerVault:
             "For each gap, tell me (1) what evidence already in my vault fills it, and (2) the 2-3 sharpest follow-up questions only I can answer."
         )
 
+        # 8. Five-stage guided journey status
+        l2_ready_count = len(episodes) - len(l2_audit["missing_projections"])
+        l3_ready_count = len(episodes) - len(l3_audit["missing_projections"])
+        s1_status = "done" if (sources and not unscanned_channels) else ("in_progress" if (sources or channel_scans) else "pending")
+        s2_status = "done" if (roles and len(episodes) >= 3) else ("in_progress" if (roles or episodes) else "pending")
+        s3_status = "done" if (episodes and depth_score >= 85 and not empty_roles and not unscanned_channels) else ("in_progress" if episodes else "pending")
+        s4_status = "done" if (episodes and l2_ready_count == len(episodes) and l2_audit["clean"] and not legalese_hits and not hierarchy_issue) else ("in_progress" if (l2_ready_count > 0 or sensitive_terms) else "pending")
+        s5_status = "done" if (s4_status == "done" and l3_ready_count > 0 and l3_audit["clean"]) else ("in_progress" if (l2_ready_count > 0 and l2_audit["clean"]) else "pending")
+
+        stages = [
+            {
+                "stage": 1,
+                "id": "scan_channels",
+                "title": "Map & scan work channels (L0)",
+                "status": s1_status,
+                "metric": f"{len(sources)} sources · {len(present_channels)} active channels",
+                "summary": "Declare Slack, Notion, Calendar, Transcripts, Docs, GitHub & social channels, then sweep them via MCP.",
+                "target_tab": "vault",
+            },
+            {
+                "stage": 2,
+                "id": "build_l1",
+                "title": "Organize roles & private stories (L1)",
+                "status": s2_status,
+                "metric": f"{len(roles)} roles · {len(episodes)} private stories",
+                "summary": "Build your full candid database: roles, timeline, key decisions, shared credit, outcomes, visuals & anchored claims.",
+                "target_tab": "experience",
+            },
+            {
+                "stage": 3,
+                "id": "deepen_gaps",
+                "title": "Deepen & close blindspots",
+                "status": s3_status,
+                "metric": f"Depth {depth_score}/100 · {len(next_actions)} open gap(s)",
+                "summary": "Run the deterministic Deepening Radar so unscanned channels, empty roles, long unlinked docs & thin stories get caught automatically.",
+                "target_tab": "studio",
+            },
+            {
+                "stage": 4,
+                "id": "polish_tiers",
+                "title": "Rank Flagships & sanitize tiers (L2 / L3)",
+                "status": s4_status,
+                "metric": f"{flagship_count} Flagships · {l2_ready_count}/{len(episodes)} L2 ready",
+                "summary": "Register confidential terms, highlight 4-6 Flagship arcs, and turn honest records into crisp human stories without legalese.",
+                "target_tab": "sharing",
+            },
+            {
+                "stage": 5,
+                "id": "share_ready",
+                "title": "Share clean views & connect agents",
+                "status": s5_status,
+                "metric": f"L2 {'clean' if l2_audit['clean'] else 'blocked'} · L3 {l3_ready_count}/{len(episodes)}",
+                "summary": "Export tiny zero-JS HTML, Resume, Markdown or JSON—or expose a read-only leak-checked L2 MCP endpoint to external agents.",
+                "target_tab": "sharing",
+            },
+        ]
+
         return {
             "depth_score": depth_score,
             "breakdown": {"coverage": cov, "depth": dep, "narrative": nar, "sharing": shr},
+            "stages": stages,
             "summary": {
                 "roles_total": len(roles),
                 "empty_roles_count": len(empty_roles),

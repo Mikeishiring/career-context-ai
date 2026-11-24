@@ -19,25 +19,23 @@ Resumes compress years of real decisions, trade-offs, prototypes, and cross-func
 
 ---
 
-## How the Process Works End-to-End
+## How the 5 Stages Work End-to-End
 
-```text
-1. Channel Discovery ("What are all the channels you communicate & work on?")
-        │  Log Slack, Notion, Google Docs, GitHub, Linear, LinkedIn, X, Substack...
-        ▼
-2. Systematic Live MCP Sweep  ──►  L0 Raw Vault (local career.sqlite + FTS5/semantic)
-        │  Time-sliced queries logged in Channel Scan Ledger (offline uploads as fallback)
-        ▼
-3. L1 Private Synthesis + Mandatory `audit-gaps` Self-Deepening Loop
-        │  Catches unscanned channels, empty roles, long unlinked docs, thin stories,
-        │  flat Flagship ranking & courtroom legalese BEFORE asking "anything else?"
-        ▼
-4. Granularity & Leak-Checked Sharing (L2 Confidential-Safe / L3 Public)
-        │  Static zero-JS HTML / Resume / Markdown / JSON  OR  Read-only L2 MCP server
-        ▼
-5. Live Local Tempo Studio (`http://127.0.0.1:8765/`)
-           Review, edit stories, inspect Deepening Radar & Channel Ledger, preview shares
-```
+| Stage | Goal | What Happens |
+|---|---|---|
+| **Stage 1 · Map & Scan Channels (`L0`)** | Build a complete raw vault | Ask *"What are all the channels you communicate & work on?"* — map **Slack, Notion, Google Docs, Calendar, Meeting Transcripts (Granola/Gong/Fireflies/Zoom), GitHub, Linear/Jira, Gmail, Slides/Figma, LinkedIn, X, Substack**, log them in the **Channel Scan Ledger**, and sweep time-sliced history via MCP into local `career.sqlite`. |
+| **Stage 2 · Roles & Private Stories (`L1`)** | Capture your real career graph | Organize Roles & Experience, chronological Timeline, candid private stories, key decisions, shared credit, outcomes, visual artifacts, and verbatim evidence-anchored claims. |
+| **Stage 3 · Deepen & Close Gaps** | Eliminate shallow AI stopping | Run **`audit-gaps`** (CLI, MCP, or Studio **Deepening Radar**) to surface unscanned channels, empty roles, long unlinked docs, unwritten clusters, and thin stories automatically. |
+| **Stage 4 · Rank & Sanitize (`L2` / `L3`)** | Turn raw truth into great stories | Register confidential terms, rank 4–6 **Flagship** arcs, and write crisp, human-voiced `L2` (confidential-safe) and `L3` (public) narratives free of robotic legal disclaimers. |
+| **Stage 5 · Share & Connect Agents** | High-throughput sharing | Export tiny zero-JS static HTML / Resume / Markdown / JSON or connect external hiring/coaching agents via a read-only, leak-checked `L2` MCP server. |
+
+---
+
+## Plain-English Glossary
+
+- **L0 / L1 / L2 / L3 (Granularity Tiers):** `L0` = raw verbatim scanned vault (never shared); `L1` = your candid private synthesis (the default); `L2` = confidential-safe overview for hiring managers/advisors/agents (hard leak-checked); `L3` = public summary & approved public links (hard leak-checked).
+- **MCP (Model Context Protocol):** The connector layer that lets your AI agent read directly from your live Slack, Notion, Calendar, Meeting Transcripts, Google Docs, GitHub, and Linear—and lets you expose a read-only `L2` view of your vault to another agent.
+- **BYO-LLM (Bring Your Own LLM):** Zero Career Context cloud or model lock-in. Use Claude, ChatGPT/Codex, Gemini, Cursor, Antigravity, or local Ollama—ideally on a plan with **model training disabled / zero-data-retention**.
 
 ---
 
@@ -72,11 +70,13 @@ python -m v2.launch private/career.sqlite --open
 *(Or with optional local cached semantic search: `.\.venv-semantic\Scripts\python.exe -m v2.launch private/career.sqlite --open`.)*
 
 Inside **`http://127.0.0.1:8765/`**:
-- **Studio:** Readiness hero deck, Context Library, Flagship story cards, read-first editorial Portrait & Roles, live **Deepening Radar ("what else have you missed?")**, Knowledge & Skills graph, and Dynamic Career Timeline.
-- **My Stories (L1):** Master-Detail Story Workbench with live search/filtering, `Overview` / `Edit Story` / `+ Claim` modes, sliding `Flagship / Core / Proof / Background` prominence picker, and lightbox visual artifacts.
-- **Share & Tiers (L2/L3):** Sensitive terms registry (`Scan & suggest`), Master-Detail Tier Studio (`L1 Reference` → side-by-side `L2` & `L3` with `← Prev / Next →` stepping), inline zero-JS HTML preview, and one-click Resume copy / downloads.
-- **Vault & Triage (L0):** **Work Channels & MCP Scan Ledger**, instant FTS5 / cached hybrid search, **Triage Unlinked Inbox**, side-by-side Source Reader, and a collapsible `+ Upload / Capture` drawer for offline files.
-- **Browser AI (BYO-API):** Optional direct browser connection to OpenAI-compatible / Anthropic / Gemini / Ollama APIs (keys stay strictly in tab `sessionStorage`, never written to SQLite) with one-click **`Deepen what I missed`** RAG prompting.
+- **Overview (Landing Page & Process Guide):** Visual 5-stage progress map, plain-English `L0–L3` / `MCP` / `BYO-LLM` glossary, LLM trust & no-training notice, and an interactive grid of all 10 supported MCP channels (including **Calendar** & **Meeting Transcripts**).
+- **Studio:** Readiness hero deck, Context Library, Flagship story cards, and live **Deepening Radar ("what else have you missed?")**.
+- **Experience:** Dedicated home for your folded-corner editorial Profile, a **Master-Detail Roles & Experience Workbench** (inspect every role's attached stories or spot uncovered eras), Dynamic Career Timeline, and Knowledge & Skills graph.
+- **Stories:** Master-Detail `L1` Story Workbench with live search/filtering, `Overview` / `Edit Story` / `+ Claim` modes, sliding `Flagship / Core / Proof / Background` prominence picker, and lightbox visual artifacts.
+- **Share:** Sensitive terms registry (`Scan & suggest`), Master-Detail Tier Studio (`L1 Reference` → side-by-side `L2` & `L3` with `← Prev / Next →` stepping), inline zero-JS HTML preview, and one-click Resume copy / downloads.
+- **Vault:** **Work Channels & MCP Scan Ledger**, instant FTS5 / cached hybrid search, **Triage Unlinked Inbox**, side-by-side Source Reader, and a collapsible `+ Upload / Capture` drawer for offline files.
+- **AI:** Optional direct browser connection to OpenAI-compatible / Anthropic / Gemini / Ollama APIs (keys stay strictly in tab `sessionStorage`, never written to SQLite) with one-click **`Deepen what I missed`** RAG prompting.
 
 ### 3. Share Read-Only With Another Agent via MCP
 ```powershell

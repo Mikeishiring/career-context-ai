@@ -583,6 +583,69 @@ dialog::backdrop {
 .toast.show { opacity: 1; transform: none; pointer-events: auto; }
 .hidden { display: none !important; }
 
+/* Landing / Overview Page Styles */
+.landing-hero {
+  position: relative; isolation: isolate; overflow: hidden;
+  border-radius: 20px; padding: clamp(26px, 3.4vw, 44px); margin-bottom: 1.65rem;
+  color: #fff;
+  background: radial-gradient(ellipse at 92% 108%, #9992ff 0, transparent 56%),
+              linear-gradient(115deg, #2d277d 0%, #4e3fb3 50%, #7a68de 100%);
+  box-shadow: 0 4px 0 #423996, 0 18px 38px -16px rgba(45, 39, 125, 0.55);
+}
+.landing-hero::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: repeating-linear-gradient(151deg, transparent 0 44px, rgba(255,255,255,0.06) 45px, transparent 46px);
+  mask-image: linear-gradient(90deg, transparent 25%, black 75%);
+}
+.landing-hero h2 { margin: 0.55rem 0 0.65rem; font-size: clamp(1.85rem, 3.1vw, 2.7rem); line-height: 1.08; letter-spacing: -0.045em; max-width: 24ch; }
+.landing-hero p { margin: 0; max-width: 66ch; font-size: 0.98rem; line-height: 1.58; color: #ece9ff; }
+.trust-banner {
+  display: flex; align-items: flex-start; gap: 0.85rem; padding: 0.95rem 1.15rem;
+  border-radius: 14px; margin-bottom: 1.65rem;
+  background: linear-gradient(115deg, #f3f1ff, #ece9ff);
+  border: 1px solid #d5d0f6; box-shadow: inset 5px 0 var(--accent);
+}
+body.dark .trust-banner { background: linear-gradient(115deg, #1d1b38, #191e30); border-color: var(--line); }
+
+.stages-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px; margin-bottom: 1.85rem;
+}
+.stage-card {
+  position: relative; display: flex; flex-direction: column; gap: 0.45rem;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
+  padding: 1.15rem 1.2rem; box-shadow: var(--raised); cursor: pointer;
+  transition: transform 210ms var(--ease-spring), border-color 160ms ease, box-shadow 210ms var(--ease-spring);
+}
+.stage-card:hover { transform: translateY(-4px); border-color: #9c8ee4; box-shadow: var(--raised-hover); }
+.stage-card .stage-num {
+  width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center;
+  font: 700 0.82rem var(--sans); background: var(--wash); color: var(--accent);
+}
+.stage-card.done .stage-num { background: var(--mint-bg); color: var(--mint); }
+.stage-card h4 { margin: 0; font-size: 0.98rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; }
+.stage-card p { margin: 0; font-size: 0.82rem; color: var(--muted); line-height: 1.48; flex: 1; }
+.stage-metric { font-size: 0.76rem; font-weight: 650; color: var(--accent); padding-top: 0.45rem; border-top: 1px solid var(--line); }
+
+.tier-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 1.6rem; }
+.tier-card {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 15px;
+  padding: 1.1rem 1.2rem; box-shadow: var(--raised);
+  transition: transform 180ms var(--ease-spring), border-color 150ms ease;
+}
+.tier-card:hover { transform: translateY(-2px); border-color: #b7b1e6; }
+.tier-card h4 { margin: 0.45rem 0 0.3rem; font-size: 1rem; font-weight: 700; letter-spacing: -0.02em; }
+.tier-card p { margin: 0; font-size: 0.84rem; color: var(--muted); line-height: 1.5; }
+
+.channel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 12px; }
+.channel-tile {
+  display: flex; flex-direction: column; justify-content: space-between; gap: 0.5rem;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 13px;
+  padding: 0.9rem 1rem; box-shadow: 0 2px 0 var(--line);
+  transition: transform 170ms var(--ease-spring), border-color 150ms ease;
+}
+.channel-tile:hover { transform: translateY(-2px); border-color: #9c8ee4; }
+
 @media (max-width: 920px) {
   .studio-desk, .portrait-card, .workbench { grid-template-columns: 1fr; }
   .index-panel { position: static; max-height: 320px; }
@@ -597,17 +660,19 @@ dialog::backdrop {
 <body>
 <header>
   <div class="header-inner">
-    <div class="brand" onclick="switchTab('timeline')">
+    <div class="brand" onclick="switchTab('overview')">
       <span class="workspace-mark" aria-hidden="true"></span>
       <h1>Career Context</h1>
     </div>
     <nav id="main-nav">
       <div class="nav-glider" id="nav-glider"></div>
-      <button class="active" data-tab="timeline">Studio</button>
-      <button data-tab="episodes">My Stories (L1)</button>
-      <button data-tab="sharing">Share &amp; Tiers (L2/L3)</button>
-      <button data-tab="vault">Vault &amp; Triage (L0)</button>
-      <button data-tab="assistant">Browser AI</button>
+      <button class="active" data-tab="overview">Overview</button>
+      <button data-tab="studio">Studio</button>
+      <button data-tab="experience">Experience</button>
+      <button data-tab="episodes">Stories</button>
+      <button data-tab="sharing">Share</button>
+      <button data-tab="vault">Vault</button>
+      <button data-tab="assistant">AI</button>
     </nav>
     <div class="owner-box">
       <div class="owner-meta">
@@ -620,8 +685,86 @@ dialog::backdrop {
 </header>
 
 <main>
-  <!-- TAB 1: STUDIO OVERVIEW, FLAGSHIPS, EDITORIAL PORTRAIT & TIMELINE -->
-  <section id="tab-timeline" class="tab-view">
+  <!-- TAB 0: OVERVIEW LANDING PAGE & PLAIN-ENGLISH GUIDE -->
+  <section id="tab-overview" class="tab-view">
+    <div class="landing-hero">
+      <span class="pill" style="background:rgba(255,255,255,0.18);color:#fff">Local-First Career Knowledge System</span>
+      <h2>Replace the low-throughput resume with your living career vault</h2>
+      <p>Resumes flatten years of real judgment, projects, and cross-functional work into 20 generic bullets. Career Context AI lets your own trusted AI agent scan across all your authorized work channels via MCP—building a private, searchable timeline and story database you can share cleanly at any confidentiality level.</p>
+      <div class="hero-actions">
+        <button class="hero-cta" onclick="switchTab('studio')">Open my Studio <span class="arrow">→</span></button>
+        <button class="hero-cta ghost" onclick="switchTab('experience')">Roles &amp; Experience</button>
+        <button class="hero-cta ghost" onclick="previewExport('L2')">Preview L2 Share ↗</button>
+      </div>
+    </div>
+
+    <div class="trust-banner">
+      <div style="font-size:1.15rem;line-height:1.2">🔒</div>
+      <div>
+        <strong>Privacy &amp; LLM Trust Model:</strong> Your SQLite vault stays 100% on your own machine—zero hosted Career Context servers and zero telemetry. However, when your AI agent scans internal channels (Slack, Notion, Calendar, Transcripts, Docs), those excerpts pass through your chosen LLM during the session. <strong>Use an LLM provider and plan you trust—ideally with model training disabled / zero-data-retention—and only scan channels you are authorized to access.</strong>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <h3>How it works · 5 live stages</h3>
+      <span class="meta">Click any stage to jump right in</span>
+    </div>
+    <div id="stages-grid" class="stages-grid"></div>
+
+    <div class="section-head">
+      <h3>What do L0, L1, L2, L3 mean?</h3>
+      <span class="meta">Default private (L0/L1); share confidential-safe (L2) or public (L3) only when you choose</span>
+    </div>
+    <div class="tier-grid">
+      <div class="tier-card">
+        <span class="pill">L0 · Raw Vault</span>
+        <h4>Everything scanned verbatim</h4>
+        <p>Raw Slack threads, Notion pages, Google Docs, Calendar entries, meeting transcripts, GitHub PRs, and social posts. Indexed locally for millisecond search. <strong>Never exported.</strong></p>
+      </div>
+      <div class="tier-card">
+        <span class="pill ok">L1 · Private Synthesis (Default)</span>
+        <h4>Your candid career database</h4>
+        <p>Your private roles, stories, real customer/coworker names, exact metrics, shelved prototypes, failures, visuals, and verbatim anchored claims—so you never have to censor your own memory.</p>
+      </div>
+      <div class="tier-card">
+        <span class="pill warn">L2 · Confidential-Safe Overview</span>
+        <h4>For hiring managers &amp; advisors</h4>
+        <p>Concrete problems, decisions, trade-offs, shared credit, and generalized scope (e.g. "a Tier-1 bank" instead of client names). Deterministically leak-checked before saving or sharing.</p>
+      </div>
+      <div class="tier-card">
+        <span class="pill">L3 · Public Highlight</span>
+        <h4>For public profiles &amp; intros</h4>
+        <p>Crisp 2–3 sentence public summaries and approved public links (GitHub, Substack, talks). Zero internal specifics, zero JavaScript, strict leak checking.</p>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <h3>Plain-English glossary (MCP, BYO-LLM, SQLite)</h3>
+    </div>
+    <div class="grid-3" style="margin-bottom:1.85rem">
+      <div class="card" style="margin-bottom:0">
+        <h3>What is MCP?</h3>
+        <p class="meta" style="margin:0.35rem 0 0;color:var(--ink);opacity:0.86"><strong>Model Context Protocol</strong> is the universal connector layer your AI assistant uses to read your live work tools—<strong>Slack, Notion, Google Docs, Calendar, Meeting Transcripts, GitHub, Linear, Gmail</strong>—directly, instead of forcing you to export ZIPs by hand. It also lets you expose a <strong>read-only, leak-checked L2 view</strong> of your vault to another agent.</p>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <h3>What is BYO-LLM?</h3>
+        <p class="meta" style="margin:0.35rem 0 0;color:var(--ink);opacity:0.86"><strong>Bring Your Own LLM</strong> means Career Context AI has no proprietary cloud or subscription lock-in. Use Claude, ChatGPT/Codex, Gemini, Cursor, Antigravity, or a local Ollama model. Your LLM handles reasoning and storytelling; local Python handles storage, search, gap auditing, and leak blocking.</p>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <h3>Why Deepening Radar?</h3>
+        <p class="meta" style="margin:0.35rem 0 0;color:var(--ink);opacity:0.86">Normally AI stops after reading 6 files and makes you keep asking <em>"what else did I miss?"</em>. Our deterministic gap engine tracks <strong>unscanned channels, empty roles, long unlinked docs, thin stories, and robotic legal phrasing</strong> so both you and your agent keep going deeper automatically.</p>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <h3>All channels your agent can scan via MCP</h3>
+      <button class="btn secondary sm" onclick="switchTab('vault')">Open Vault &amp; Scan Ledger →</button>
+    </div>
+    <div id="overview-channels-grid" class="channel-grid"></div>
+  </section>
+
+  <!-- TAB 1: STUDIO COMMAND CENTER (HERO, FLAGSHIPS & DEEPENING RADAR) -->
+  <section id="tab-studio" class="tab-view hidden">
     <div class="page-head">
       <h2>Career studio</h2>
       <div class="row">
@@ -652,10 +795,10 @@ dialog::backdrop {
 
       <div class="library-card">
         <h3>Context library</h3>
-        <button class="lib-row" onclick="switchTab('episodes')"><span class="lib-icon">E</span><span>Work stories (L1)</span><strong id="lib-episodes">0</strong><span class="chev">›</span></button>
-        <button class="lib-row" onclick="switchTab('vault')"><span class="lib-icon">S</span><span>Saved sources (L0)</span><strong id="lib-sources">0</strong><span class="chev">›</span></button>
+        <button class="lib-row" onclick="switchTab('experience')"><span class="lib-icon">R</span><span>Roles &amp; experience</span><strong id="lib-roles">0</strong><span class="chev">›</span></button>
+        <button class="lib-row" onclick="switchTab('episodes')"><span class="lib-icon">S</span><span>Work stories (L1)</span><strong id="lib-episodes">0</strong><span class="chev">›</span></button>
+        <button class="lib-row" onclick="switchTab('vault')"><span class="lib-icon">V</span><span>Saved sources (L0)</span><strong id="lib-sources">0</strong><span class="chev">›</span></button>
         <button class="lib-row" onclick="switchTab('vault');document.getElementById('triage-btn').click()"><span class="lib-icon">I</span><span>Unlinked inbox</span><strong id="lib-unlinked">0</strong><span class="chev">›</span></button>
-        <button class="lib-row" onclick="switchTab('episodes')"><span class="lib-icon">V</span><span>Visual artifacts</span><strong id="lib-visuals">0</strong><span class="chev">›</span></button>
         <button class="lib-row" onclick="switchTab('sharing')"><span class="lib-icon">L2</span><span>Shareable L2 / L3</span><strong id="lib-tiers">0/0</strong><span class="chev">›</span></button>
       </div>
     </div>
@@ -666,11 +809,40 @@ dialog::backdrop {
     </div>
     <div id="flagship-grid" class="story-grid"></div>
 
-    <!-- Editorial Portrait Card (Read-First with Smooth Inline Edit Switch) -->
-    <div class="portrait-card">
+    <!-- Live Deepening Radar ("What Else Have I Missed?") -->
+    <div class="card" id="deepening-radar" style="margin-bottom:1.5rem">
+      <div class="split" style="align-items:center;margin-bottom:0.75rem">
+        <div>
+          <div class="row" style="margin-bottom:0.2rem">
+            <h3 style="margin:0">Deepening radar · what else have you missed?</h3>
+            <span class="pill ok" id="depth-score-pill">Depth 0/100</span>
+          </div>
+          <p class="meta" style="margin:0">Deterministic audit of unscanned MCP channels, uncovered roles, long unlinked docs, thin stories, voice quality, and sharing safety.</p>
+        </div>
+        <div class="row">
+          <button class="btn secondary sm" id="copy-deepening-btn">Copy AI deepening prompt</button>
+          <button class="btn sm" id="send-deepening-ai-btn">Deepen with Browser AI →</button>
+        </div>
+      </div>
+      <div id="depth-pillars" class="row" style="margin-bottom:0.8rem"></div>
+      <div id="gap-actions-list"></div>
+    </div>
+  </section>
+
+  <!-- TAB 2: DEDICATED EXPERIENCE, ROLES, PROFILE, TIMELINE & KNOWLEDGE GRAPH -->
+  <section id="tab-experience" class="tab-view hidden">
+    <div class="page-head">
+      <h2>Roles &amp; experience</h2>
+      <div class="row">
+        <button class="btn" id="toggle-role-form">+ Add role</button>
+      </div>
+    </div>
+
+    <!-- Folded-Corner Editorial Portrait -->
+    <div class="portrait-card" style="grid-template-columns:1fr">
       <div class="portrait-intro">
         <div class="split" style="align-items:center">
-          <span class="pill">Private Overview (L1)</span>
+          <span class="pill">Private Profile Overview (L1)</span>
           <button class="btn secondary sm" id="toggle-profile-edit">Edit profile</button>
         </div>
         <div id="profile-read-view">
@@ -688,62 +860,51 @@ dialog::backdrop {
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="portrait-side">
-        <div class="split" style="align-items:center;margin-bottom:0.65rem">
-          <h3 style="margin:0">Roles &amp; experience</h3>
-          <button class="btn secondary sm" id="toggle-role-form">+ Add role</button>
-        </div>
-        <div id="role-form" class="hidden sheet-animate" style="padding:0.8rem;margin-bottom:0.8rem;background:var(--surface);border:1px solid var(--line);border-radius:12px">
-          <div class="form-row">
-            <div><label style="margin-top:0">Role title</label><input id="r-title" placeholder="e.g. Staff Engineer or VP Product"></div>
-            <div><label style="margin-top:0">Organization</label><input id="r-org" placeholder="e.g. Acme Labs"></div>
-          </div>
-          <div class="form-row" style="margin-top:0.45rem">
-            <div><label style="margin-top:0">Start (YYYY-MM)</label><input id="r-start" placeholder="2023-01"></div>
-            <div><label style="margin-top:0">End (blank if current)</label><input id="r-end" placeholder="2026-01"></div>
-          </div>
-          <div class="row" style="margin-top:0.65rem;justify-content:space-between">
-            <label style="margin:0;display:flex;align-items:center;gap:0.35rem;text-transform:none;letter-spacing:0"><input id="r-curr" type="checkbox" style="width:auto"> Current role</label>
-            <div class="row">
-              <button class="btn secondary sm" id="cancel-role-form">Cancel</button>
-              <button class="btn sm" id="save-role">Save role</button>
-            </div>
-          </div>
-        </div>
-        <div id="roles-list"></div>
+    <!-- Collapsible Add Role Form -->
+    <div id="role-form" class="card hidden sheet-animate" style="margin-bottom:1.25rem;background:var(--surface)">
+      <div class="split" style="align-items:center;margin-bottom:0.5rem">
+        <h3 style="margin:0">Add a career role</h3>
+        <button class="btn secondary sm" id="cancel-role-form">Cancel</button>
+      </div>
+      <div class="form-row">
+        <div><label style="margin-top:0">Role title</label><input id="r-title" placeholder="e.g. Staff Engineer or VP Product"></div>
+        <div><label style="margin-top:0">Organization</label><input id="r-org" placeholder="e.g. Acme Labs"></div>
+        <div><label style="margin-top:0">Start (YYYY-MM)</label><input id="r-start" placeholder="2023-01"></div>
+        <div><label style="margin-top:0">End (blank if current)</label><input id="r-end" placeholder="2026-01"></div>
+      </div>
+      <label>Private L1 role summary (optional)</label>
+      <textarea id="r-summary" style="min-height:70px" placeholder="Scope, team size, mandate, or why you joined / moved on..."></textarea>
+      <div class="row" style="margin-top:0.75rem;justify-content:space-between">
+        <label style="margin:0;display:flex;align-items:center;gap:0.35rem;text-transform:none;letter-spacing:0"><input id="r-curr" type="checkbox" style="width:auto"> Current role</label>
+        <button class="btn" id="save-role">Save role</button>
       </div>
     </div>
 
-    <!-- Live Deepening Radar ("What Else Have I Missed?") -->
-    <div class="card" id="deepening-radar" style="margin-bottom:1.5rem">
-      <div class="split" style="align-items:center;margin-bottom:0.75rem">
-        <div>
-          <div class="row" style="margin-bottom:0.2rem">
-            <h3 style="margin:0">Deepening radar · what else have you missed?</h3>
-            <span class="pill ok" id="depth-score-pill">Depth 0/100</span>
-          </div>
-          <p class="meta" style="margin:0">Deterministic audit of uncovered roles, unlinked long docs, thin stories, voice quality, and sharing safety.</p>
+    <!-- Master-Detail Roles & Attached Stories Workbench -->
+    <div class="workbench" style="margin-bottom:1.6rem">
+      <aside class="index-panel">
+        <div class="index-controls">
+          <strong style="font-size:0.88rem">Career roles</strong>
+          <div class="meta">Select a role to inspect or deepen its stories</div>
         </div>
-        <div class="row">
-          <button class="btn secondary sm" id="copy-deepening-btn">Copy AI deepening prompt</button>
-          <button class="btn sm" id="send-deepening-ai-btn">Deepen with Browser AI →</button>
-        </div>
-      </div>
-      <div id="depth-pillars" class="row" style="margin-bottom:0.8rem"></div>
-      <div id="gap-actions-list"></div>
+        <div id="roles-index-list" class="index-scroll"></div>
+      </aside>
+
+      <div id="role-sheet" class="sheet-panel"></div>
     </div>
 
     <div class="grid-2">
       <div class="card">
-        <h3>Knowledge &amp; skills graph</h3>
-        <p class="meta">Capabilities, recurring themes, and key decisions aggregated across your stories.</p>
-        <div id="knowledge-graph"></div>
-      </div>
-      <div class="card">
         <h3>Dynamic career timeline</h3>
         <p class="meta">Chronological view across Roles, Stories, and unlinked dated sources. Click any story to open it.</p>
         <div id="timeline-list"></div>
+      </div>
+      <div class="card">
+        <h3>Knowledge &amp; skills graph</h3>
+        <p class="meta">Capabilities, recurring themes, and key decisions aggregated across your stories.</p>
+        <div id="knowledge-graph"></div>
       </div>
     </div>
   </section>
@@ -879,7 +1040,7 @@ dialog::backdrop {
         <h3>Quick capture into L0 vault</h3>
         <label style="margin-top:0.25rem">Title</label><input id="cap-title" placeholder="e.g. Postmortem note or voice memo">
         <div class="form-row">
-          <div><label>Channel</label><select id="cap-channel"><option>voice_note</option><option>doc</option><option>slack</option><option>github</option><option>notion</option><option>x</option><option>linkedin</option><option>substack</option><option>resume</option></select></div>
+          <div><label>Channel</label><select id="cap-channel"><option value="transcript">Meeting Transcript</option><option value="calendar">Calendar Event</option><option value="voice_note">Voice Note</option><option value="doc">Doc / Google Doc</option><option value="slack">Slack / Chat</option><option value="notion">Notion / Wiki</option><option value="github">GitHub / Linear</option><option value="gmail">Email / Gmail</option><option value="slides">Slides / Figma</option><option value="linkedin">LinkedIn</option><option value="x">X / Twitter</option><option value="substack">Substack / Blog</option><option value="resume">Resume</option></select></div>
           <div><label>Event Date</label><input id="cap-date" placeholder="YYYY-MM-DD"></div>
           <div><label>Sensitivity</label><select id="cap-sens"><option>L0</option><option>L1</option><option>L2</option><option>L3</option></select></div>
         </div>
@@ -899,7 +1060,7 @@ dialog::backdrop {
       </div>
       <div id="ch-form" class="hidden sheet-animate" style="padding:0.75rem;margin-bottom:0.75rem;background:var(--surface);border:1px solid var(--line);border-radius:12px">
         <div class="form-row">
-          <div><label style="margin-top:0">Channel</label><select id="ch-name"><option value="slack">Slack</option><option value="notion">Notion</option><option value="gdoc">Google Docs / Drive</option><option value="github">GitHub</option><option value="linear">Linear / Jira</option><option value="gmail">Gmail / Email</option><option value="calendar">Calendar</option><option value="linkedin">LinkedIn</option><option value="x">X / Twitter</option><option value="substack">Substack / Blog</option><option value="doc">Local Docs / Folder</option></select></div>
+          <div><label style="margin-top:0">Channel</label><select id="ch-name"><option value="slack">Slack / Chat</option><option value="notion">Notion / Wiki</option><option value="gdoc">Google Docs / Drive</option><option value="calendar">Calendar (Events &amp; Forums)</option><option value="transcript">Meeting Transcripts (Granola / Gong / Zoom)</option><option value="github">GitHub</option><option value="linear">Linear / Jira</option><option value="gmail">Gmail / Email</option><option value="slides">Slides / Figma</option><option value="linkedin">LinkedIn</option><option value="x">X / Twitter</option><option value="substack">Substack / Blog</option><option value="doc">Local Docs / Folder</option></select></div>
           <div><label style="margin-top:0">Access method</label><select id="ch-method"><option value="mcp">MCP connector</option><option value="connector">Live connector</option><option value="export">Export / file upload</option><option value="manual">Manual notes</option></select></div>
           <div><label style="margin-top:0">Scan status</label><select id="ch-status"><option value="declared">Declared (not scanned yet)</option><option value="scanning">Scanning (partial)</option><option value="scanned">Scanned</option><option value="skipped">Skipped</option></select></div>
         </div>
@@ -1023,7 +1184,9 @@ const CSRF = "@@CSRF_TOKEN@@";
 let STATE = null;
 let LAST_TRIAGE = null;
 let ACTIVE_STORY_ID = null;
+let ACTIVE_ROLE_ID = null;
 let STORY_MODE = "read"; // "read" | "edit" | "new" | "claim"
+let PENDING_NEW_ROLE_ID = "";
 let STORY_FILTER = "all";
 let ACTIVE_TIER_ID = null;
 let TIER_FILTER = "all";
@@ -1111,8 +1274,9 @@ document.getElementById("theme-toggle").onclick = () => applyTheme(!document.bod
 
 /* Tab switching */
 function switchTab(tab) {
-  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
-  document.querySelectorAll("main > section").forEach(s => s.classList.toggle("hidden", s.id !== "tab-" + tab));
+  const target = tab === "timeline" ? "studio" : tab;
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active", b.dataset.tab === target));
+  document.querySelectorAll("main > section").forEach(s => s.classList.toggle("hidden", s.id !== "tab-" + target));
   window.scrollTo({ top: 0, behavior: "instant" });
   requestAnimationFrame(() => {
     syncNavGlider();
@@ -1174,6 +1338,8 @@ async function refresh() {
 
   if (!ACTIVE_STORY_ID && episodes.length) ACTIVE_STORY_ID = episodes[0].id;
   if (ACTIVE_STORY_ID && !episodes.some(e => e.id === ACTIVE_STORY_ID)) ACTIVE_STORY_ID = episodes[0]?.id || null;
+  if (!ACTIVE_ROLE_ID && roles.length) ACTIVE_ROLE_ID = roles[0].id;
+  if (ACTIVE_ROLE_ID && !roles.some(r => r.id === ACTIVE_ROLE_ID)) ACTIVE_ROLE_ID = roles[0]?.id || null;
   if (!ACTIVE_TIER_ID && episodes.length) ACTIVE_TIER_ID = episodes[0].id;
   if (ACTIVE_TIER_ID && !episodes.some(e => e.id === ACTIVE_TIER_ID)) ACTIVE_TIER_ID = episodes[0]?.id || null;
 
@@ -1191,10 +1357,10 @@ async function refresh() {
 
   // Hero + Context library
   const c = status.counts, g = status.granularity;
+  document.getElementById("lib-roles").textContent = c.roles;
   document.getElementById("lib-episodes").textContent = c.episodes;
   document.getElementById("lib-sources").textContent = c.sources;
   document.getElementById("lib-unlinked").textContent = c.unlinked_sources;
-  document.getElementById("lib-visuals").textContent = c.artifacts || 0;
   document.getElementById("lib-tiers").textContent = `${g.L2.ready}/${g.L3.ready}`;
   const pct = g.L2.total ? Math.round((g.L2.ready / g.L2.total) * 100) : 0;
   document.getElementById("hero-progress-label").textContent = `${g.L2.ready} of ${g.L2.total} stories ready for confidential-safe L2 sharing (${g.L3.ready} public L3)`;
@@ -1224,16 +1390,11 @@ async function refresh() {
     </div>`;
   }).join("") || '<p class="meta">No stories yet.</p>';
 
-  // Roles list (hover-reveal Remove)
-  document.getElementById("roles-list").innerHTML = roles.map(r => `
-    <div class="hover-row">
-      <div style="min-width:0;flex:1">
-        <strong>${esc(r.title)}</strong>${r.organization ? ` · ${esc(r.organization)}` : ''}
-        <div class="meta">${esc(r.period_label || 'undated')}</div>
-      </div>
-      <button class="btn danger sm hover-action" onclick="delRole('${esc(r.id)}')">Remove</button>
-    </div>
-  `).join("") || '<p class="meta">No roles added yet.</p>';
+  // Overview Tab: 5 Live Stages & Supported MCP Channels
+  renderOverview();
+
+  // Experience Tab: Master-Detail Roles Workbench
+  renderExperienceWorkbench();
 
   // Deepening Radar ("What Else Have I Missed?")
   const gaps = STATE.gaps || { depth_score: 0, breakdown: {}, next_actions: [], deepening_prompt: "" };
@@ -1330,6 +1491,156 @@ async function refresh() {
   });
 }
 
+/* ===== TAB 0: OVERVIEW LANDING & TAB 2: EXPERIENCE WORKBENCH ===== */
+const MCP_CHANNEL_CATALOG = [
+  { key: "slack", label: "Slack / Chat", desc: "Authored messages, project channels, launches, and retros time-sliced by year.", match: ["slack", "chat", "teams", "discord"] },
+  { key: "notion", label: "Notion / Wiki", desc: "PRDs, RFCs, quarterly OKRs, playbooks, onboarding guides, and career docs.", match: ["notion", "wiki", "confluence"] },
+  { key: "calendar", label: "Calendar", desc: "Recurring leadership forums, launches, workshops, offsites, talks, and key reviews.", match: ["calendar"] },
+  { key: "transcript", label: "Meeting Transcripts", desc: "Granola, Gong, Fireflies, Otter, Zoom/Meet transcripts, and voice memos.", match: ["transcript", "transcripts", "meeting", "voice_note", "granola", "gong", "fireflies", "otter", "zoom"] },
+  { key: "gdoc", label: "Google Docs / Drive", desc: "Strategy memos, architecture docs, hiring rubrics, and postmortems.", match: ["gdoc", "doc", "resume", "note"] },
+  { key: "github", label: "GitHub / Linear / Jira", desc: "Authored & reviewed PRs, RFC issues, shipped prototypes, and epics.", match: ["github", "git", "linear", "jira"] },
+  { key: "gmail", label: "Gmail / Email", desc: "Major launches, customer escalations, executive updates, and feedback.", match: ["gmail", "email"] },
+  { key: "slides", label: "Slides / Figma", desc: "Board decks, all-hands talks, workshops, and product/system diagrams.", match: ["slides", "figma"] },
+  { key: "linkedin", label: "LinkedIn", desc: "Chronological role history, company dates, and public posts.", match: ["linkedin"] },
+  { key: "substack", label: "X / Substack / Talks", desc: "Public essays, technical threads, podcasts, and conference talks.", match: ["x", "substack", "blog", "youtube"] },
+];
+
+function renderOverview() {
+  if (!STATE) return;
+  const stages = STATE.gaps?.stages || [];
+  document.getElementById("stages-grid").innerHTML = stages.map(st => {
+    const badge = st.status === "done"
+      ? '<span class="pill ok">Done</span>'
+      : (st.status === "in_progress" ? '<span class="pill warn">In Progress</span>' : '<span class="pill">Up Next</span>');
+    return `
+    <div class="stage-card ${esc(st.status)}" onclick="switchTab('${esc(st.target_tab)}')">
+      <div class="split" style="align-items:center">
+        <span class="stage-num">${st.status === 'done' ? '✓' : st.stage}</span>
+        ${badge}
+      </div>
+      <h4>Stage ${st.stage} · ${esc(st.title)}</h4>
+      <p>${esc(st.summary)}</p>
+      <div class="stage-metric">${esc(st.metric)} →</div>
+    </div>`;
+  }).join("");
+
+  const counts = {};
+  (STATE.sources || []).forEach(s => { counts[s.channel] = (counts[s.channel] || 0) + 1; });
+  const declared = new Map((STATE.channel_scans || []).map(c => [c.channel, c]));
+
+  document.getElementById("overview-channels-grid").innerHTML = MCP_CHANNEL_CATALOG.map(ch => {
+    const n = ch.match.reduce((acc, k) => acc + (counts[k] || 0), 0);
+    const ledger = declared.get(ch.key);
+    const statusPill = ledger
+      ? `<span class="pill ${ledger.status === 'scanned' ? 'ok' : 'warn'}">${esc(ledger.status)}</span>`
+      : (n > 0 ? `<span class="pill ok">${n} saved</span>` : '<span class="pill">Not scanned</span>');
+    return `
+    <div class="channel-tile">
+      <div>
+        <div class="split" style="align-items:center;flex-wrap:nowrap;gap:0.4rem;margin-bottom:0.3rem">
+          <strong style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(ch.label)}</strong>
+          <span style="flex-shrink:0">${statusPill}</span>
+        </div>
+        <div class="meta">${esc(ch.desc)}</div>
+      </div>
+      <div class="row" style="justify-content:space-between;margin-top:0.3rem">
+        <span class="meta">${n} item(s) in vault</span>
+        ${ledger ? `<button class="btn secondary sm" onclick="switchTab('vault')">View in Vault</button>` : `<button class="btn secondary sm" onclick="quickDeclareChannel('${esc(ch.key)}','${esc(ch.label)}')">+ Declare MCP</button>`}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+window.quickDeclareChannel = async (channel, label) => {
+  await api("/api/channels", { channel, label, access_method: "mcp", status: "declared" });
+  toast(`Declared ${label} for MCP scanning`);
+  await refresh();
+};
+
+function renderExperienceWorkbench() {
+  if (!STATE) return;
+  const roles = STATE.roles || [];
+  const episodes = STATE.episodes || [];
+  const epCount = {};
+  episodes.forEach(e => { if (e.role_id) epCount[e.role_id] = (epCount[e.role_id] || 0) + 1; });
+
+  document.getElementById("roles-index-list").innerHTML = roles.map(r => {
+    const n = epCount[r.id] || 0;
+    const active = r.id === ACTIVE_ROLE_ID;
+    return `
+    <button class="index-item ${active ? 'active' : ''}" onclick="selectRole('${esc(r.id)}')">
+      <div class="index-title">${esc(r.title)}</div>
+      <div class="index-sub">
+        <span>${esc(r.organization || 'Independent')}</span>
+        <span>· ${esc(shortPeriod(r.period_label))}</span>
+        <span class="pill ${n > 0 ? 'ok' : 'warn'}" style="margin-left:auto;padding:0.1rem 0.45rem">${n} ${n === 1 ? 'story' : 'stories'}</span>
+      </div>
+    </button>`;
+  }).join("") || '<p class="meta" style="padding:1rem">No roles recorded yet. Click <strong>+ Add role</strong> above.</p>';
+
+  const host = document.getElementById("role-sheet");
+  const r = roles.find(x => x.id === ACTIVE_ROLE_ID);
+  if (!r) {
+    host.innerHTML = '<div class="meta" style="text-align:center;padding:3rem 1rem">Select a role on the left (or click <strong>+ Add role</strong>) to organize your career eras and attached stories.</div>';
+    return;
+  }
+  const roleEps = episodes.filter(e => e.role_id === r.id);
+  host.innerHTML = `
+    <div class="sheet-animate">
+      <div class="sheet-head">
+        <div style="min-width:0;flex:1">
+          <div class="row" style="margin-bottom:0.35rem">
+            ${r.is_current ? '<span class="pill ok">Current Role</span>' : '<span class="pill">Past Role</span>'}
+            <span class="meta">${esc(r.period_label || 'Undated')}</span>
+          </div>
+          <h3>${esc(r.title)}${r.organization ? ` · ${esc(r.organization)}` : ''}</h3>
+        </div>
+        <div class="row">
+          <button class="btn sm" onclick="startStoryForRole('${esc(r.id)}')">+ New story in this role</button>
+          <button class="btn danger sm" onclick="delRole('${esc(r.id)}')">Remove role</button>
+        </div>
+      </div>
+
+      ${r.summary_l1 ? `<p class="story-lead">${esc(r.summary_l1)}</p>` : '<p class="meta" style="margin-top:0">No private role summary yet — your attached stories carry the detail below.</p>'}
+
+      <div class="section-head" style="margin-top:1.1rem">
+        <h3 style="font-size:1.05rem">Stories from this role (${roleEps.length})</h3>
+      </div>
+      ${roleEps.length ? roleEps.map(ep => `
+        <div class="hover-row" style="cursor:pointer" onclick="openStory('${esc(ep.id)}','read')">
+          <div style="min-width:0;flex:1">
+            <div class="row" style="gap:0.4rem;margin-bottom:0.15rem">
+              ${levelPill(ep.importance)}
+              <strong>${esc(ep.title)}</strong>
+              <span class="meta">${esc(shortPeriod(ep.period_label))}</span>
+            </div>
+            <div class="meta">${esc(cleanSnippet(ep.tiers?.L2?.summary || ep.summary_l1, 165))}</div>
+          </div>
+          <button class="btn secondary sm" style="flex-shrink:0">Open →</button>
+        </div>
+      `).join("") : `
+        <div class="l1-ref-box">
+          <strong>0 stories captured for this role yet</strong>
+          <p class="meta" style="margin:0.35rem 0 0.7rem;color:var(--ink);opacity:0.86">This era shows up as a coverage gap in Deepening Radar. Scan relevant MCP channels (Slack, Notion, Docs, Calendar, Transcripts) or jot down 1–2 defining moments from this role.</p>
+          <button class="btn sm" onclick="startStoryForRole('${esc(r.id)}')">+ Add first story for ${esc(r.organization || r.title)}</button>
+        </div>`}
+    </div>`;
+}
+
+window.selectRole = (id) => {
+  ACTIVE_ROLE_ID = id;
+  renderExperienceWorkbench();
+};
+
+window.startStoryForRole = (roleId) => {
+  PENDING_NEW_ROLE_ID = roleId;
+  STORY_MODE = "new";
+  window.PENDING_CLUSTER_SOURCES = [];
+  switchTab("episodes");
+  renderStoriesIndex();
+  renderStorySheet();
+};
+
 /* ===== TAB 2: MY STORIES (L1) MASTER-DETAIL WORKBENCH ===== */
 window.openStory = (id, mode = "read") => {
   ACTIVE_STORY_ID = id;
@@ -1340,6 +1651,7 @@ window.openStory = (id, mode = "read") => {
 };
 
 document.getElementById("new-story-btn").onclick = () => {
+  PENDING_NEW_ROLE_ID = "";
   STORY_MODE = "new";
   window.PENDING_CLUSTER_SOURCES = [];
   renderStoriesIndex();
@@ -1520,8 +1832,9 @@ function renderStorySheet() {
 function buildStoryFormHTML(ep) {
   const isNew = !ep;
   const imp = ep ? (ep.importance ?? 1) : 2;
+  const selectedRoleId = ep ? (ep.role_id || "") : (PENDING_NEW_ROLE_ID || "");
   const roleOpts = '<option value="">(Unassigned)</option>' +
-    STATE.roles.map(r => `<option value="${esc(r.id)}" ${ep?.role_id === r.id ? 'selected' : ''}>${esc(r.title)}${r.organization ? ' @ ' + esc(r.organization) : ''}</option>`).join("");
+    STATE.roles.map(r => `<option value="${esc(r.id)}" ${selectedRoleId === r.id ? 'selected' : ''}>${esc(r.title)}${r.organization ? ' @ ' + esc(r.organization) : ''}</option>`).join("");
   const statuses = ["shipped", "pilot", "prototype", "shelved", "ongoing", "reflection"];
   const statusOpts = statuses.map(st => `<option value="${st}" ${(ep?.status || "shipped") === st ? 'selected' : ''}>${st}</option>`).join("");
 
@@ -1609,6 +1922,7 @@ function wireStoryForm(ep) {
 }
 
 window.cancelNewStory = () => {
+  PENDING_NEW_ROLE_ID = "";
   STORY_MODE = "read";
   renderStoriesIndex();
   renderStorySheet();
@@ -2010,8 +2324,20 @@ document.getElementById("save-person").onclick = async () => {
   toast("Saved profile to SQLite"); await refresh();
 };
 document.getElementById("save-role").onclick = async () => {
-  await api("/api/roles", { title: document.getElementById("r-title").value, organization: document.getElementById("r-org").value, start_date: document.getElementById("r-start").value, end_date: document.getElementById("r-end").value, is_current: document.getElementById("r-curr").checked });
-  document.getElementById("r-title").value = ""; document.getElementById("r-org").value = "";
+  const title = document.getElementById("r-title").value.trim();
+  if (!title) { toast("Please enter a role title"); return; }
+  const saved = await api("/api/roles", {
+    title,
+    organization: document.getElementById("r-org").value,
+    start_date: document.getElementById("r-start").value,
+    end_date: document.getElementById("r-end").value,
+    is_current: document.getElementById("r-curr").checked,
+    summary_l1: document.getElementById("r-summary").value,
+  });
+  document.getElementById("r-title").value = "";
+  document.getElementById("r-org").value = "";
+  document.getElementById("r-summary").value = "";
+  ACTIVE_ROLE_ID = saved.id || ACTIVE_ROLE_ID;
   setRoleFormOpen(false);
   toast("Saved role"); await refresh();
 };

@@ -579,6 +579,8 @@ class TestCareerVaultV2(unittest.TestCase):
         )
 
         gaps = self.vault.audit_gaps()
+        self.assertEqual(len(gaps["stages"]), 5)
+        self.assertIn("calendar_and_transcripts", gaps["channel_coverage"])
         self.assertEqual(gaps["summary"]["unscanned_channels_count"], 2)
         self.assertEqual(gaps["next_actions"][0]["id"], "unscanned_channels")
         self.assertEqual(gaps["summary"]["empty_roles_count"], 1)
