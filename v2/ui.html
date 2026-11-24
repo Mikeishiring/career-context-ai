@@ -771,6 +771,113 @@ dialog::backdrop {
   display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;
 }
 
+/* ===== POLISHED STORIES, SHARE & VAULT WORKSPACES ===== */
+.form-sep {
+  margin: 1.5rem 0 0.75rem; padding-top: 1.15rem; border-top: 1px solid var(--line);
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+}
+.source-ref-list { display: grid; gap: 0.45rem; margin-top: 0.55rem; }
+.source-ref-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  width: 100%; text-align: left; cursor: pointer;
+  padding: 0.58rem 0.8rem; border-radius: 11px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  font: 500 0.84rem/1.35 var(--sans);
+  transition: transform 160ms var(--ease-spring), border-color 150ms ease, background-color 150ms ease;
+}
+.source-ref-row:hover { transform: translateX(3px); border-color: #9c8ee4; background: var(--paper); }
+.source-ref-row .go { font-size: 0.76rem; font-weight: 650; color: var(--accent); flex-shrink: 0; }
+
+.inline-disclosure {
+  margin-top: 0.85rem; border: 1px dashed var(--line-strong); border-radius: 12px;
+  padding: 0.7rem 0.95rem; background: var(--surface);
+}
+.inline-disclosure summary {
+  cursor: pointer; font-size: 0.82rem; font-weight: 650; color: var(--accent);
+  list-style: none; display: flex; align-items: center; gap: 0.4rem;
+}
+.inline-disclosure summary::-webkit-details-marker { display: none; }
+.inline-disclosure[open] { border-style: solid; border-color: #c5bdfa; background: var(--paper); }
+
+/* Share sub-workspace & focused single-tier canvas */
+.l1-ref-details {
+  border-radius: 13px; border: 1px solid #d7d2f7;
+  background: linear-gradient(115deg, #f5f3ff, #efecff);
+  padding: 0.72rem 1rem; margin-bottom: 1.15rem;
+}
+body.dark .l1-ref-details { background: linear-gradient(115deg, #1d1b38, #191e30); border-color: var(--line); }
+.l1-ref-details summary {
+  cursor: pointer; font-size: 0.8rem; font-weight: 680; color: var(--accent);
+  display: flex; align-items: center; justify-content: space-between; gap: 0.85rem; list-style: none;
+}
+.l1-ref-details summary::-webkit-details-marker { display: none; }
+.l1-ref-details summary .ref-label { white-space: nowrap; flex-shrink: 0; }
+.l1-ref-details summary .ref-preview { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.l1-ref-details p { margin: 0.65rem 0 0; font-size: 0.86rem; line-height: 1.58; color: var(--ink); opacity: 0.9; }
+
+.tier-canvas {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 15px;
+  padding: 1.25rem 1.35rem;
+}
+.tier-canvas input.title-input { font-size: 1.0rem; font-weight: 650; padding: 0.6rem 0.85rem; }
+.export-list { display: grid; gap: 0.75rem; margin-top: 0.9rem; }
+.export-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 0.9rem 1.05rem; border-radius: 13px; border: 1px solid var(--line);
+  background: var(--surface);
+  transition: border-color 150ms ease, background-color 150ms ease, transform 160ms var(--ease-spring);
+}
+.export-item:hover { border-color: #b4a9ef; background: var(--paper); transform: translateY(-1px); }
+.export-item strong { display: block; font-size: 0.9rem; margin-bottom: 0.14rem; letter-spacing: -0.015em; }
+.export-item .meta { font-size: 0.79rem; line-height: 1.4; }
+.export-item .row { flex-shrink: 0; }
+
+/* Vault clickable brand-logo filter bar & clean document viewer */
+.vault-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.85rem; flex-wrap: wrap;
+  background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 0.85rem 1.05rem; margin-bottom: 1.4rem; box-shadow: var(--raised);
+}
+.vault-chips { display: flex; align-items: center; gap: 0.42rem; flex-wrap: wrap; flex: 1; min-width: 240px; }
+.ch-chip {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.34rem 0.7rem; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  font: 600 0.77rem/1.15 var(--sans); cursor: pointer;
+  transition: transform 150ms var(--ease-spring), border-color 140ms ease, background-color 140ms ease, color 140ms ease;
+}
+.ch-chip:hover { transform: translateY(-1px); border-color: #9c8ee4; background: var(--paper); }
+.ch-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 2px 0 #362986; }
+.ch-chip svg { width: 14px; height: 14px; flex: none; display: block; }
+.ch-chip .cnt { font-size: 0.7rem; opacity: 0.78; font-variant-numeric: tabular-nums; }
+.ch-chip.active .cnt { opacity: 0.92; }
+
+.rail-search { display: flex; gap: 0.4rem; align-items: center; }
+.rail-search input { min-height: 36px; padding: 0.4rem 0.68rem; font-size: 0.83rem; }
+.rail-foot {
+  padding: 0.55rem 0.75rem; border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;
+  background: var(--surface); font-size: 0.74rem; color: var(--muted);
+}
+.rail-foot button {
+  border: 0; background: transparent; color: var(--accent); font: 600 0.74rem var(--sans);
+  cursor: pointer; padding: 0.15rem 0.3rem; border-radius: 6px;
+}
+.rail-foot button:hover { background: var(--wash); }
+
+.doc-viewer {
+  white-space: pre-wrap; word-break: break-word; background: var(--surface);
+  border: 1px solid var(--line); padding: 1.35rem 1.5rem; border-radius: 14px;
+  font: 400 0.93rem/1.7 var(--sans); color: var(--ink); max-height: 58vh; overflow: auto;
+}
+.doc-viewer.mono { font: 400 0.83rem/1.58 var(--mono); }
+.attach-bar {
+  display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap;
+  padding: 0.72rem 0.95rem; margin-bottom: 1.05rem; border-radius: 12px;
+  background: var(--surface); border: 1px solid var(--line);
+}
+.attach-bar select { height: 34px; font-size: 0.81rem; padding: 0.25rem 0.6rem; flex: 1; min-width: 190px; }
+
 @media (max-width: 960px) {
   .landing-hero, .pipeline-spotlight, .aperture-shell, .split-shell, .mcp-dock { grid-template-columns: 1fr; }
   .split-pane { border-left: 0; border-top: 1px solid var(--line); }
@@ -1134,7 +1241,10 @@ dialog::backdrop {
   <!-- TAB 2: MY STORIES (L1) — TEMPO MASTER-DETAIL WORKBENCH -->
   <section id="tab-episodes" class="tab-view hidden">
     <div class="page-head">
-      <h2>My Stories (L1 Private)</h2>
+      <div class="row" style="gap:0.75rem">
+        <h2>My Stories</h2>
+        <span class="pill" id="stories-count-pill">L1 Private</span>
+      </div>
       <div class="row">
         <button class="btn" id="new-story-btn">+ New story</button>
       </div>
@@ -1159,100 +1269,186 @@ dialog::backdrop {
     </div>
   </section>
 
-  <!-- TAB 3: SHARE & TIERS (L2/L3) — FOCUSED TIER STUDIO -->
+  <!-- TAB 3: SHARE & TIERS (L2/L3) — 3-MODE FOCUSED SHARING STUDIO -->
   <section id="tab-sharing" class="tab-view hidden">
     <div class="page-head">
-      <h2>Share &amp; Tiers (L2 / L3)</h2>
+      <h2>Share &amp; Export</h2>
+      <div class="seg-control" id="share-subnav">
+        <div class="seg-thumb"></div>
+        <button class="active" data-sub="polish">1. Polish Stories</button>
+        <button data-sub="blocked">2. Blocked Terms (<span id="share-blocked-count">0</span>)</button>
+        <button data-sub="export">3. Export &amp; Hand Off</button>
+      </div>
       <div class="row">
-        <button class="btn secondary" onclick="previewExport('L2')">Preview L2 ↗</button>
-        <button class="btn secondary" onclick="previewExport('L3')">Preview L3 ↗</button>
-        <button class="btn" onclick="copyResume('L2')">Copy L2 Resume</button>
+        <button class="btn secondary sm" onclick="previewExport('L2')">Preview L2 ↗</button>
+        <button class="btn sm" onclick="setShareSubtab('export')">Export →</button>
       </div>
     </div>
 
-    <div class="split-shell">
-      <div class="split-pane">
-        <div class="split" style="align-items:center">
-          <h3>Sensitive terms</h3>
-          <button class="btn secondary sm" id="st-suggest-btn">Scan &amp; suggest</button>
-        </div>
-        <div class="row" style="margin-top:0.65rem">
-          <input id="st-term" placeholder="Confidential term..." style="flex:2;min-width:130px">
-          <input id="st-repl" placeholder="Safe replacement..." style="flex:2;min-width:130px">
-          <select id="st-cat" style="flex:1;min-width:105px"><option>customer</option><option>metric</option><option>proprietary</option><option>person</option><option>internal_id</option><option>other</option></select>
-          <button class="btn sm" id="st-add">Add</button>
-        </div>
-        <div id="suggested-terms" style="margin-top:0.55rem"></div>
-        <div id="sensitive-list" style="margin-top:0.55rem;max-height:175px;overflow-y:auto"></div>
-      </div>
+    <!-- SUB-VIEW 1: POLISH STORIES (ONE FOCUSED TIER AT A TIME) -->
+    <div id="share-view-polish" class="sheet-animate">
+      <div class="workbench">
+        <aside class="index-panel">
+          <div class="index-controls">
+            <div class="seg-control full" id="tier-filter-seg">
+              <div class="seg-thumb"></div>
+              <button class="active" data-tfilter="all">All</button>
+              <button data-tfilter="flagship">Flagship</button>
+              <button data-tfilter="needs">Needs review</button>
+            </div>
+          </div>
+          <div id="tier-index-list" class="index-scroll"></div>
+          <div class="rail-foot">
+            <span id="tier-readiness-foot">L2 / L3 status</span>
+            <button type="button" onclick="batchSanitize(ACTIVE_SHARE_TIER)" title="Auto-draft missing or stale stories for active tier">Auto-draft all</button>
+          </div>
+        </aside>
 
-      <div class="split-pane">
-        <div class="split" style="align-items:center">
-          <h3>Export for humans or another AI</h3>
-          <div class="row">
-            <button class="btn secondary sm" onclick="batchSanitize('L2')">Auto-Sanitize L2</button>
-            <button class="btn secondary sm" onclick="batchSanitize('L3')">Auto-Sanitize L3</button>
-          </div>
-        </div>
-        <div style="margin-top:0.7rem">
-          <div class="meta" style="font-weight:700;text-transform:uppercase;letter-spacing:0.04em;font-size:0.69rem;margin-bottom:0.35rem">For Humans (Succinct · Zero JS)</div>
-          <div class="row">
-            <a class="btn secondary sm" href="/api/export?tier=L2&format=html">L2 Visual Brief (HTML) ↓</a>
-            <a class="btn secondary sm" href="/api/export?tier=L3&format=html">L3 Public Page (HTML) ↓</a>
-            <a class="btn secondary sm" href="/api/export?tier=L2&format=resume">1-Page Resume (MD) ↓</a>
-          </div>
-        </div>
-        <div style="margin-top:0.75rem">
-          <div class="meta" style="font-weight:700;text-transform:uppercase;letter-spacing:0.04em;font-size:0.69rem;margin-bottom:0.35rem">For Someone Else's AI (Exhaustive · Leak-Checked)</div>
-          <div class="row">
-            <a class="btn sm" href="/api/export?tier=L2&format=agent_pack">L2 AI Context Pack (MD) ↓</a>
-            <a class="btn secondary sm" href="/api/export?tier=L2&format=agent_json">L2 AI Pack (JSON) ↓</a>
-            <button class="btn secondary sm" onclick="copyAgentPack('L2')">Copy L2 Pack</button>
-            <button class="btn secondary sm" onclick="copyShareMcp()">Copy L2 MCP</button>
-          </div>
-        </div>
-        <details style="margin-top:0.85rem">
-          <summary class="meta" style="cursor:pointer;font-weight:650;color:var(--accent)">Edit L2 &amp; L3 top-level overviews</summary>
-          <label>L2 Confidential-Safe Overview</label><textarea id="p-l2" style="min-height:72px"></textarea>
-          <label>L3 Public Overview</label><textarea id="p-l3" style="min-height:72px"></textarea>
-          <button class="btn sm" id="save-overviews" style="margin-top:0.55rem">Save overviews</button>
-        </details>
+        <div id="tier-sheet" class="sheet-panel"></div>
       </div>
     </div>
 
-    <div class="workbench">
-      <aside class="index-panel">
-        <div class="index-controls">
-          <div class="seg-control full" id="tier-filter-seg">
-            <div class="seg-thumb"></div>
-            <button class="active" data-tfilter="all">All</button>
-            <button data-tfilter="flagship">Flagship</button>
-            <button data-tfilter="needs">Needs work</button>
+    <!-- SUB-VIEW 2: BLOCKED TERMS & PRIVACY RULES -->
+    <div id="share-view-blocked" class="hidden sheet-animate">
+      <div class="card">
+        <div class="split" style="align-items:center;margin-bottom:0.85rem">
+          <div>
+            <h3>Blocked terms &amp; safe replacements</h3>
+            <p class="meta" style="margin:0.2rem 0 0">Anything listed here is automatically blocked from every L2/L3 export and replaced when you click Auto-Sanitize. Emails, API keys, and Slack <code>#channels</code> are always blocked automatically.</p>
+          </div>
+          <button class="btn secondary" id="st-suggest-btn">Scan vault for terms</button>
+        </div>
+
+        <div class="row" style="margin-top:0.85rem">
+          <input id="st-term" placeholder="Confidential term (e.g. client or codename)" style="flex:2;min-width:190px">
+          <input id="st-repl" placeholder="Safe replacement (e.g. a Tier-1 enterprise client)" style="flex:2;min-width:190px">
+          <select id="st-cat" style="flex:1;min-width:125px"><option>customer</option><option>metric</option><option>proprietary</option><option>person</option><option>internal_id</option><option>other</option></select>
+          <button class="btn" id="st-add">Add rule</button>
+        </div>
+
+        <div id="suggested-terms" style="margin-top:0.85rem"></div>
+        <div id="sensitive-list" style="margin-top:1.1rem"></div>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW 3: EXPORT & HAND OFF (HUMANS vs. SOMEONE ELSE'S AI) -->
+    <div id="share-view-export" class="hidden sheet-animate">
+      <div class="split-shell" style="margin-bottom:2rem">
+        <div class="split-pane">
+          <span class="pill">Succinct · Zero JS</span>
+          <h3 style="margin-top:0.55rem">For humans</h3>
+          <p class="meta" style="margin:0.2rem 0 0">Clean visual briefs and resumes for hiring managers, advisors, or a public bio.</p>
+          <div class="export-list">
+            <div class="export-item">
+              <div>
+                <strong>L2 Confidential-Safe Visual Brief</strong>
+                <span class="meta">Self-contained HTML page · leak-checked · zero scripts</span>
+              </div>
+              <div class="row">
+                <button class="btn secondary sm" onclick="previewExport('L2')">Preview</button>
+                <a class="btn sm" href="/api/export?tier=L2&format=html">HTML ↓</a>
+              </div>
+            </div>
+            <div class="export-item">
+              <div>
+                <strong>L3 Public Career Page</strong>
+                <span class="meta">Short open-web summary plus approved links · zero scripts</span>
+              </div>
+              <div class="row">
+                <button class="btn secondary sm" onclick="previewExport('L3')">Preview</button>
+                <a class="btn secondary sm" href="/api/export?tier=L3&format=html">HTML ↓</a>
+              </div>
+            </div>
+            <div class="export-item">
+              <div>
+                <strong>1-Page Resume (Markdown)</strong>
+                <span class="meta">L2 safe roles, outcomes, and flagship stories</span>
+              </div>
+              <div class="row">
+                <button class="btn secondary sm" onclick="copyResume('L2')">Copy</button>
+                <a class="btn secondary sm" href="/api/export?tier=L2&format=resume">MD ↓</a>
+              </div>
+            </div>
           </div>
         </div>
-        <div id="tier-index-list" class="index-scroll"></div>
-      </aside>
 
-      <div id="tier-sheet" class="sheet-panel"></div>
+        <div class="split-pane">
+          <span class="pill ok">Exhaustive · Leak-Checked</span>
+          <h3 style="margin-top:0.55rem">For someone else's AI</h3>
+          <p class="meta" style="margin:0.2rem 0 0">Rich, full-detail L2 context built for an external assistant to read—no confidential terms, no raw L0 vault.</p>
+          <div class="export-list">
+            <div class="export-item">
+              <div>
+                <strong>L2 AI Context Pack (Markdown)</strong>
+                <span class="meta">All L2 roles, capabilities, decisions, outcomes, and AI reading guide</span>
+              </div>
+              <div class="row">
+                <button class="btn secondary sm" onclick="copyAgentPack('L2')">Copy</button>
+                <a class="btn sm" href="/api/export?tier=L2&format=agent_pack">MD ↓</a>
+              </div>
+            </div>
+            <div class="export-item">
+              <div>
+                <strong>L2 Structured Context (JSON)</strong>
+                <span class="meta">Machine-readable schema for agent workflows and custom prompts</span>
+              </div>
+              <div class="row">
+                <a class="btn secondary sm" href="/api/export?tier=L2&format=agent_json">JSON ↓</a>
+              </div>
+            </div>
+            <div class="export-item">
+              <div>
+                <strong>Read-Only L2 MCP Server Config</strong>
+                <span class="meta">Let an external agent query L2 stories without touching L0 or L1</span>
+              </div>
+              <div class="row">
+                <button class="btn secondary sm" onclick="copyShareMcp()">Copy config</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="split" style="align-items:center;margin-bottom:0.4rem">
+          <div>
+            <h3>Top-level overviews</h3>
+            <p class="meta" style="margin:0.15rem 0 0">Shown at the top of your exported L2 brief, AI Context Pack, and L3 public page.</p>
+          </div>
+          <button class="btn sm" id="save-overviews">Save overviews</button>
+        </div>
+        <div class="grid-2" style="margin-top:0.65rem">
+          <div>
+            <label style="margin-top:0">L2 Confidential-Safe Overview</label>
+            <textarea id="p-l2" style="min-height:92px" placeholder="High-signal intro for hiring managers and external AI assistants..."></textarea>
+          </div>
+          <div>
+            <label style="margin-top:0">L3 Public Overview</label>
+            <textarea id="p-l3" style="min-height:92px" placeholder="Short, open-web bio summary..."></textarea>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- TAB 4: RAW VAULT & TRIAGE (L0) -->
   <section id="tab-vault" class="tab-view hidden">
     <div class="page-head">
-      <h2>Raw Vault &amp; Triage (L0)</h2>
+      <div class="row" style="gap:0.75rem">
+        <h2>Raw Vault</h2>
+        <span class="pill" id="vault-summary-pill">L0 Local</span>
+      </div>
       <div class="row">
-        <button class="btn secondary" id="toggle-upload-btn">+ Upload / Capture</button>
-        <button class="btn secondary" id="triage-btn">Triage unlinked inbox</button>
-        <button class="btn secondary" id="sync-emb-btn">Sync semantic cache</button>
+        <button class="btn secondary" id="triage-btn">Inbox Triage</button>
+        <button class="btn" id="toggle-upload-btn">+ Add File / Note</button>
       </div>
     </div>
 
     <!-- Collapsible Upload + Quick Capture Drawer -->
-    <div id="upload-drawer" class="grid-2 hidden sheet-animate" style="margin-bottom:1.1rem">
+    <div id="upload-drawer" class="grid-2 hidden sheet-animate" style="margin-bottom:1.35rem">
       <div class="card" style="margin-bottom:0">
-        <h3>Drop any career file to ingest</h3>
-        <div id="dropzone" class="dropzone">
+        <h3>Drop any career file</h3>
+        <div id="dropzone" class="dropzone" style="margin-top:0.6rem">
           <div><strong>Drop files here or click to browse</strong></div>
           <div class="meta">Auto-detects .docx, .md, .txt, LinkedIn CSVs, X tweets.js, Substack XML, Slack/GitHub JSON, or v1 HTML</div>
           <input id="file-input" type="file" multiple style="display:none">
@@ -1263,78 +1459,73 @@ dialog::backdrop {
         </div>
       </div>
       <div class="card" style="margin-bottom:0">
-        <h3>Quick capture into L0 vault</h3>
-        <label style="margin-top:0.25rem">Title</label><input id="cap-title" placeholder="e.g. Postmortem note or voice memo">
+        <h3>Quick note into L0 vault</h3>
+        <label style="margin-top:0.35rem">Title</label><input id="cap-title" placeholder="e.g. Postmortem note or voice memo">
         <div class="form-row">
           <div><label>Channel</label><select id="cap-channel"><option value="transcript">Meeting Transcript</option><option value="calendar">Calendar Event</option><option value="voice_note">Voice Note</option><option value="doc">Doc / Google Doc</option><option value="slack">Slack / Chat</option><option value="notion">Notion / Wiki</option><option value="github">GitHub / Linear</option><option value="gmail">Email / Gmail</option><option value="slides">Slides / Figma</option><option value="linkedin">LinkedIn</option><option value="x">X / Twitter</option><option value="substack">Substack / Blog</option><option value="resume">Resume</option></select></div>
           <div><label>Event Date</label><input id="cap-date" placeholder="YYYY-MM-DD"></div>
           <div><label>Sensitivity</label><select id="cap-sens"><option>L0</option><option>L1</option><option>L2</option><option>L3</option></select></div>
         </div>
         <label>Raw Text</label><textarea id="cap-text" style="min-height:74px" placeholder="Paste raw notes, threads, transcripts..."></textarea>
-        <div class="row" style="margin-top:0.65rem"><button class="btn sm" id="cap-save">Ingest immediately</button></div>
+        <div class="row" style="margin-top:0.65rem"><button class="btn sm" id="cap-save">Save to vault</button></div>
       </div>
     </div>
 
-    <!-- Connected Work Channels & MCP Scan Ledger -->
-    <div class="card" style="margin-bottom:1.5rem">
-      <div class="split" style="align-items:center;margin-bottom:0.55rem">
-        <div class="row" style="gap:0.5rem">
-          <h3 style="margin:0">Channels &amp; MCP scan ledger</h3>
-          <span class="meta">Scanned by your agent via MCP · upload files offline anytime</span>
-        </div>
-        <div class="row">
-          <button class="btn secondary sm" onclick="copyMcpSetup()">Copy sweep prompt</button>
-          <button class="btn secondary sm" id="toggle-ch-form">+ Track channel</button>
-        </div>
+    <!-- Single Compact Brand-Logo Channel Filter Bar -->
+    <div class="vault-bar">
+      <div class="vault-chips" id="vault-channel-bar"></div>
+      <div class="row" style="flex-shrink:0">
+        <button class="btn secondary sm" onclick="copyMcpSetup()">Copy MCP Prompt</button>
+        <button class="btn secondary sm" id="toggle-ch-form">+ Track channel</button>
       </div>
-      <div id="ch-form" class="hidden sheet-animate" style="padding:0.75rem;margin-bottom:0.75rem;background:var(--surface);border:1px solid var(--line);border-radius:12px">
-        <div class="form-row">
-          <div><label style="margin-top:0">Channel</label><select id="ch-name"><option value="slack">Slack / Chat</option><option value="notion">Notion / Wiki</option><option value="gdoc">Google Docs / Drive</option><option value="calendar">Calendar (Events &amp; Forums)</option><option value="transcript">Meeting Transcripts (Granola / Gong / Zoom)</option><option value="github">GitHub</option><option value="linear">Linear / Jira</option><option value="gmail">Gmail / Email</option><option value="slides">Slides / Figma</option><option value="linkedin">LinkedIn</option><option value="x">X / Twitter</option><option value="substack">Substack / Blog</option><option value="doc">Local Docs / Folder</option></select></div>
-          <div><label style="margin-top:0">Access method</label><select id="ch-method"><option value="mcp">MCP connector</option><option value="connector">Live connector</option><option value="export">Export / file upload</option><option value="manual">Manual notes</option></select></div>
-          <div><label style="margin-top:0">Scan status</label><select id="ch-status"><option value="declared">Declared (not scanned yet)</option><option value="scanning">Scanning (partial)</option><option value="scanned">Scanned</option><option value="skipped">Skipped</option></select></div>
-        </div>
-        <div class="form-row" style="margin-top:0.45rem">
-          <div><label style="margin-top:0">Date range covered</label><input id="ch-dates" placeholder="e.g. 2023–2026"></div>
-          <div><label style="margin-top:0">Remaining / notes</label><input id="ch-notes" placeholder="e.g. Still need 2022–2023 threads"></div>
-        </div>
-        <div class="row" style="margin-top:0.65rem">
-          <button class="btn sm" id="save-ch-btn">Save channel</button>
-          <button class="btn secondary sm" id="cancel-ch-btn">Cancel</button>
-        </div>
-      </div>
-      <div id="channels-ledger" class="row"></div>
     </div>
 
-    <div class="card">
-      <div class="row">
-        <input id="search-input" placeholder="Search across Slack, GitHub, Notion, X, Substack, DOCX, docs..." style="flex:1;min-width:240px">
-        <select id="search-mode" style="width:185px">
-          <option value="auto">Auto (Hybrid / FTS5)</option>
-          <option value="fts5">FTS5 Instant</option>
-        </select>
-        <button class="btn" id="search-btn">Search</button>
-        <button class="btn secondary" id="search-clear">Clear</button>
+    <!-- Collapsible Track Channel Form -->
+    <div id="ch-form" class="card hidden sheet-animate" style="margin-bottom:1.35rem">
+      <div class="split" style="align-items:center;margin-bottom:0.5rem">
+        <h3>Track an MCP or offline channel</h3>
+        <span class="meta">Shows up in Overview and Deepening Radar so nothing gets skipped</span>
       </div>
-      <div id="search-results" style="margin-top:0.9rem"></div>
-      <div id="triage-results" style="margin-top:0.9rem"></div>
+      <div class="form-row">
+        <div><label style="margin-top:0">Channel</label><select id="ch-name"><option value="slack">Slack / Chat</option><option value="notion">Notion / Wiki</option><option value="gdoc">Google Docs / Drive</option><option value="calendar">Calendar (Events &amp; Forums)</option><option value="transcript">Meeting Transcripts (Granola / Gong / Zoom)</option><option value="github">GitHub</option><option value="linear">Linear / Jira</option><option value="gmail">Gmail / Email</option><option value="slides">Slides / Figma</option><option value="linkedin">LinkedIn</option><option value="x">X / Twitter</option><option value="substack">Substack / Blog</option><option value="doc">Local Docs / Folder</option></select></div>
+        <div><label style="margin-top:0">Access method</label><select id="ch-method"><option value="mcp">MCP connector</option><option value="connector">Live connector</option><option value="export">Export / file upload</option><option value="manual">Manual notes</option></select></div>
+        <div><label style="margin-top:0">Scan status</label><select id="ch-status"><option value="declared">Declared (not scanned yet)</option><option value="scanning">Scanning (partial)</option><option value="scanned">Scanned</option><option value="skipped">Skipped</option></select></div>
+      </div>
+      <div class="form-row" style="margin-top:0.45rem">
+        <div><label style="margin-top:0">Date range covered</label><input id="ch-dates" placeholder="e.g. 2023–2026"></div>
+        <div><label style="margin-top:0">Remaining / notes</label><input id="ch-notes" placeholder="e.g. Still need 2022–2023 threads"></div>
+      </div>
+      <div class="row" style="margin-top:0.75rem">
+        <button class="btn sm" id="save-ch-btn">Save channel</button>
+        <button class="btn secondary sm" id="cancel-ch-btn">Cancel</button>
+      </div>
     </div>
 
+    <!-- Closable Inbox Triage Panel (opens on click of Inbox Triage) -->
+    <div id="triage-results" class="hidden" style="margin-bottom:1.35rem"></div>
+
+    <!-- Clean Master-Detail Vault Workbench -->
     <div class="workbench">
       <aside class="index-panel">
         <div class="index-controls">
-          <div class="row" style="justify-content:space-between;margin-bottom:0.45rem">
-            <strong style="font-size:0.88rem">Ingested sources</strong>
-            <select id="source-channel-filter" style="width:auto;padding:0.25rem 0.5rem;font-size:0.78rem">
-              <option value="all">All channels</option>
-              <option value="unlinked">Unlinked inbox</option>
-            </select>
+          <div class="rail-search">
+            <input id="search-input" placeholder="Search all raw sources...">
+            <button class="btn secondary sm" id="search-btn" style="flex-shrink:0">Find</button>
+          </div>
+          <div id="search-status-bar" class="hidden row" style="justify-content:space-between;margin-top:0.5rem;font-size:0.76rem">
+            <span class="meta" id="search-status-text"></span>
+            <button type="button" class="btn secondary sm" id="search-clear" style="min-height:24px;padding:0.12rem 0.5rem;font-size:0.72rem">Clear ×</button>
           </div>
         </div>
         <div id="sources-list" class="index-scroll"></div>
+        <div class="rail-foot">
+          <span id="sources-foot-count">0 shown</span>
+          <button type="button" id="sync-emb-btn" title="Refresh local semantic search vectors">Refresh search index</button>
+        </div>
       </aside>
 
       <div id="source-reader" class="sheet-panel">
-        <div class="meta" style="text-align:center;padding:3rem 1rem">Select any source on the left (or from Search) to inspect its full verified raw text here.</div>
+        <div class="meta" style="text-align:center;padding:3.25rem 1.25rem">Select any document on the left to read its full text and attach it to a story.</div>
       </div>
     </div>
   </section>
@@ -1421,7 +1612,13 @@ let PENDING_NEW_ROLE_ID = "";
 let STORY_FILTER = "all";
 let ACTIVE_TIER_ID = null;
 let TIER_FILTER = "all";
+let SHARE_SUBTAB = "polish";
+let ACTIVE_SHARE_TIER = "L2";
 let ACTIVE_SOURCE_ID = null;
+let ACTIVE_SOURCE_OBJ = null;
+let VAULT_FILTER = "all";
+let VAULT_SEARCH_HITS = null;
+let VAULT_DOC_MONO = false;
 let TOAST_TIMER = null;
 
 function toast(msg) {
@@ -1602,11 +1799,9 @@ function syncNavGlider() {
   function activateNode(node) {
     if (CHANNEL_MATCH[node]) {
       switchTab("vault");
-      const sel = document.getElementById("source-channel-filter");
-      if (sel) {
-        const matchOpt = [...sel.options].find(o => CHANNEL_MATCH[node].includes(o.value));
-        if (matchOpt) { sel.value = matchOpt.value; renderSourcesList(); }
-      }
+      const sources = STATE?.sources || [];
+      const exact = sources.find(s => CHANNEL_MATCH[node].includes(s.channel))?.channel;
+      setVaultFilter(exact || "all");
     } else if (node === "mcp") {
       copyMcpSetup();
     } else if (node === "vault") {
@@ -1654,6 +1849,9 @@ function switchTab(tab) {
   document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active", b.dataset.tab === target));
   document.querySelectorAll("main > section").forEach(s => s.classList.toggle("hidden", s.id !== "tab-" + target));
   window.scrollTo({ top: 0, behavior: "instant" });
+  if (target === "vault" && !ACTIVE_SOURCE_ID && STATE?.sources?.length) {
+    openSource(STATE.sources[0].id);
+  }
   requestAnimationFrame(() => {
     syncNavGlider();
     document.querySelectorAll(".seg-control").forEach(syncSegControl);
@@ -1665,9 +1863,22 @@ function toggleUploadDrawer(forceOpen = null) {
   const el = document.getElementById("upload-drawer");
   const show = forceOpen === null ? el.classList.contains("hidden") : forceOpen;
   el.classList.toggle("hidden", !show);
-  document.getElementById("toggle-upload-btn").textContent = show ? "Close upload ×" : "+ Upload / Capture";
+  document.getElementById("toggle-upload-btn").textContent = show ? "Close upload ×" : "+ Add File / Note";
 }
 document.getElementById("toggle-upload-btn").onclick = () => toggleUploadDrawer();
+
+/* Share 3-mode sub-navigation */
+window.setShareSubtab = (sub) => {
+  SHARE_SUBTAB = sub;
+  document.querySelectorAll("#share-subnav button").forEach(b => b.classList.toggle("active", b.dataset.sub === sub));
+  ["polish", "blocked", "export"].forEach(k => {
+    document.getElementById("share-view-" + k).classList.toggle("hidden", k !== sub);
+  });
+  requestAnimationFrame(() => document.querySelectorAll("#tab-sharing .seg-control").forEach(syncSegControl));
+};
+document.querySelectorAll("#share-subnav button").forEach(b => {
+  b.onclick = () => setShareSubtab(b.dataset.sub);
+});
 
 /* Profile inline edit switch */
 function setProfileEditing(editing) {
@@ -1704,8 +1915,6 @@ document.querySelectorAll("#tier-filter-seg button").forEach(b => {
     renderTierWorkbench();
   };
 });
-
-document.getElementById("source-channel-filter").onchange = () => renderSourcesList();
 
 /* Load & render full state */
 async function refresh() {
@@ -1823,44 +2032,29 @@ async function refresh() {
     </div>`;
   }).join("") || '<p class="meta">No timeline events yet.</p>';
 
+  // Stories, Share, and Vault summary pills
+  document.getElementById("stories-count-pill").textContent = `${c.episodes} private stories · L1`;
+  document.getElementById("share-blocked-count").textContent = sensitive_terms.length;
+  document.getElementById("vault-summary-pill").textContent = `${c.sources} sources · ${c.unlinked_sources} unlinked`;
+  document.getElementById("triage-btn").textContent = c.unlinked_sources ? `Inbox Triage (${c.unlinked_sources})` : "Inbox Triage";
+  document.getElementById("tier-readiness-foot").textContent = `${g.L2.ready}/${g.L2.total} L2 · ${g.L3.ready}/${g.L3.total} L3`;
+
   // Sensitive terms (hover-reveal Remove)
   document.getElementById("sensitive-list").innerHTML = sensitive_terms.map(t => `
     <div class="hover-row">
-      <div style="min-width:0;flex:1"><code>${esc(t.term)}</code> → <strong>${esc(t.replacement)}</strong> <span class="pill">${esc(t.category)}</span></div>
+      <div style="min-width:0;flex:1"><code>${esc(t.term)}</code> → <strong>${esc(t.replacement)}</strong> <span class="pill" style="margin-left:0.35rem">${esc(t.category)}</span></div>
       <button class="btn danger sm hover-action" onclick="delTerm(${t.id})">Remove</button>
     </div>
-  `).join("") || '<p class="meta">No sensitive terms registered yet. Click "Scan &amp; suggest" above.</p>';
+  `).join("") || '<p class="meta">No custom blocked terms yet. Click <strong>Scan vault for terms</strong> above to find client names or internal terms automatically.</p>';
 
-  // Work channels & MCP scan ledger (with authentic brand icons)
-  const scans = STATE.channel_scans || [];
-  const countsByCh = {};
-  sources.forEach(s => { countsByCh[s.channel] = (countsByCh[s.channel] || 0) + 1; });
-  const ledgerEl = document.getElementById("channels-ledger");
-  if (scans.length) {
-    ledgerEl.innerHTML = scans.map(ch => {
-      const cls = ch.status === "scanned" ? "ok" : (ch.status === "skipped" ? "" : "warn");
-      const ico = getBrandIcon(ch.channel);
-      return `<span class="pill ${cls}" style="gap:0.4rem;padding:0.24rem 0.65rem" title="${esc((ch.date_range_covered ? 'Covered: ' + ch.date_range_covered + ' · ' : '') + (ch.remaining_notes || ''))}"><span style="width:14px;height:14px;display:inline-grid;place-items:center">${ico}</span>${esc(ch.label)} · ${esc(ch.access_method.toUpperCase())} · ${esc(ch.status)} (${ch.items_ingested})</span>`;
-    }).join("");
-  } else {
-    const inferred = Object.entries(countsByCh);
-    ledgerEl.innerHTML = inferred.length
-      ? inferred.map(([ch, n]) => `<span class="pill" style="gap:0.38rem;padding:0.24rem 0.65rem"><span style="width:14px;height:14px;display:inline-grid;place-items:center">${getBrandIcon(ch)}</span>${esc(ch)} (${n} saved)</span>`).join("") + '<span class="meta" style="margin-left:0.3rem">Click "+ Track channel" (or let your MCP agent log channels) to track unscanned work tools.</span>'
-      : '<span class="meta">No work channels tracked yet. Click <strong>+ Track channel</strong> or start your agent session with <code>v2/SKILL.md</code> to map and scan your MCP channels.</span>';
-  }
-
-  // Populate Vault channel filter dynamically
-  const chSel = document.getElementById("source-channel-filter");
-  const curCh = chSel.value;
-  const channels = [...new Set(sources.map(s => s.channel))].sort();
-  chSel.innerHTML = '<option value="all">All channels (' + sources.length + ')</option><option value="unlinked">Unlinked inbox</option>' +
-    channels.map(ch => `<option value="${esc(ch)}">${esc(ch)}</option>`).join("");
-  if ([...chSel.options].some(o => o.value === curCh)) chSel.value = curCh;
-
+  renderVaultChannelBar();
   renderStoriesIndex();
   renderStorySheet();
   renderTierWorkbench();
   renderSourcesList();
+  if (ACTIVE_SOURCE_OBJ && ACTIVE_SOURCE_ID === ACTIVE_SOURCE_OBJ.id) {
+    renderSourceReader(ACTIVE_SOURCE_OBJ);
+  }
 
   requestAnimationFrame(() => {
     syncNavGlider();
@@ -2243,7 +2437,9 @@ window.setStoryMode = (mode) => {
 function renderStorySheet() {
   const host = document.getElementById("story-sheet");
   if (!STATE) return;
-  const ep = STATE.episodes.find(e => e.id === ACTIVE_STORY_ID);
+  const list = getFilteredStories();
+  const idx = list.findIndex(e => e.id === ACTIVE_STORY_ID);
+  const ep = list[idx] || STATE.episodes.find(e => e.id === ACTIVE_STORY_ID);
 
   if (STORY_MODE === "new") {
     host.innerHTML = buildStoryFormHTML(null);
@@ -2255,93 +2451,68 @@ function renderStorySheet() {
     return;
   }
 
+  const prevId = idx > 0 ? list[idx - 1].id : null;
+  const nextId = idx >= 0 && idx < list.length - 1 ? list[idx + 1].id : null;
+  const roleObj = (STATE.roles || []).find(r => r.id === ep.role_id);
+  const roleLabel = roleObj ? `${roleObj.title}${roleObj.organization ? ' · ' + roleObj.organization : ''}` : "";
+  const isEdit = STORY_MODE === "edit";
+
   const headerHtml = `
     <div class="sheet-head">
       <div style="min-width:0;flex:1">
         <div class="row" style="margin-bottom:0.4rem">
           ${levelPill(ep.importance)}
           <span class="pill">${esc(ep.status)}</span>
-          <span class="meta">${esc(shortPeriod(ep.period_label))} · ${ep.source_refs.length} sources · ${(ep.artifacts||[]).length} visuals · ${ep.claims.length} claims</span>
+          ${roleLabel ? `<span class="meta">${esc(roleLabel)}</span>` : ''}
+          <span class="meta">· ${esc(shortPeriod(ep.period_label))}</span>
         </div>
         <h3>${esc(ep.title)}</h3>
       </div>
-      <div class="seg-control" id="sheet-mode-seg">
-        <div class="seg-thumb"></div>
-        <button class="${STORY_MODE === 'read' ? 'active' : ''}" onclick="setStoryMode('read')">Overview</button>
-        <button class="${STORY_MODE === 'edit' ? 'active' : ''}" onclick="setStoryMode('edit')">Edit Story</button>
-        <button class="${STORY_MODE === 'claim' ? 'active' : ''}" onclick="setStoryMode('claim')">+ Claim</button>
+      <div class="row" style="flex-shrink:0">
+        <div class="seg-control" id="sheet-mode-seg">
+          <div class="seg-thumb"></div>
+          <button class="${!isEdit ? 'active' : ''}" onclick="setStoryMode('read')">Read</button>
+          <button class="${isEdit ? 'active' : ''}" onclick="setStoryMode('edit')">Edit</button>
+        </div>
+        <button class="btn secondary sm" ${prevId ? `onclick="selectStory('${esc(prevId)}')"` : 'disabled style="opacity:0.4;cursor:default"'}>←</button>
+        <button class="btn secondary sm" ${nextId ? `onclick="selectStory('${esc(nextId)}')"` : 'disabled style="opacity:0.4;cursor:default"'}>→</button>
       </div>
     </div>`;
 
-  if (STORY_MODE === "edit") {
+  if (isEdit) {
     host.innerHTML = `<div class="sheet-animate">${headerHtml}${buildStoryFormHTML(ep)}</div>`;
     wireStoryForm(ep);
     requestAnimationFrame(() => document.querySelectorAll("#story-sheet .seg-control").forEach(syncSegControl));
     return;
   }
 
-  if (STORY_MODE === "claim") {
-    host.innerHTML = `
-      <div class="sheet-animate">
-        ${headerHtml}
-        <h4 style="margin:0 0 0.25rem">Anchor a verifiable claim or correction to this story</h4>
-        <p class="meta" style="margin-top:0">Provide a source ID and exact verbatim quote to let Python auto-compute character offsets and SHA-256 verification.</p>
-        <label>Statement</label>
-        <input id="cl-stmt" placeholder="Exact factual claim, qualification, or correction">
-        <div class="form-row">
-          <div><label>Kind</label><select id="cl-kind"><option>fact</option><option>self_report</option><option>interpretation</option><option>hypothesis</option><option>correction</option></select></div>
-          <div><label>Status</label><select id="cl-status"><option>supported</option><option>qualified</option><option>candidate</option><option>disputed</option><option>rejected</option></select></div>
-        </div>
-        <div class="form-row">
-          <div><label>Optional Source ID</label><input id="cl-src" placeholder="source_id" value="${esc(ep.source_refs[0] || '')}"></div>
-          <div><label>Exact Verbatim Quote</label><input id="cl-quote" placeholder="Exact snippet copied from source"></div>
-        </div>
-        <div class="row" style="margin-top:1rem">
-          <button class="btn" id="save-claim-btn">Save anchored claim</button>
-          <button class="btn secondary" onclick="setStoryMode('read')">Cancel</button>
-        </div>
-      </div>`;
-    document.getElementById("save-claim-btn").onclick = async () => {
-      try {
-        const src = document.getElementById("cl-src").value.trim(), quote = document.getElementById("cl-quote").value.trim();
-        await api("/api/claims", {
-          statement: document.getElementById("cl-stmt").value,
-          episode_id: ep.id,
-          kind: document.getElementById("cl-kind").value,
-          status: document.getElementById("cl-status").value,
-          evidence_quotes: (src && quote) ? [{ source_id: src, quote }] : [],
-        });
-        toast("Saved anchored claim");
-        STORY_MODE = "read";
-        await refresh();
-      } catch (err) { toast("Error: " + err.message); }
-    };
-    requestAnimationFrame(() => syncSegControl(document.getElementById("sheet-mode-seg")));
-    return;
-  }
+  // Resolve backing source records for readable, clickable evidence list
+  const srcById = new Map((STATE.sources || []).map(s => [s.id, s]));
+  const linkedSources = (ep.source_refs || []).map(sid => srcById.get(sid) || { id: sid, title: sid, channel: "doc", event_date: "" });
+  const claimSourceOpts = '<option value="">(No specific source)</option>' +
+    linkedSources.map(s => `<option value="${esc(s.id)}">[${esc(s.channel)}] ${esc(cleanSnippet(s.title, 70))}</option>`).join("");
 
   // READ MODE
   host.innerHTML = `
     <div class="sheet-animate">
       ${headerHtml}
       <p class="story-lead">${esc(ep.summary_l1)}</p>
+
       ${ep.decisions.length ? `
         <div class="meta" style="font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Key decisions</div>
         <ul class="decisions-list">${ep.decisions.map(d => `<li>${esc(d)}</li>`).join("")}</ul>` : ""}
+
       ${(ep.shared_credit_l1 || ep.outcome_l1) ? `
         <div class="callout-strip">
           ${ep.outcome_l1 ? `<div><strong>Outcome</strong><div>${esc(ep.outcome_l1)}</div></div>` : ""}
           ${ep.shared_credit_l1 ? `<div><strong>Shared credit</strong><div>${esc(ep.shared_credit_l1)}</div></div>` : ""}
         </div>` : ""}
+
       ${(ep.tags || []).length ? `<div class="row" style="margin:0.85rem 0">${ep.tags.map(t => `<span class="pill">#${esc(t)}</span>`).join("")}</div>` : ""}
-      ${ep.claims.length ? `
-        <div style="margin-top:1rem">
-          <div class="meta" style="font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem">Evidence-anchored claims (${ep.claims.length})</div>
-          <div class="row">${ep.claims.map(cl => `<span class="pill ${cl.status === 'rejected' || cl.status === 'disputed' ? 'danger' : 'ok'}">${esc(cl.kind)}/${esc(cl.status)}: ${esc(cl.statement.slice(0, 95))}</span>`).join("")}</div>
-        </div>` : ""}
+
       ${(ep.artifacts || []).length ? `
-        <div style="margin-top:1.25rem">
-          <div class="meta" style="font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Visual artifacts (${ep.artifacts.length})</div>
+        <div style="margin-top:1.35rem">
+          <div class="meta" style="font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Visuals (${ep.artifacts.length})</div>
           <div class="thumb-grid">${ep.artifacts.map(a => `
             <div class="thumb">
               <div class="thumb-img-wrap" onclick="openLightbox('/api/artifact/${esc(a.sha256)}','${esc(a.title || 'Visual')}')">
@@ -2355,14 +2526,82 @@ function renderStorySheet() {
             </div>`).join("")}
           </div>
         </div>` : ""}
-      <div class="split" style="margin-top:1.4rem;padding-top:1rem;border-top:1px solid var(--line);align-items:center">
-        <div class="row">
-          <span class="pill ${ep.tiers.L2 ? (ep.tiers.L2.stale ? 'warn' : 'ok') : ''}">L2 ${ep.tiers.L2 ? (ep.tiers.L2.stale ? 'stale' : 'ready') : 'missing'}</span>
-          <span class="pill ${ep.tiers.L3 ? (ep.tiers.L3.stale ? 'warn' : 'ok') : ''}">L3 ${ep.tiers.L3 ? (ep.tiers.L3.stale ? 'stale' : 'ready') : 'missing'}</span>
+
+      <!-- Backing Sources (clickable jump to Vault reader) -->
+      <div style="margin-top:1.45rem">
+        <div class="split" style="align-items:center">
+          <div class="meta" style="font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Backing sources (${linkedSources.length})</div>
+          <button class="btn secondary sm" onclick="switchTab('vault')">Browse Vault →</button>
         </div>
-        <button class="btn secondary sm" onclick="openInSharing('${esc(ep.id)}')">Edit L2 / L3 sharing version →</button>
+        ${linkedSources.length ? `
+          <div class="source-ref-list">
+            ${linkedSources.slice(0, 8).map(s => `
+              <button type="button" class="source-ref-row" onclick="openSourceInVault('${esc(s.id)}')">
+                <span style="display:inline-flex;align-items:center;gap:0.55rem;min-width:0">
+                  <span style="width:16px;height:16px;flex:none;display:inline-grid;place-items:center">${getBrandIcon(s.channel)}</span>
+                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.title)}</span>
+                  ${s.event_date ? `<span class="meta" style="flex-shrink:0">· ${esc(s.event_date)}</span>` : ''}
+                </span>
+                <span class="go">Read →</span>
+              </button>`).join("")}
+            ${linkedSources.length > 8 ? `<div class="meta" style="padding:0.2rem 0.4rem">+ ${linkedSources.length - 8} more linked sources in Vault</div>` : ''}
+          </div>` : `<p class="meta" style="margin:0.45rem 0 0">No raw sources linked yet. Open any document in Vault to attach it to this story.</p>`}
+      </div>
+
+      <!-- Evidence Notes & Quotes (progressive disclosure for adding a quote) -->
+      <div style="margin-top:1.35rem">
+        ${ep.claims.length ? `
+          <div class="meta" style="font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.45rem">Verified notes &amp; quotes (${ep.claims.length})</div>
+          <div class="row" style="margin-bottom:0.5rem">${ep.claims.map(cl => `<span class="pill ${cl.status === 'rejected' || cl.status === 'disputed' ? 'danger' : 'ok'}">${esc(cl.kind)}: ${esc(cl.statement.slice(0, 95))}</span>`).join("")}</div>` : ""}
+        <details class="inline-disclosure" id="story-quote-disclosure">
+          <summary>+ Add verified quote or fact check</summary>
+          <div style="margin-top:0.75rem">
+            <label style="margin-top:0">Fact, correction, or note</label>
+            <input id="cl-stmt" placeholder="e.g. Launched in Q3 with 4 enterprise customers">
+            <div class="form-row">
+              <div><label>Type</label><select id="cl-kind"><option value="fact">Verified fact</option><option value="self_report">Personal note</option><option value="correction">Correction / nuance</option><option value="interpretation">Takeaway</option></select></div>
+              <div><label>Confidence</label><select id="cl-status"><option value="supported">Supported</option><option value="qualified">Qualified</option><option value="candidate">Needs check</option><option value="disputed">Disputed</option></select></div>
+            </div>
+            <div class="form-row">
+              <div><label>Source document (optional)</label><select id="cl-src">${claimSourceOpts}</select></div>
+              <div><label>Exact quote from document (optional)</label><input id="cl-quote" placeholder="Paste exact snippet to auto-link"></div>
+            </div>
+            <div class="row" style="margin-top:0.85rem">
+              <button class="btn sm" id="save-claim-btn">Save note</button>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="split" style="margin-top:1.5rem;padding-top:1.05rem;border-top:1px solid var(--line);align-items:center">
+        <div class="row">
+          <span class="pill ${ep.tiers.L2 ? (ep.tiers.L2.stale ? 'warn' : 'ok') : ''}">L2 ${ep.tiers.L2 ? (ep.tiers.L2.stale ? 'needs update' : 'ready') : 'not drafted'}</span>
+          <span class="pill ${ep.tiers.L3 ? (ep.tiers.L3.stale ? 'warn' : 'ok') : ''}">L3 ${ep.tiers.L3 ? (ep.tiers.L3.stale ? 'needs update' : 'ready') : 'not drafted'}</span>
+        </div>
+        <button class="btn secondary sm" onclick="openInSharing('${esc(ep.id)}')">Polish for sharing →</button>
       </div>
     </div>`;
+
+  const saveClaimBtn = document.getElementById("save-claim-btn");
+  if (saveClaimBtn) {
+    saveClaimBtn.onclick = async () => {
+      try {
+        const stmt = document.getElementById("cl-stmt").value.trim();
+        if (!stmt) { toast("Enter a fact or note first"); return; }
+        const src = document.getElementById("cl-src").value.trim();
+        const quote = document.getElementById("cl-quote").value.trim();
+        await api("/api/claims", {
+          statement: stmt,
+          episode_id: ep.id,
+          kind: document.getElementById("cl-kind").value,
+          status: document.getElementById("cl-status").value,
+          evidence_quotes: (src && quote) ? [{ source_id: src, quote }] : [],
+        });
+        toast("Saved verified note");
+        await refresh();
+      } catch (err) { toast("Error: " + err.message); }
+    };
+  }
   requestAnimationFrame(() => syncSegControl(document.getElementById("sheet-mode-seg")));
 }
 
@@ -2380,7 +2619,7 @@ function buildStoryFormHTML(ep) {
     <label style="margin-top:0">Story Title</label>
     <input id="ep-title" class="title-input" value="${esc(ep?.title || '')}" placeholder="Concrete project, decision, or turning point">
 
-    <label>Story Level (controls prominence in your L2 &amp; L3 views)</label>
+    <label>Story Level (controls prominence in your L2 &amp; L3 exports)</label>
     <div class="seg-control full mint" id="ep-imp-seg" style="margin-bottom:0.2rem">
       <div class="seg-thumb"></div>
       <button type="button" class="${imp >= 3 ? 'active' : ''}" data-imp="3">Flagship</button>
@@ -2396,21 +2635,23 @@ function buildStoryFormHTML(ep) {
       <div><label>Status</label><select id="ep-status">${statusOpts}</select></div>
     </div>
 
-    <label>L1 Private Summary (full honest context — never shared directly)</label>
-    <textarea id="ep-summary" style="min-height:130px" placeholder="What were the stakes, the tension, your move, and the honest result?">${esc(ep?.summary_l1 || '')}</textarea>
+    <label>Private Summary (L1 — full honest detail, never shared directly)</label>
+    <textarea id="ep-summary" style="min-height:140px" placeholder="What were the stakes, the tension, your move, and the honest result?">${esc(ep?.summary_l1 || '')}</textarea>
 
-    <label>Key Decisions (one per line)</label>
-    <textarea id="ep-decisions" style="min-height:92px" placeholder="One concrete judgment call or tradeoff per line...">${esc((ep?.decisions || []).join("\n"))}</textarea>
+    <div class="form-sep">Supporting details (optional)</div>
+
+    <label style="margin-top:0">Key Decisions (one per line)</label>
+    <textarea id="ep-decisions" style="min-height:86px" placeholder="One concrete judgment call or tradeoff per line...">${esc((ep?.decisions || []).join("\n"))}</textarea>
 
     <div class="form-row">
-      <div><label>Shared Credit</label><textarea id="ep-credit" style="min-height:66px" placeholder="Who partnered with you?">${esc(ep?.shared_credit_l1 || '')}</textarea></div>
-      <div><label>Outcome</label><textarea id="ep-outcome" style="min-height:66px" placeholder="Measured result or honest stopping point">${esc(ep?.outcome_l1 || '')}</textarea></div>
+      <div><label>Outcome</label><textarea id="ep-outcome" style="min-height:68px" placeholder="Measured result or honest stopping point">${esc(ep?.outcome_l1 || '')}</textarea></div>
+      <div><label>Shared Credit</label><textarea id="ep-credit" style="min-height:68px" placeholder="Who partnered with you?">${esc(ep?.shared_credit_l1 || '')}</textarea></div>
     </div>
 
     <label>Tags (comma-separated)</label>
     <input id="ep-tags" value="${esc((ep?.tags || []).join(', '))}" placeholder="hiring, ai-tooling, leadership">
 
-    <div class="row" style="margin-top:1.15rem;padding-top:1rem;border-top:1px solid var(--line)">
+    <div class="row" style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--line)">
       <button class="btn" id="save-episode-btn">${isNew ? 'Create L1 story' : 'Save changes'}</button>
       <button class="btn secondary" onclick="${isNew ? 'cancelNewStory()' : "setStoryMode('read')"}">Cancel</button>
     </div>`;
@@ -2465,10 +2706,16 @@ window.cancelNewStory = () => {
   renderStorySheet();
 };
 
-/* ===== TAB 3: SHARE & TIERS WORKBENCH ===== */
+/* ===== TAB 3: SHARE & TIERS WORKBENCH (FOCUSED 1-TIER-AT-A-TIME) ===== */
 window.openInSharing = (id) => {
   ACTIVE_TIER_ID = id;
   switchTab("sharing");
+  setShareSubtab("polish");
+  renderTierWorkbench();
+};
+
+window.setActiveShareTier = (tier) => {
+  ACTIVE_SHARE_TIER = tier;
   renderTierWorkbench();
 };
 
@@ -2509,13 +2756,26 @@ function renderTierWorkbench() {
   const ep = list[idx] || STATE.episodes.find(e => e.id === ACTIVE_TIER_ID);
   const host = document.getElementById("tier-sheet");
   if (!ep) {
-    host.innerHTML = '<div class="meta" style="text-align:center;padding:3rem 1rem">Select a story to polish its L2 and L3 shareable tiers.</div>';
+    host.innerHTML = '<div class="meta" style="text-align:center;padding:3rem 1rem">Select a story to polish its shareable L2 and L3 versions.</div>';
     return;
   }
-  const l2 = ep.tiers.L2 || { title: "", summary: "", leaks: [], stale: false };
-  const l3 = ep.tiers.L3 || { title: "", summary: "", leaks: [], stale: false };
+
+  const tier = ACTIVE_SHARE_TIER === "L3" ? "L3" : "L2";
+  const p = tier.toLowerCase();
+  const saved = ep.tiers?.[tier];
+  const cur = saved || { title: "", summary: "", leaks: [], stale: false };
   const prevId = idx > 0 ? list[idx - 1].id : null;
   const nextId = idx >= 0 && idx < list.length - 1 ? list[idx + 1].id : null;
+
+  const statusPill = cur.leaks?.length
+    ? `<span class="pill danger">Blocked: ${cur.leaks.length} sensitive match${cur.leaks.length === 1 ? '' : 'es'}</span>`
+    : (!saved
+      ? `<span class="pill">Not drafted yet</span>`
+      : (cur.stale ? `<span class="pill warn">Needs update (L1 edited)</span>` : `<span class="pill ok">✓ Ready to share</span>`));
+
+  const tierAudience = tier === "L2"
+    ? "Safe for hiring managers & external AI"
+    : "Short open-web highlight for a bio or site";
 
   host.innerHTML = `
     <div class="sheet-animate">
@@ -2524,52 +2784,59 @@ function renderTierWorkbench() {
           <div class="row" style="margin-bottom:0.35rem">${levelPill(ep.importance)} <span class="meta">${esc(shortPeriod(ep.period_label))}</span></div>
           <h3>${esc(ep.title)}</h3>
         </div>
-        <div class="row">
+        <div class="row" style="flex-shrink:0">
           <button class="btn secondary sm" ${prevId ? `onclick="selectTierStory('${esc(prevId)}')"` : 'disabled style="opacity:0.4;cursor:default"'}>← Prev</button>
           <button class="btn secondary sm" ${nextId ? `onclick="selectTierStory('${esc(nextId)}')"` : 'disabled style="opacity:0.4;cursor:default"'}>Next →</button>
         </div>
       </div>
 
-      <div class="l1-ref-box">
-        <div class="split" style="align-items:center;margin-bottom:0.35rem">
-          <span class="pill">L1 Private Source of Truth (Reference)</span>
-          <div class="row">
-            <button class="btn secondary sm" onclick="autoDraft('${esc(ep.id)}','L2')">Auto-Sanitize L2</button>
-            <button class="btn secondary sm" onclick="autoDraft('${esc(ep.id)}','L3')">Auto-Sanitize L3</button>
-            <button class="btn secondary sm" onclick="aiDraftTier('${esc(ep.id)}','L2')">AI Polish L2</button>
-            <button class="btn secondary sm" onclick="aiDraftTier('${esc(ep.id)}','L3')">AI Polish L3</button>
-          </div>
+      <!-- Sliding Tier Selector: One focused editor at a time -->
+      <div class="split" style="align-items:center;margin-bottom:1.1rem">
+        <div class="seg-control mint" id="active-tier-seg">
+          <div class="seg-thumb"></div>
+          <button type="button" class="${tier === 'L2' ? 'active' : ''}" onclick="setActiveShareTier('L2')">L2 · Confidential-Safe</button>
+          <button type="button" class="${tier === 'L3' ? 'active' : ''}" onclick="setActiveShareTier('L3')">L3 · Public</button>
         </div>
-        <p class="meta" style="margin:0;color:var(--ink);opacity:0.88">${esc(ep.summary_l1)}</p>
+        ${statusPill}
       </div>
 
-      <div class="grid-2">
-        <div>
-          <div class="row" style="margin-bottom:0.4rem">
-            <span class="pill ${l2.leaks.length ? 'danger' : (ep.tiers.L2 ? 'ok' : '')}">L2 Confidential-Safe (Hiring Managers)</span>
-            ${l2.stale ? '<span class="pill warn">stale</span>' : ''}
-            ${l2.leaks.length ? `<span class="pill danger">${l2.leaks.length} leak(s)</span>` : ''}
+      <!-- Compact collapsible Private L1 reference -->
+      <details class="l1-ref-details">
+        <summary>
+          <span class="ref-label">Private L1 reference ▾</span>
+          <span class="meta ref-preview">${esc(cleanSnippet(ep.summary_l1, 95))}</span>
+        </summary>
+        <p>${esc(ep.summary_l1)}</p>
+        ${ep.outcome_l1 ? `<p><strong>Outcome:</strong> ${esc(ep.outcome_l1)}</p>` : ''}
+      </details>
+
+      <!-- Focused Single-Tier Editor Canvas -->
+      <div class="tier-canvas">
+        <div class="split" style="align-items:center;margin-bottom:0.85rem">
+          <span class="meta">${tierAudience}</span>
+          <div class="row" style="flex-shrink:0">
+            <button class="btn secondary sm" onclick="autoDraft('${esc(ep.id)}','${tier}')">Auto-Sanitize</button>
+            <button class="btn secondary sm" onclick="aiDraftTier('${esc(ep.id)}','${tier}')">AI Polish</button>
           </div>
-          <label style="margin-top:0.35rem">L2 Title</label>
-          <input id="l2-t-${esc(ep.id)}" value="${esc(l2.title)}">
-          <label>L2 Story</label>
-          <textarea id="l2-s-${esc(ep.id)}" style="min-height:165px">${esc(l2.summary)}</textarea>
-          <button class="btn" style="margin-top:0.75rem" onclick="saveTier('${esc(ep.id)}','L2')">Save L2</button>
         </div>
-        <div>
-          <div class="row" style="margin-bottom:0.4rem">
-            <span class="pill ${l3.leaks.length ? 'danger' : (ep.tiers.L3 ? 'ok' : '')}">L3 Public Highlight</span>
-            ${l3.stale ? '<span class="pill warn">stale</span>' : ''}
-            ${l3.leaks.length ? `<span class="pill danger">${l3.leaks.length} leak(s)</span>` : ''}
+
+        <label style="margin-top:0">${tier} Title</label>
+        <input id="${p}-t-${esc(ep.id)}" class="title-input" value="${esc(cur.title)}" placeholder="Clean ${tier} headline...">
+
+        <label>${tier === 'L2' ? 'L2 Confidential-Safe Story' : 'L3 Public Highlight'}</label>
+        <textarea id="${p}-s-${esc(ep.id)}" style="min-height:205px" placeholder="${tier === 'L2' ? 'Click Auto-Sanitize to draft from L1 with blocked terms replaced, then polish in your own voice...' : 'Write a crisp 2-sentence public highlight...'}">${esc(cur.summary)}</textarea>
+
+        <div class="split" style="margin-top:1.05rem;align-items:center">
+          <div class="row">
+            <button class="btn" onclick="saveTier('${esc(ep.id)}','${tier}')">Save ${tier}</button>
+            <button class="btn secondary sm" onclick="previewExport('${tier}')">Preview ${tier} ↗</button>
           </div>
-          <label style="margin-top:0.35rem">L3 Title</label>
-          <input id="l3-t-${esc(ep.id)}" value="${esc(l3.title)}">
-          <label>L3 Highlight</label>
-          <textarea id="l3-s-${esc(ep.id)}" style="min-height:165px">${esc(l3.summary)}</textarea>
-          <button class="btn" style="margin-top:0.75rem" onclick="saveTier('${esc(ep.id)}','L3')">Save L3</button>
+          <button class="btn secondary sm" onclick="openStory('${esc(ep.id)}','edit')">Edit L1 source →</button>
         </div>
       </div>
     </div>`;
+
+  requestAnimationFrame(() => syncSegControl(document.getElementById("active-tier-seg")));
 }
 
 window.selectTierStory = (id) => {
@@ -2577,47 +2844,173 @@ window.selectTierStory = (id) => {
   renderTierWorkbench();
 };
 
-/* ===== TAB 4: VAULT SOURCES LIST & READER ===== */
+/* ===== TAB 4: VAULT CHANNEL BAR, SOURCES LIST & READABLE DOCUMENT VIEWER ===== */
+function renderVaultChannelBar() {
+  if (!STATE) return;
+  const sources = STATE.sources || [];
+  const scans = STATE.channel_scans || [];
+  const countsByCh = {};
+  let unlinkedCount = 0;
+  sources.forEach(s => {
+    countsByCh[s.channel] = (countsByCh[s.channel] || 0) + 1;
+    if (!s.linked) unlinkedCount++;
+  });
+  const scanStatus = {};
+  scans.forEach(sc => { scanStatus[sc.channel] = sc.status; });
+
+  const chKeys = [...new Set([...Object.keys(countsByCh), ...scans.map(s => s.channel)])]
+    .sort((a, b) => (countsByCh[b] || 0) - (countsByCh[a] || 0));
+
+  const bar = document.getElementById("vault-channel-bar");
+  const chips = [
+    `<button type="button" class="ch-chip ${VAULT_FILTER === 'all' ? 'active' : ''}" onclick="setVaultFilter('all')">All <span class="cnt">${sources.length}</span></button>`,
+    `<button type="button" class="ch-chip ${VAULT_FILTER === 'unlinked' ? 'active' : ''}" onclick="setVaultFilter('unlinked')">Unlinked <span class="cnt">${unlinkedCount}</span></button>`,
+  ];
+  chKeys.forEach(ch => {
+    const n = countsByCh[ch] || 0;
+    const st = scanStatus[ch];
+    const dot = st ? `<span class="dot ${st === 'scanned' ? 'ok' : (st === 'skipped' ? '' : 'warn')}" title="MCP scan: ${esc(st)}"></span>` : '';
+    chips.push(`
+      <button type="button" class="ch-chip ${VAULT_FILTER === ch ? 'active' : ''}" onclick="setVaultFilter('${esc(ch)}')">
+        ${getBrandIcon(ch)}
+        <span>${esc(ch)}</span>
+        <span class="cnt">${n}</span>
+        ${dot}
+      </button>`);
+  });
+  bar.innerHTML = chips.join("");
+}
+
+window.setVaultFilter = (val) => {
+  VAULT_FILTER = val;
+  VAULT_SEARCH_HITS = null;
+  document.getElementById("search-input").value = "";
+  document.getElementById("search-status-bar").classList.add("hidden");
+  renderVaultChannelBar();
+  renderSourcesList();
+};
+
 function renderSourcesList() {
   if (!STATE) return;
-  const f = document.getElementById("source-channel-filter").value;
-  const list = STATE.sources.filter(s => {
-    if (f === "unlinked") return !s.linked;
-    if (f !== "all" && s.channel !== f) return false;
-    return true;
-  }).slice(0, 120);
+  const listEl = document.getElementById("sources-list");
+  const footEl = document.getElementById("sources-foot-count");
 
-  document.getElementById("sources-list").innerHTML = list.map(s => `
+  if (VAULT_SEARCH_HITS) {
+    const { episodes = [], sources = [] } = VAULT_SEARCH_HITS;
+    const parts = [];
+    if (episodes.length) {
+      parts.push(`<div class="meta" style="padding:0.35rem 0.65rem 0.2rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Matching stories (${episodes.length})</div>`);
+      episodes.slice(0, 5).forEach(e => {
+        parts.push(`
+          <button class="index-item" onclick="openStory('${esc(e.episode_id || e.id)}','read')">
+            <div class="index-title">${esc(e.title)}</div>
+            <div class="index-sub"><span class="pill ok" style="padding:0.1rem 0.45rem">Story</span><span>Open in Stories →</span></div>
+          </button>`);
+      });
+    }
+    if (sources.length) {
+      parts.push(`<div class="meta" style="padding:0.45rem 0.65rem 0.2rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Matching documents (${sources.length})</div>`);
+      sources.slice(0, 40).forEach(h => {
+        parts.push(`
+          <button class="index-item ${h.source_id === ACTIVE_SOURCE_ID ? 'active' : ''}" onclick="openSource('${esc(h.source_id)}')">
+            <div class="index-title" style="display:flex;align-items:center;gap:0.45rem"><span style="width:15px;height:15px;flex:none;display:inline-grid;place-items:center">${getBrandIcon(h.channel)}</span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(h.title)}</span></div>
+            <div class="index-sub"><span>${esc(cleanSnippet(h.snippet, 68))}</span></div>
+          </button>`);
+      });
+    }
+    listEl.innerHTML = parts.join("") || '<p class="meta" style="padding:1rem">No matches found for that search.</p>';
+    footEl.textContent = `${episodes.length + sources.length} hits`;
+    return;
+  }
+
+  const all = STATE.sources.filter(s => {
+    if (VAULT_FILTER === "unlinked") return !s.linked;
+    if (VAULT_FILTER !== "all" && s.channel !== VAULT_FILTER) return false;
+    return true;
+  });
+  const list = all.slice(0, 150);
+
+  listEl.innerHTML = list.map(s => `
     <button class="index-item ${s.id === ACTIVE_SOURCE_ID ? 'active' : ''}" onclick="openSource('${esc(s.id)}')">
       <div class="index-title" style="display:flex;align-items:center;gap:0.45rem"><span style="width:15px;height:15px;flex:none;display:inline-grid;place-items:center">${getBrandIcon(s.channel)}</span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.title)}</span></div>
       <div class="index-sub">
         <span class="pill" style="padding:0.1rem 0.45rem">${esc(s.channel)}</span>
-        <span class="pill ${s.linked ? 'ok' : 'warn'}" style="padding:0.1rem 0.45rem">${s.linked ? 'linked' : 'inbox'}</span>
+        <span class="pill ${s.linked ? 'ok' : 'warn'}" style="padding:0.1rem 0.45rem">${s.linked ? 'linked' : 'unlinked'}</span>
         <span>${esc(s.event_date || 'undated')}</span>
       </div>
     </button>
-  `).join("") || '<p class="meta" style="padding:1rem">No sources match this filter.</p>';
+  `).join("") || '<p class="meta" style="padding:1rem">No documents in this channel yet.</p>';
+  footEl.textContent = all.length > list.length ? `Showing ${list.length} of ${all.length}` : `${all.length} document${all.length === 1 ? '' : 's'}`;
+}
+
+window.openSourceInVault = async (id) => {
+  switchTab("vault");
+  await openSource(id);
+};
+
+window.toggleDocMono = () => {
+  VAULT_DOC_MONO = !VAULT_DOC_MONO;
+  if (ACTIVE_SOURCE_OBJ) renderSourceReader(ACTIVE_SOURCE_OBJ);
+};
+
+window.attachSourceToStory = async (sourceId) => {
+  const sel = document.getElementById("attach-story-sel");
+  const epId = sel ? sel.value : "";
+  if (!epId) { toast("Pick a story to attach this document to"); return; }
+  await api("/api/episodes/link", { episode_id: epId, source_ids: [sourceId] });
+  const epTitle = (STATE.episodes || []).find(e => e.id === epId)?.title || "story";
+  toast(`Attached to "${cleanSnippet(epTitle, 42)}"`);
+  await refresh();
+};
+
+function renderSourceReader(s) {
+  const linkedEps = (STATE?.episodes || []).filter(ep => (ep.source_refs || []).includes(s.id));
+  const availEps = (STATE?.episodes || []).filter(ep => !(ep.source_refs || []).includes(s.id));
+  const attachOpts = '<option value="">Attach this document to a story...</option>' +
+    availEps.map(ep => `<option value="${esc(ep.id)}">${esc(cleanSnippet(ep.title, 65))}</option>`).join("");
+
+  document.getElementById("source-reader").innerHTML = `
+    <div class="sheet-animate">
+      <div class="sheet-head" style="margin-bottom:1rem">
+        <div style="min-width:0;flex:1">
+          <div class="row" style="margin-bottom:0.4rem">
+            <span style="width:17px;height:17px;display:inline-grid;place-items:center">${getBrandIcon(s.channel)}</span>
+            <span class="pill">${esc(s.channel)}</span>
+            <span class="pill">${esc(s.sensitivity)}</span>
+            <span class="meta">${esc(s.event_date || 'Undated')}</span>
+          </div>
+          <h3>${esc(s.title)}</h3>
+        </div>
+        <button type="button" class="btn secondary sm" style="flex-shrink:0" onclick="toggleDocMono()">${VAULT_DOC_MONO ? 'Readable view' : 'Monospace'}</button>
+      </div>
+
+      <!-- Linked Stories + 1-Click Attach Bar -->
+      <div class="attach-bar">
+        ${linkedEps.length
+          ? linkedEps.map(ep => `<span class="pill ok clickable" onclick="openStory('${esc(ep.id)}','read')" title="Open linked story">Linked: ${esc(cleanSnippet(ep.title, 38))} →</span>`).join("")
+          : '<span class="pill warn">Unlinked inbox</span>'}
+        ${availEps.length ? `
+          <select id="attach-story-sel">${attachOpts}</select>
+          <button type="button" class="btn secondary sm" onclick="attachSourceToStory('${esc(s.id)}')">+ Attach</button>` : ''}
+      </div>
+
+      <div class="doc-viewer ${VAULT_DOC_MONO ? 'mono' : ''}">${esc(s.raw_text)}</div>
+
+      <details style="margin-top:0.9rem">
+        <summary class="meta" style="cursor:pointer;font-weight:600">Technical metadata</summary>
+        <div class="meta" style="margin-top:0.4rem;font-family:var(--mono);font-size:0.75rem">
+          Source ID: ${esc(s.id)} · SHA-256: ${esc(s.content_sha256.slice(0, 16))}… · ${(s.raw_text || '').length.toLocaleString()} chars
+        </div>
+      </details>
+    </div>`;
 }
 
 window.openSource = async (id) => {
   ACTIVE_SOURCE_ID = id;
   renderSourcesList();
   const s = await api("/api/source/" + encodeURIComponent(id));
-  document.getElementById("source-reader").innerHTML = `
-    <div class="sheet-animate">
-      <div class="sheet-head" style="margin-bottom:0.9rem">
-        <div>
-          <div class="row" style="margin-bottom:0.35rem">
-            <span class="pill">${esc(s.channel)}</span>
-            <span class="pill">${esc(s.sensitivity)}</span>
-            <span class="meta">${esc(s.event_date || 'undated')} · sha256:${esc(s.content_sha256.slice(0, 12))}</span>
-          </div>
-          <h3>${esc(s.title)}</h3>
-          <div class="meta">Source ID: <code>${esc(s.id)}</code></div>
-        </div>
-      </div>
-      <pre>${esc(s.raw_text)}</pre>
-    </div>`;
+  ACTIVE_SOURCE_OBJ = s;
+  renderSourceReader(s);
 };
 
 /* ===== ACTIONS, DIALOGS, API CALLS ===== */
@@ -2795,23 +3188,40 @@ async function uploadFiles(fileList) {
   await refresh();
 }
 
+window.closeTriagePanel = () => {
+  const el = document.getElementById("triage-results");
+  el.classList.add("hidden");
+  el.innerHTML = "";
+};
+
 document.getElementById("triage-btn").onclick = async () => {
   const res = await api("/api/inbox/triage");
   LAST_TRIAGE = res;
   const att = res.attach_candidates || [], clu = res.potential_new_clusters || [];
-  document.getElementById("triage-results").innerHTML = `
-    <div class="card sheet-animate" style="background:var(--surface);box-shadow:none;margin-bottom:0">
-      <div class="split">
-        <div><strong>Inbox triage (${esc(res.method)})</strong> <span class="meta">${res.unlinked_examined} unlinked · ${att.length} likely matches · ${clu.length} unwritten clusters</span></div>
-        ${att.length ? `<button class="btn secondary sm" onclick="batchLinkTop()">Link top ${Math.min(25, att.length)} matches</button>` : ''}
-      </div>
-      ${att.slice(0, 10).map(a => `
-        <div class="hover-row">
-          <div class="meta"><span class="pill">${esc(a.channel)}</span> <strong>${esc(a.title)}</strong> → <em>${esc(a.suggested_episode_title)}</em> (${a.similarity || a.score})</div>
-          <button class="btn secondary sm" onclick="linkSource('${esc(a.suggested_episode_id)}','${esc(a.source_id)}')">+ Link</button>
+  const box = document.getElementById("triage-results");
+  box.classList.remove("hidden");
+  box.innerHTML = `
+    <div class="card sheet-animate" style="margin-bottom:0">
+      <div class="split" style="align-items:center;margin-bottom:0.55rem">
+        <div>
+          <h3 style="margin:0">Inbox Triage</h3>
+          <div class="meta">${res.unlinked_examined} unlinked examined · ${att.length} likely story matches · ${clu.length} unwritten clusters</div>
         </div>
-      `).join("")}
-      ${clu.length ? `<details style="margin-top:0.65rem"><summary class="meta" style="cursor:pointer;font-weight:650;color:var(--accent)">Potential unwritten stories (${clu.length} clusters)</summary>${clu.slice(0, 12).map((c, idx) => `
+        <div class="row">
+          ${att.length ? `<button class="btn sm" onclick="batchLinkTop()">Link top ${Math.min(25, att.length)} matches</button>` : ''}
+          <button class="btn secondary sm" onclick="closeTriagePanel()">Close ×</button>
+        </div>
+      </div>
+      ${att.slice(0, 8).map(a => `
+        <div class="hover-row">
+          <div class="meta" style="min-width:0;flex:1"><span class="pill">${esc(a.channel)}</span> <strong>${esc(a.title)}</strong> → <em>${esc(a.suggested_episode_title)}</em></div>
+          <div class="row" style="flex-shrink:0">
+            <button class="btn secondary sm" onclick="openSource('${esc(a.source_id)}')">Read</button>
+            <button class="btn sm" onclick="linkSource('${esc(a.suggested_episode_id)}','${esc(a.source_id)}')">+ Link</button>
+          </div>
+        </div>
+      `).join("") || '<p class="meta" style="margin:0.4rem 0 0">No automatic story matches found for remaining unlinked items.</p>'}
+      ${clu.length ? `<details style="margin-top:0.75rem"><summary class="meta" style="cursor:pointer;font-weight:650;color:var(--accent)">Potential unwritten stories (${clu.length} clusters)</summary>${clu.slice(0, 12).map((c, idx) => `
         <div class="hover-row">
           <div class="meta"><strong>${esc(c.cluster)}</strong> (${c.count} sources) — ${esc(c.sources.slice(0,2).map(s => s.title).join("; "))}</div>
           <button class="btn secondary sm" onclick="draftFromCluster(${idx})">Start story</button>
@@ -2898,19 +3308,25 @@ document.getElementById("st-add").onclick = async () => {
 };
 document.getElementById("search-btn").onclick = async () => {
   const q = document.getElementById("search-input").value.trim();
-  if (!q) return;
-  const mode = document.getElementById("search-mode").value;
-  const r = await api(`/api/search?q=${encodeURIComponent(q)}&mode=${encodeURIComponent(mode)}`);
-  document.getElementById("search-results").innerHTML =
-    `<p class="meta">Method: <code>${esc(r.method)}</code> · ${r.episodes.length} story hit(s), ${r.sources.length} source(s)${r.total_ms ? ` in ${r.total_ms} ms` : ''}</p>` +
-    r.episodes.slice(0, 5).map(e => `<div class="hover-row"><div class="meta"><span class="pill ok">story</span> <strong>${esc(e.title)}</strong>${e.similarity ? ` (sim ${e.similarity})` : ''}</div><button class="btn secondary sm" onclick="openStory('${esc(e.episode_id || e.id)}','read')">Open</button></div>`).join("") +
-    r.sources.slice(0, 8).map(h => `<div class="hover-row"><div class="meta"><span class="pill">${esc(h.channel)}</span> <strong>${esc(h.title)}</strong> — ${esc(cleanSnippet(h.snippet, 190))}</div><button class="btn secondary sm" onclick="openSource('${esc(h.source_id)}')">Read</button></div>`).join("");
+  if (!q) {
+    VAULT_SEARCH_HITS = null;
+    document.getElementById("search-status-bar").classList.add("hidden");
+    renderSourcesList();
+    return;
+  }
+  const r = await api(`/api/search?q=${encodeURIComponent(q)}&mode=auto`);
+  VAULT_SEARCH_HITS = r;
+  document.getElementById("search-status-text").textContent = `${r.episodes.length} stories · ${r.sources.length} docs`;
+  document.getElementById("search-status-bar").classList.remove("hidden");
+  renderSourcesList();
+  if (r.sources.length) openSource(r.sources[0].source_id);
 };
 document.getElementById("search-input").addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("search-btn").click(); });
 document.getElementById("search-clear").onclick = () => {
   document.getElementById("search-input").value = "";
-  document.getElementById("search-results").innerHTML = "";
-  document.getElementById("triage-results").innerHTML = "";
+  VAULT_SEARCH_HITS = null;
+  document.getElementById("search-status-bar").classList.add("hidden");
+  renderSourcesList();
 };
 document.getElementById("llm-save-cfg").onclick = () => {
   sessionStorage.setItem("cc_llm_provider", document.getElementById("llm-provider").value);
