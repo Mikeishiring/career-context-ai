@@ -13,47 +13,48 @@ from .db import CareerVault
 
 STATIC_CSS = """
 :root {
+  --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, "Times New Roman", serif;
   --sans: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
-  --bg: #f7f8fc; --paper: #ffffff; --ink: #182643; --muted: #53637a;
-  --line: #dce1ed; --wash: #eeedfc; --accent: #5141bd; --raised: 0 3px 0 #dce0ed;
+  --bg: #f6f3ec; --paper: #fffdf9; --ink: #1b221e; --muted: #5c635d;
+  --line: #ddd6c7; --wash: #ebe6da; --accent: #1d5c48; --ochre: #8a4b10; --raised: 0 3px 0 #ddd6c7;
 }
 * { box-sizing: border-box; }
 body { margin: 0; font-family: var(--sans); background: var(--bg); color: var(--ink); line-height: 1.62; overflow-x: hidden; overflow-wrap: anywhere; }
 main { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem 4.5rem; }
 .hero {
-  position: relative; overflow: hidden; border-radius: 18px; border: 1px solid #d3d5ed;
-  box-shadow: 0 3px 0 #dfe1ee; padding: 2rem 2.2rem; margin-bottom: 2.2rem;
-  background: radial-gradient(ellipse at 100% 15%, #dbd8ff, transparent 68%), linear-gradient(115deg, #f3f1ff, #eae7ff);
-  box-shadow: inset 6px 0 #6c58cd, 0 3px 0 #dfe1ee;
+  position: relative; overflow: hidden; border-radius: 18px; border: 1px solid #d5ccb9;
+  padding: 2rem 2.2rem; margin-bottom: 2.2rem;
+  background: radial-gradient(ellipse at 100% 15%, #e9dec8, transparent 68%), linear-gradient(115deg, #f5f0e5, #ede5d4);
+  box-shadow: inset 6px 0 var(--accent), 0 3px 0 #ddd6c7;
 }
 .hero::before {
   content: ""; position: absolute; right: 0; top: 0; width: 28px; height: 28px;
-  background: linear-gradient(45deg, #c3b8ff 8%, #9887e2 49%, var(--bg) 51%);
-  border-bottom-left-radius: 5px; box-shadow: -2px 2px 4px #57479825;
+  background: linear-gradient(45deg, #d7c7aa 8%, #b9a480 49%, var(--bg) 51%);
+  border-bottom-left-radius: 5px; box-shadow: -2px 2px 4px rgba(56, 44, 24, 0.14);
 }
-.badge { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.03em; padding: 0.22rem 0.65rem; border-radius: 999px; background: #fff; border: 1px solid #c9c3ee; color: var(--accent); text-transform: uppercase; }
-.badge.flagship { background: #d8f6e9; border-color: #9edec4; color: #105947; }
-h1 { margin: 0.7rem 0 0.25rem; font-size: clamp(1.8rem, 3.2vw, 2.5rem); font-weight: 700; letter-spacing: -0.045em; line-height: 1.12; color: #1d1b3f; }
-.headline { margin: 0 0 1rem; color: #474178; font-size: 1.05rem; font-weight: 600; letter-spacing: -0.015em; }
-.overview { margin: 0; font-size: 1.05rem; line-height: 1.58; color: #262449; max-width: 66ch; }
-h2 { margin: 2.2rem 0 0.9rem; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.03em; color: var(--ink); }
+.badge { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; padding: 0.22rem 0.65rem; border-radius: 999px; background: #fffdf9; border: 1px solid #cfc4ae; color: var(--accent); text-transform: uppercase; }
+.badge.flagship { background: #dceee5; border-color: #a4d1bd; color: #16543f; }
+h1 { margin: 0.7rem 0 0.25rem; font-family: var(--serif); font-size: clamp(1.9rem, 3.3vw, 2.6rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.12; color: #1b221e; }
+.headline { margin: 0 0 1rem; color: var(--accent); font-size: 1.04rem; font-weight: 600; letter-spacing: -0.01em; }
+.overview { margin: 0; font-size: 1.03rem; line-height: 1.62; color: #2b342f; max-width: 66ch; }
+h2 { margin: 2.2rem 0 0.9rem; font-family: var(--serif); font-size: 1.38rem; font-weight: 600; letter-spacing: -0.015em; color: var(--ink); }
 .card { background: var(--paper); border: 1px solid var(--line); border-radius: 15px; padding: 1.35rem 1.55rem; margin-bottom: 1rem; box-shadow: var(--raised); }
-.card h3 { margin: 0 0 0.25rem; font-size: 1.16rem; font-weight: 680; letter-spacing: -0.025em; line-height: 1.3; display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+.card h3 { margin: 0 0 0.25rem; font-family: var(--serif); font-size: 1.2rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.3; display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
 .meta { font-size: 0.84rem; color: var(--muted); font-weight: 500; margin-bottom: 0.7rem; }
 .card p { margin: 0.55rem 0; font-size: 0.96rem; color: var(--ink); }
 .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.85rem; }
 .tag { font-size: 0.74rem; font-weight: 600; padding: 0.16rem 0.58rem; border-radius: 999px; background: var(--wash); color: var(--accent); }
 ul { margin: 0.65rem 0 0.65rem 0; padding: 0; list-style: none; }
-li { position: relative; padding-left: 0.9rem; margin-bottom: 0.4rem; font-size: 0.93rem; color: var(--ink); border-left: 2px solid #c5bff4; }
+li { position: relative; padding-left: 0.9rem; margin-bottom: 0.4rem; font-size: 0.93rem; color: var(--ink); border-left: 2px solid #b5c9be; }
 a { color: var(--accent); text-decoration: none; font-weight: 600; }
 a:hover { text-decoration: underline; }
 .roles { display: grid; gap: 0.55rem; }
-.role-row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: 0.78rem 1.1rem; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 2px 0 #dce1ed; }
+.role-row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: 0.78rem 1.1rem; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 2px 0 #ddd6c7; }
 .role-row strong { font-weight: 650; letter-spacing: -0.015em; }
 footer { margin-top: 3rem; padding-top: 1.1rem; border-top: 1px solid var(--line); font-size: 0.8rem; color: var(--muted); }
 @media print {
   body { background: #fff; color: #000; }
-  .hero { background: #f5f4fc; box-shadow: none; }
+  .hero { background: #f5f0e5; box-shadow: none; }
   .card, .role-row { box-shadow: none; break-inside: avoid; }
 }
 """
