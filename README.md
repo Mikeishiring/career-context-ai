@@ -1,5 +1,7 @@
 # Career Context AI
 
+> **[? Try the 30-second playable experiment live ?](https://mikeishiring.github.io/career-context-ai/)** � see how real work records and a local L2 privacy shutter beat a 1-page resume.
+
 **Build your own local career database with your own AI—then export a clean brief for humans or an exhaustive, leak-checked Context Pack for someone else's AI.**
 
 A standard resume squeezes years of decisions, projects, and trade-offs into twenty bullets. Career Context AI gives you a local SQLite vault, a dual-mode MCP server, and a clean browser front end so you can organize your own career history on your own machine—without connecting to our servers or paying for a hosted service.

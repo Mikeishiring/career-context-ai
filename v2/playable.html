@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Same Career, Different Context — A Playable Experiment by Career Context AI</title>
+<meta name="description" content="A 1-page resume strips away 95% of the proof an AI or hiring manager needs. Drop real work records into a local vault and pull the privacy shutter to see what changes.">
+<meta property="og:title" content="Same Career, Different Context — Playable Experiment">
+<meta property="og:description" content="Touch one folder and pull one privacy shutter to feel why a local career database beats a 1-page resume—without leaking confidential details.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+:root {
+  --bg: #f6f3ec;
+  --paper: #fffdf9;
+  --surface: #efebe2;
+  --wash: #e8e3d7;
+  --ink: #1b221e;
+  --muted: #5c635d;
+  --line: #ddd6c7;
+  --line-strong: #c6bca6;
+  --accent: #1d5c48;
+  --accent-hover: #154737;
+  --accent-soft: #e1eee8;
+  --ochre: #b46525;
+  --ochre-light: #e6b574;
+  --ochre-bg: #f8ebd8;
+  --mint: #16543f;
+  --mint-bg: #dceee5;
+  --mint-bar: #287a5e;
+  --danger: #a93226;
+  --danger-bg: #fbe4e1;
+  --raised: 0 3px 0 #ddd6c7;
+  --raised-accent: 0 3px 0 #113b2d;
+  --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, "Times New Roman", serif;
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --spring: cubic-bezier(0.22, 0.85, 0.25, 1);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.6 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Subtle archival paper grain */
+body::before {
+  content: "";
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.32;
+  background-image: radial-gradient(rgba(27, 34, 30, 0.045) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 1120px; margin: 0 auto;
+  padding: 1.25rem clamp(1rem, 3vw, 2.25rem) 5rem;
+}
+
+/* Minimal Archival Masthead (zero competing navbars) */
+.masthead {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.75rem; flex-wrap: wrap;
+  padding-bottom: 1rem; margin-bottom: 1.75rem;
+  border-bottom: 1px solid var(--line);
+}
+.brand {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  text-decoration: none; color: var(--ink);
+}
+.mark { position: relative; width: 24px; height: 26px; flex: none; }
+.mark::before, .mark::after {
+  content: ""; position: absolute; width: 16px; height: 19px; border-radius: 5px;
+  transition: transform 220ms var(--spring);
+}
+.mark::before { left: 1px; top: 1px; transform: rotate(-13deg); background: #d69e62; }
+.mark::after {
+  left: 6px; top: 4px;
+  background: linear-gradient(155deg, #27735a, #174938);
+  box-shadow: inset 0 -2.5px #103528;
+}
+.brand:hover .mark::before { transform: rotate(-20deg) translate(-1px, -1px); }
+.brand-name { font-family: var(--serif); font-size: 1.04rem; font-weight: 700; letter-spacing: -0.015em; }
+.tag-quiet {
+  font-size: 0.72rem; font-weight: 650; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--muted); padding: 0.16rem 0.52rem; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--line);
+}
+.mast-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+/* Buttons & Quiet Controls */
+.btn-quiet {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.36rem 0.72rem; border-radius: 9px;
+  border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+  font: 600 0.78rem var(--sans); text-decoration: none; cursor: pointer;
+  box-shadow: 0 2px 0 var(--line);
+  transition: transform 150ms var(--spring), border-color 140ms ease, color 140ms ease, background-color 140ms ease;
+}
+.btn-quiet:hover { transform: translateY(-1px); border-color: #93b3a5; color: var(--accent); background: #fff; }
+.btn-quiet:active { transform: translateY(1px); box-shadow: none; }
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.52rem 1.05rem; border-radius: 10px;
+  border: 1px solid var(--accent); background: var(--accent); color: #fffdf9;
+  font: 650 0.84rem var(--sans); text-decoration: none; cursor: pointer;
+  box-shadow: var(--raised-accent);
+  transition: transform 160ms var(--spring), background-color 140ms ease, box-shadow 160ms var(--spring);
+}
+.btn-primary:hover { background: var(--accent-hover); transform: translateY(-1.5px); box-shadow: 0 4.5px 0 #113b2d; }
+.btn-primary:active { transform: translateY(2px); box-shadow: none; }
+
+/* Live Recipe Headline */
+.recipe-header { margin-bottom: 1.75rem; max-width: 920px; }
+.recipe-eyebrow {
+  font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--ochre); margin-bottom: 0.45rem;
+}
+.recipe-title {
+  margin: 0; font-family: var(--serif);
+  font-size: clamp(1.75rem, 3.6vw, 2.75rem);
+  font-weight: 600; line-height: 1.14; letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.recipe-bar {
+  display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;
+  margin-top: 0.9rem; font-size: 0.86rem; color: var(--muted); font-weight: 600;
+}
+.r-token {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.24rem 0.65rem; border-radius: 8px;
+  font: 650 0.8rem var(--sans);
+  border: 1px solid var(--line-strong); background: var(--paper); color: var(--ink);
+  transition: transform 170ms var(--spring), background-color 160ms ease, border-color 160ms ease;
+}
+.r-token.slot {
+  border-style: dashed; border-color: #c29c72; background: var(--ochre-bg); color: var(--ochre);
+  cursor: pointer;
+}
+.r-token.slot:hover { transform: translateY(-1px); border-color: var(--ochre); }
+.r-token.filled {
+  background: var(--mint-bg); border-color: #9bc8b5; color: var(--mint);
+  cursor: pointer; animation: pop-in 260ms var(--spring) both;
+}
+.r-token.filled:hover { transform: translateY(-1.5px); }
+.r-token.shield {
+  background: var(--accent); border-color: var(--accent); color: #fffdf9;
+  animation: pop-in 260ms var(--spring) both;
+}
+@keyframes pop-in { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: none; } }
+
+/* Main Playable Stage: 2-Column Archival Desk */
+.stage {
+  display: grid; grid-template-columns: minmax(290px, 0.88fr) minmax(0, 1.32fr);
+  gap: clamp(18px, 2.6vw, 30px); align-items: start;
+}
+
+/* Left Column: Fixed Question + Vault Drop Tray + Physical Source Folders */
+.desk-left { display: flex; flex-direction: column; gap: 1rem; }
+
+.question-card {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
+  padding: 1.05rem 1.2rem; box-shadow: var(--raised);
+}
+.q-label {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--muted); margin-bottom: 0.35rem;
+}
+.fixed-pin {
+  font-size: 0.68rem; font-weight: 700; color: var(--accent);
+  background: var(--accent-soft); padding: 0.12rem 0.45rem; border-radius: 999px;
+}
+.question-card blockquote {
+  margin: 0; font-family: var(--serif); font-size: 1.12rem; line-height: 1.36;
+  color: var(--ink); font-weight: 600;
+}
+.resume-pill-row {
+  margin-top: 0.65rem; padding-top: 0.6rem; border-top: 1px solid var(--line);
+  font-size: 0.77rem; color: var(--muted); display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+}
+
+/* Local SQLite Vault Drop Tray */
+.vault-tray {
+  position: relative;
+  border-radius: 17px; padding: 1.15rem 1.2rem;
+  color: #f8f5ed;
+  background: radial-gradient(ellipse at 92% 110%, rgba(214, 158, 98, 0.24) 0, transparent 58%),
+              linear-gradient(120deg, #132821 0%, #1b3b30 58%, #244d3f 100%);
+  border: 1.5px solid #2b5949;
+  box-shadow: 0 4px 0 #0d1d18, 0 14px 28px -14px rgba(13, 29, 24, 0.5);
+  transition: transform 200ms var(--spring), border-color 160ms ease, box-shadow 200ms ease;
+}
+.vault-tray.drag-over {
+  transform: scale(1.02);
+  border-color: var(--ochre-light);
+  box-shadow: 0 0 0 4px rgba(230, 181, 116, 0.25), 0 6px 0 #0d1d18;
+}
+.vault-tray.impact { animation: vault-recoil 320ms var(--spring); }
+@keyframes vault-recoil {
+  0% { transform: scale(1); }
+  35% { transform: scale(0.975) translateY(2px); }
+  100% { transform: scale(1); }
+}
+.vault-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+.vault-head strong { font-family: var(--serif); font-size: 1.04rem; font-weight: 600; }
+.vault-file-tag {
+  font: 600 0.71rem var(--mono); color: var(--ochre-light);
+  background: rgba(12, 26, 21, 0.55); border: 1px solid rgba(230, 181, 116, 0.35);
+  padding: 0.14rem 0.5rem; border-radius: 999px;
+}
+.vault-slots {
+  display: flex; flex-wrap: wrap; gap: 0.4rem; min-height: 30px; align-items: center;
+}
+.vault-empty-hint {
+  font-size: 0.78rem; color: rgba(221, 231, 225, 0.78); font-style: italic;
+}
+.filed-chip {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.22rem 0.55rem; border-radius: 7px;
+  background: rgba(255, 253, 249, 0.14); border: 1px solid rgba(230, 181, 116, 0.45);
+  font: 600 0.73rem var(--sans); color: #fffdf9;
+  animation: pop-in 240ms var(--spring) both;
+}
+.filed-chip button {
+  border: 0; background: transparent; color: rgba(255, 253, 249, 0.75);
+  cursor: pointer; font: 700 0.8rem var(--sans); padding: 0 0.1rem; line-height: 1;
+}
+.filed-chip button:hover { color: #fff; }
+.vault-progress {
+  margin-top: 0.75rem; padding-top: 0.6rem; border-top: 1px solid rgba(255, 253, 249, 0.14);
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  font-size: 0.74rem; color: #d3e2da;
+}
+.dots-track { display: inline-flex; gap: 5px; align-items: center; }
+.dots-track i {
+  display: block; width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255, 253, 249, 0.24);
+  transition: background-color 220ms ease, transform 240ms var(--spring);
+}
+.dots-track i.on { background: var(--ochre-light); transform: scale(1.18); }
+
+/* Tactile Physical Source Folders */
+.folders-stack { display: grid; gap: 0.65rem; }
+.source-folder {
+  position: relative; width: 100%; text-align: left; cursor: grab;
+  background: var(--paper); border: 1.5px solid var(--line); border-radius: 14px;
+  padding: 0.85rem 1rem 0.85rem 1.05rem; box-shadow: var(--raised);
+  color: var(--ink); font: inherit;
+  transition: transform 200ms var(--spring), border-color 160ms ease, box-shadow 200ms var(--spring), opacity 180ms ease;
+  user-select: none; touch-action: manipulation;
+}
+.source-folder::before {
+  content: ""; position: absolute; left: 14px; top: -7px; width: 52px; height: 7px;
+  border-radius: 5px 5px 0 0; background: #e3d6be; border: 1.5px solid var(--line); border-bottom: 0;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+.source-folder:hover:not(.used) {
+  transform: translateY(-3px) rotate(-0.5deg);
+  border-color: #93b3a5;
+  box-shadow: 0 10px 22px -10px rgba(29, 92, 72, 0.22), 0 3px 0 #c6bcaa;
+}
+.source-folder:active:not(.used) { cursor: grabbing; transform: scale(0.985); }
+.source-folder.spotlight:not(.used) {
+  border-color: var(--ochre);
+  box-shadow: 0 10px 24px -10px rgba(180, 101, 37, 0.28), 0 3px 0 #cfa478;
+}
+.source-folder.spotlight:not(.used)::before { background: var(--ochre-bg); border-color: var(--ochre); }
+.source-folder.used {
+  opacity: 0.5; background: var(--surface); box-shadow: none; cursor: pointer;
+}
+.source-folder.used:hover { opacity: 0.78; }
+.source-folder.proxy-lit { transform: translateY(-4px) scale(1.015); border-color: var(--accent); }
+
+.sf-top { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.25rem; }
+.sf-brand { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 700; font-size: 0.87rem; }
+.sf-brand svg { width: 16px; height: 16px; flex: none; }
+.sf-cue {
+  font-size: 0.7rem; font-weight: 700; padding: 0.14rem 0.5rem; border-radius: 999px;
+  background: var(--surface); color: var(--muted); border: 1px solid var(--line);
+  white-space: nowrap;
+}
+.source-folder.spotlight:not(.used) .sf-cue {
+  background: var(--ochre); color: #fffdf9; border-color: var(--ochre);
+  animation: gentle-pulse 2.2s ease-in-out infinite;
+}
+@keyframes gentle-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+.source-folder.used .sf-cue { background: var(--mint-bg); color: var(--mint); border-color: #a4d1bd; }
+.sf-snippet { font-size: 0.79rem; color: var(--muted); line-height: 1.42; }
+
+/* Right Column: Answer Canvas + Before/After Scrub + L2 Privacy Shutter */
+.desk-right { display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
+
+.answer-shell {
+  position: relative;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 18px;
+  box-shadow: var(--raised); overflow: hidden;
+}
+.answer-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;
+  padding: 0.95rem 1.35rem; background: var(--surface); border-bottom: 1px solid var(--line);
+}
+.answer-head-left { display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap; }
+.answer-head strong { font-size: 0.86rem; font-weight: 700; }
+.tier-pill {
+  font-size: 0.72rem; font-weight: 700; padding: 0.18rem 0.6rem; border-radius: 999px;
+  background: var(--wash); color: var(--muted); border: 1px solid var(--line);
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+.tier-pill.l1 { background: var(--danger-bg); color: var(--danger); border-color: #e9b7b2; }
+.tier-pill.l2 { background: var(--mint-bg); color: var(--mint); border-color: #9bc8b5; }
+
+/* Locked-height Answer Stage for zero layout jump & Before/After drag scrub */
+.answer-stage {
+  position: relative; min-height: 325px; overflow: hidden;
+}
+.answer-pane {
+  padding: 1.45rem 1.55rem 1.5rem;
+}
+.answer-pane.before-layer {
+  position: absolute; inset: 0; z-index: 2;
+  background: #f5f1e7;
+  pointer-events: none;
+  border-right: 2px solid var(--ochre);
+}
+.pane-kicker {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--muted); margin-bottom: 0.65rem;
+}
+.pane-kicker.vault-kicker { color: var(--accent); }
+.answer-body {
+  font-size: 0.97rem; line-height: 1.66; color: var(--ink);
+}
+.answer-body p { margin: 0 0 0.85rem; }
+.answer-body p:last-child { margin-bottom: 0; }
+.answer-proof-list {
+  list-style: none; padding: 0; margin: 0.75rem 0 0;
+  display: grid; gap: 0.45rem;
+}
+.answer-proof-list li {
+  padding: 0.3rem 0 0.3rem 0.85rem;
+  border-left: 2.5px solid #b5c9be;
+  font-size: 0.88rem; line-height: 1.48; color: var(--ink);
+}
+.missing-note {
+  margin-top: 1rem; padding: 0.75rem 0.95rem; border-radius: 11px;
+  background: var(--surface); border: 1px dashed var(--line-strong);
+  font-size: 0.82rem; color: var(--muted); line-height: 1.48;
+}
+.missing-note strong { color: var(--ink); }
+
+/* Directional Impact Wipe Overlay */
+.wipe-flash {
+  position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: 0;
+  background: linear-gradient(90deg, rgba(29, 92, 72, 0.16), rgba(230, 181, 116, 0.12) 45%, transparent 80%);
+}
+.wipe-flash.run { animation: dir-wipe 520ms var(--ease) both; }
+@keyframes dir-wipe {
+  0% { opacity: 1; transform: translateX(-100%); }
+  65% { opacity: 0.9; transform: translateX(15%); }
+  100% { opacity: 0; transform: translateX(100%); }
+}
+
+/* Confidential Red-Ink Tokens -> Forest-Safe L2 Stamped Replacements */
+.tok {
+  display: inline; padding: 0.06rem 0.36rem; border-radius: 5px; font-weight: 650;
+  transition: background-color 260ms ease, color 260ms ease, box-shadow 260ms ease;
+}
+.tok.secret { background: var(--danger-bg); color: var(--danger); box-shadow: inset 0 -1px rgba(169, 50, 38, 0.25); }
+.tok.safe { background: var(--mint-bg); color: var(--mint); box-shadow: inset 0 -1px rgba(22, 84, 63, 0.25); }
+.tok.stamped { animation: stamp-pop 380ms var(--spring) both; }
+@keyframes stamp-pop {
+  0% { transform: scale(1.12); background: var(--ochre-bg); color: var(--ochre); }
+  100% { transform: scale(1); }
+}
+
+/* Before / After Interactive Brass Divider Handle */
+.scrub-handle {
+  position: absolute; top: 0; bottom: 0; z-index: 6; width: 32px; margin-left: -16px;
+  cursor: ew-resize; display: flex; align-items: center; justify-content: center;
+  touch-action: none;
+}
+.scrub-line {
+  position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; margin-left: -1px;
+  background: var(--ochre); pointer-events: none;
+}
+.scrub-knob {
+  position: relative; z-index: 1; width: 30px; height: 30px; border-radius: 50%;
+  background: var(--ochre); color: #fffdf9; border: 2px solid #fffdf9;
+  box-shadow: 0 3px 10px rgba(27, 34, 30, 0.24);
+  display: grid; place-items: center; font: 700 0.72rem var(--sans);
+  transition: transform 150ms var(--spring);
+}
+.scrub-handle:hover .scrub-knob, .scrub-handle.dragging .scrub-knob { transform: scale(1.12); }
+.scrub-hint {
+  position: absolute; top: 12px; left: 26px;
+  white-space: nowrap; font: 700 0.69rem var(--sans);
+  background: var(--ink); color: #fffdf9; padding: 0.2rem 0.56rem; border-radius: 999px;
+  box-shadow: 0 4px 10px rgba(27, 34, 30, 0.2);
+  pointer-events: none; transition: opacity 220ms ease;
+}
+.scrub-hint.retired { opacity: 0; }
+
+/* Archival Rubber Stamp Overlay (Leak Blocked Gate) */
+.leak-stamp {
+  position: absolute; right: 16px; top: 12px; z-index: 8; pointer-events: none;
+  padding: 0.36rem 0.78rem; border-radius: 8px;
+  border: 2.5px solid var(--danger); color: var(--danger);
+  background: rgba(251, 228, 225, 0.97);
+  font: 800 0.72rem/1.2 var(--mono); text-transform: uppercase; letter-spacing: 0.06em;
+  transform: rotate(-3deg) scale(1.35); opacity: 0;
+  box-shadow: 0 8px 20px rgba(169, 50, 38, 0.22);
+}
+.leak-stamp.slam { animation: stamp-slam 2.4s var(--spring) forwards; }
+@keyframes stamp-slam {
+  0% { opacity: 0; transform: rotate(-10deg) scale(1.7); }
+  12% { opacity: 1; transform: rotate(-4deg) scale(0.97); }
+  20% { opacity: 1; transform: rotate(-5deg) scale(1); }
+  82% { opacity: 1; transform: rotate(-5deg) scale(1); }
+  100% { opacity: 0; transform: rotate(-5deg) scale(0.96); }
+}
+
+/* Beat 3: Tactile Brass L2 Privacy Shutter Control */
+.shutter-card {
+  background: var(--paper); border: 1.5px solid var(--line); border-radius: 16px;
+  padding: 1.05rem 1.25rem; box-shadow: var(--raised);
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  transition: opacity 260ms ease, transform 260ms var(--spring), border-color 180ms ease;
+}
+.shutter-card.active-cue { border-color: var(--accent); }
+.shutter-card.hidden { display: none; }
+.shutter-copy strong { display: block; font-size: 0.92rem; letter-spacing: -0.015em; }
+.shutter-copy span { font-size: 0.8rem; color: var(--muted); }
+.shutter-controls { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+
+.shutter-switch {
+  position: relative; display: inline-flex; align-items: center;
+  padding: 4px; border-radius: 999px;
+  background: var(--surface); border: 1.5px solid var(--line-strong);
+  cursor: pointer; user-select: none;
+}
+.shutter-switch button {
+  position: relative; z-index: 1; border: 0; background: transparent;
+  padding: 0.38rem 0.85rem; border-radius: 999px; cursor: pointer;
+  font: 700 0.78rem var(--sans); color: var(--muted); white-space: nowrap;
+  transition: color 180ms ease;
+}
+.shutter-switch button.on { color: #fffdf9; }
+.shutter-thumb {
+  position: absolute; top: 4px; bottom: 4px; left: 4px; z-index: 0;
+  border-radius: 999px; background: var(--danger);
+  transition: transform 260ms var(--spring), width 260ms var(--spring), background-color 220ms ease;
+}
+.shutter-switch.is-l2 .shutter-thumb { background: var(--accent); }
+
+/* Flying Folder Particle (Physical Throw/Drop Choreography) */
+.fly-folder {
+  position: fixed; z-index: 90; pointer-events: none;
+  padding: 0.4rem 0.75rem; border-radius: 10px;
+  background: #f5ebd6; border: 1.5px solid var(--ochre); color: var(--ink);
+  font: 700 0.78rem var(--sans); box-shadow: 0 12px 26px rgba(27, 34, 30, 0.22);
+  transition: transform 360ms var(--spring), opacity 360ms ease;
+}
+
+/* Synthetic Demo Cursor (yields on any user input) */
+.demo-cursor {
+  position: fixed; z-index: 100; width: 22px; height: 22px; pointer-events: none;
+  border-radius: 50%; background: rgba(180, 101, 37, 0.92);
+  border: 2.5px solid #fffdf9; box-shadow: 0 4px 14px rgba(27, 34, 30, 0.34);
+  transform: translate(-50%, -50%) scale(0); opacity: 0;
+  transition: left 560ms var(--ease), top 560ms var(--ease), transform 180ms var(--spring), opacity 200ms ease;
+}
+.demo-cursor.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.demo-cursor.press { transform: translate(-50%, -50%) scale(0.76); }
+
+/* Beat 4: Quiet Utility Strip, Inspect Drawer & Build-Yours-Locally Payoff */
+.utility-bar {
+  margin-top: 1.85rem; padding-top: 1.15rem; border-top: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;
+}
+.honesty-line { font-size: 0.78rem; color: var(--muted); }
+
+.inspect-drawer {
+  margin-top: 1rem; background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
+  padding: 1.25rem 1.4rem; box-shadow: var(--raised);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;
+}
+.inspect-drawer.hidden { display: none; }
+.inspect-col h4 { margin: 0 0 0.35rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); }
+.inspect-col pre {
+  margin: 0; white-space: pre-wrap; word-break: break-word;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 0.75rem 0.85rem; font: 400 0.76rem/1.52 var(--mono); color: var(--ink);
+}
+
+.about-disclosure {
+  margin-top: 1.25rem; border: 1px solid var(--line); border-radius: 14px;
+  background: var(--paper); padding: 0.8rem 1.1rem;
+}
+.about-disclosure summary {
+  cursor: pointer; font-weight: 650; font-size: 0.84rem; color: var(--ink);
+}
+.about-disclosure p { margin: 0.6rem 0 0; font-size: 0.84rem; color: var(--muted); line-height: 1.58; max-width: 74ch; }
+
+/* Build Yours Locally Footer Card */
+.cta-card {
+  margin-top: 2.25rem; border-radius: 18px; padding: clamp(1.35rem, 3vw, 2rem);
+  color: #f8f5ed;
+  background: radial-gradient(ellipse at 92% 110%, rgba(214, 158, 98, 0.22) 0, transparent 58%),
+              linear-gradient(118deg, #122620 0%, #19382e 54%, #234b3e 100%);
+  box-shadow: 0 4px 0 #0d1d18;
+  display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
+  gap: 1.5rem; align-items: center;
+}
+.cta-card > * { min-width: 0; }
+.cta-card h2 { margin: 0 0 0.4rem; font-family: var(--serif); font-size: clamp(1.4rem, 2.4vw, 1.85rem); font-weight: 600; line-height: 1.16; }
+.cta-card p { margin: 0; font-size: 0.88rem; color: #dde7e1; line-height: 1.58; }
+.cmd-stack { display: grid; gap: 0.55rem; min-width: 0; }
+.cmd-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.65rem; min-width: 0;
+  background: rgba(12, 26, 21, 0.55); border: 1px solid rgba(255, 253, 249, 0.16);
+  border-radius: 11px; padding: 0.52rem 0.75rem; overflow: hidden;
+}
+.cmd-row code { font: 600 0.77rem var(--mono); color: #f4ebd8; overflow-x: auto; white-space: nowrap; min-width: 0; flex: 1; }
+.cmd-copy {
+  border: 1px solid rgba(230, 181, 116, 0.45); background: rgba(230, 181, 116, 0.14);
+  color: var(--ochre-light); border-radius: 7px; padding: 0.24rem 0.58rem;
+  font: 700 0.72rem var(--sans); cursor: pointer; flex-shrink: 0;
+  transition: background-color 140ms ease;
+}
+.cmd-copy:hover { background: rgba(230, 181, 116, 0.28); }
+
+.toast {
+  position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 120;
+  background: var(--ink); color: #fffdf9; padding: 0.65rem 1.05rem; border-radius: 11px;
+  font: 600 0.82rem var(--sans); box-shadow: 0 12px 28px rgba(17, 26, 22, 0.3);
+  opacity: 0; transform: translateY(12px); pointer-events: none;
+  transition: opacity 180ms ease, transform 220ms var(--spring);
+}
+.toast.show { opacity: 1; transform: none; }
+
+@media (max-width: 860px) {
+  .stage, .cta-card { grid-template-columns: 1fr; }
+  .answer-stage { min-height: 350px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Minimal Archival Masthead -->
+  <header class="masthead">
+    <a class="brand" href="https://github.com/Mikeishiring/career-context-ai" target="_blank" rel="noopener">
+      <span class="mark" aria-hidden="true"></span>
+      <span class="brand-name">Career Context AI</span>
+      <span class="tag-quiet">Playable Experiment</span>
+    </a>
+    <div class="mast-actions">
+      <button type="button" class="btn-quiet" id="demo-btn">▶ Watch demo</button>
+      <a class="btn-quiet" href="https://github.com/Mikeishiring/career-context-ai" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+  </header>
+
+  <!-- Live Recipe Headline -->
+  <section class="recipe-header" aria-live="polite">
+    <div class="recipe-eyebrow">One hiring question · Same career underneath</div>
+    <h1 class="recipe-title" id="recipe-headline">A 1-page resume leaves out 95% of the proof.</h1>
+    <div class="recipe-bar" id="recipe-bar"></div>
+  </section>
+
+  <!-- Core Interactive Stage -->
+  <section class="stage">
+
+    <!-- LEFT: Fixed Question + Local Vault Drop Tray + Tactile Source Folders -->
+    <div class="desk-left">
+      <div class="question-card">
+        <div class="q-label">
+          <span>Hiring manager asks an AI</span>
+          <span class="fixed-pin">Fixed control</span>
+        </div>
+        <blockquote>“How does Maya handle high-stakes technical trade-offs under pressure?”</blockquote>
+        <div class="resume-pill-row">
+          <span>Always included: <strong>1-Page Resume</strong> (1 bullet)</span>
+          <button type="button" class="btn-quiet" style="padding:0.2rem 0.5rem;font-size:0.72rem" id="peek-inputs-btn">Inspect text</button>
+        </div>
+      </div>
+
+      <!-- Local SQLite Vault Drop Tray -->
+      <div class="vault-tray" id="vault-tray" aria-label="Local SQLite Vault drop zone">
+        <div class="vault-head">
+          <strong>Local Vault</strong>
+          <span class="vault-file-tag">career.sqlite · local disk</span>
+        </div>
+        <div class="vault-slots" id="vault-slots">
+          <span class="vault-empty-hint">Drop or click a work folder below to file it here.</span>
+        </div>
+        <div class="vault-progress">
+          <span id="vault-count-label">0 of 3 records filed</span>
+          <span class="dots-track" id="vault-dots"><i></i><i></i><i></i></span>
+        </div>
+      </div>
+
+      <!-- 3 Physical Source Folders -->
+      <div class="folders-stack" id="folders-stack"></div>
+    </div>
+
+    <!-- RIGHT: AI Answer Sheet + Before/After Brass Drag Handle + L2 Privacy Shutter -->
+    <div class="desk-right">
+      <div class="answer-shell">
+        <div class="answer-head">
+          <div class="answer-head-left">
+            <strong id="answer-title">AI answer · Resume only</strong>
+            <span class="tier-pill" id="tier-pill">Baseline</span>
+          </div>
+          <span style="font-size:0.74rem;color:var(--muted);font-weight:600" id="compare-readout">Add a folder to compare</span>
+        </div>
+
+        <div class="answer-stage" id="answer-stage">
+          <!-- Main (After) Layer -->
+          <div class="answer-pane" id="after-pane"></div>
+
+          <!-- Before (Resume-Only Baseline) Overlay for Direct Drag Scrub -->
+          <div class="answer-pane before-layer" id="before-pane" style="display:none"></div>
+
+          <!-- Directional Wipe Flash -->
+          <div class="wipe-flash" id="wipe-flash"></div>
+
+          <!-- Interactive Before/After Brass Divider -->
+          <div class="scrub-handle" id="scrub-handle" style="display:none" role="slider" tabindex="0" aria-label="Drag to compare resume-only answer against local vault answer" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="scrub-line"></div>
+            <div class="scrub-hint" id="scrub-hint">Drag to compare →</div>
+            <div class="scrub-knob">⇄</div>
+          </div>
+
+          <!-- Archival Leak-Blocked Rubber Stamp -->
+          <div class="leak-stamp" id="leak-stamp">BLOCKED · "AcmeBank" caught locally</div>
+        </div>
+      </div>
+
+      <!-- Beat 3: Tactile L2 Privacy Shutter (Unlocks once >= 1 folder is in the vault) -->
+      <div class="shutter-card hidden" id="shutter-card">
+        <div class="shutter-copy">
+          <strong id="shutter-heading">Pull the L2 privacy shutter</strong>
+          <span id="shutter-sub">Strip confidential names and figures while keeping the full reasoning intact.</span>
+        </div>
+        <div class="shutter-controls">
+          <div class="shutter-switch" id="shutter-switch" role="group" aria-label="Confidentiality tier switch">
+            <div class="shutter-thumb" id="shutter-thumb"></div>
+            <button type="button" class="on" data-tier="L1" id="btn-l1">L1 Private</button>
+            <button type="button" data-tier="L2" id="btn-l2">L2 Share-Safe</button>
+          </div>
+          <button type="button" class="btn-quiet" id="test-leak-btn" style="display:none">Test a leak</button>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Beat 4: Quiet Utility Strip & Honest Disclosure -->
+  <div class="utility-bar">
+    <span class="honesty-line">Saved fictional example (Maya Lin), not live AI generation—same fixed question and records underneath.</span>
+    <div class="mast-actions">
+      <button type="button" class="btn-quiet" id="sound-btn">Sound: On</button>
+      <button type="button" class="btn-quiet" id="inspect-btn">Inspect exact inputs</button>
+      <button type="button" class="btn-quiet" id="reset-btn">Reset</button>
+    </div>
+  </div>
+
+  <!-- Inspectable Raw Inputs Drawer -->
+  <div class="inspect-drawer hidden" id="inspect-drawer">
+    <div class="inspect-col">
+      <h4>Fixed Baseline · 1-Page Resume</h4>
+      <pre>Staff Product &amp; Operations Lead, Northstar Pay (2023–Present)
+• Led checkout risk modernization across European banking deployments, reducing false declines by 38%.</pre>
+    </div>
+    <div class="inspect-col">
+      <h4>Record 1 · Slack (#risk-checkout)</h4>
+      <pre>[2024-09-18 · Maya Lin, Devon Park]
+AcmeBank ($14.2M ARR prospect) hit 11.4% false declines under our &gt;4 retries/10m per BIN rule.
+Paired with Devon Park on a shadow-mode evaluator; EU cohort false declines dropped 38% over 6 weeks with zero fraud regression.</pre>
+    </div>
+    <div class="inspect-col">
+      <h4>Record 2 · Launch Review Transcript</h4>
+      <pre>[2024-10-04 · Risk &amp; Launch Review]
+• Rejected a one-off merchant velocity override for AcmeBank.
+• Devon Park built the streaming replay pipeline; Maya owned merchant impact scoring, sign-off, and the 14-day shadow launch gate.</pre>
+    </div>
+    <div class="inspect-col">
+      <h4>Record 3 · Calendar &amp; Rollout Notes</h4>
+      <pre>[2024-11 · Bi-Weekly Executive Readiness Forum]
+• Standardized the 14-day shadow gate across all Tier-1 banking launches.
+• Ran weekly joint reviews with VP Product, Risk Eng, and Enterprise Solutions.</pre>
+    </div>
+  </div>
+
+  <details class="about-disclosure">
+    <summary>About this experiment</summary>
+    <p><strong>What stayed fixed:</strong> The candidate, the hiring question, and the 1-page resume bullet never change. Only the context given to the AI—and whether the local L2 confidentiality shutter is closed—changes.</p>
+    <p><strong>How Career Context AI v2 works on your machine:</strong> You store your own raw work records (`L0`) and private stories (`L1`) in a local SQLite database (`career.sqlite`) using your own AI assistant or offline files (PDF, DOCX, Slack, Notion, Calendar, Transcripts). Nothing connects to our servers. When you're ready to share, a deterministic local leak checker blocks registered client names, revenue figures, emails, API keys, and `#channels` before exporting a succinct brief for humans or an exhaustive L2 Context Pack for someone else's AI.</p>
+  </details>
+
+  <!-- Build Yours Locally Payoff -->
+  <section class="cta-card">
+    <div>
+      <h2>Build your own local career vault</h2>
+      <p>Runs locally on Python 3.11+ with zero required packages. Bring your own AI (MCP or web chat), drop a PDF resume, or try Maya Lin's full interactive Studio sample in 10 seconds.</p>
+      <div style="margin-top:1rem;display:flex;gap:0.6rem;flex-wrap:wrap">
+        <a class="btn-primary" style="background:#fffdf9;color:#164435;border-color:#fffdf9;box-shadow:0 3px 0 #0e241d" href="https://github.com/Mikeishiring/career-context-ai" target="_blank" rel="noopener">Get it on GitHub →</a>
+      </div>
+    </div>
+    <div class="cmd-stack">
+      <div class="cmd-row">
+        <code>git clone https://github.com/Mikeishiring/career-context-ai.git</code>
+        <button type="button" class="cmd-copy" data-copy="git clone https://github.com/Mikeishiring/career-context-ai.git">Copy</button>
+      </div>
+      <div class="cmd-row">
+        <code>python -m v2.launch --demo --open</code>
+        <button type="button" class="cmd-copy" data-copy="python -m v2.launch --demo --open">Copy</button>
+      </div>
+      <div class="cmd-row">
+        <code>python -m v2.launch --open</code>
+        <button type="button" class="cmd-copy" data-copy="python -m v2.launch --open">Copy</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Synthetic Cursor for Watch Demo -->
+<div class="demo-cursor" id="demo-cursor" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const SOURCES = [
+  {
+    id: "slack",
+    label: "#risk-checkout Slack",
+    short: "Slack thread",
+    snippet: "AcmeBank ($14.2M ARR) hit 11.4% false declines under our >4 retries/10m per BIN rule…",
+    icon: `<svg viewBox="0 0 24 24" fill="none"><path d="M6 15a2 2 0 1 1-2-2h2v2zm1 0a2 2 0 0 1 4 0v5a2 2 0 1 1-4 0v-5z" fill="#E01E5A"/><path d="M9 6a2 2 0 1 1 2-2v2H9zm0 1a2 2 0 0 1 0 4H4a2 2 0 1 1 0-4h5z" fill="#36C5F0"/><path d="M18 9a2 2 0 1 1 2 2h-2V9zm-1 0a2 2 0 0 1-4 0V4a2 2 0 1 1 4 0v5z" fill="#2EB67D"/><path d="M15 18a2 2 0 1 1-2 2v-2h2zm0-1a2 2 0 0 1 0-4h5a2 2 0 1 1 0 4h-5z" fill="#ECB22E"/></svg>`,
+  },
+  {
+    id: "transcript",
+    label: "Launch Review Transcript",
+    short: "Transcript",
+    snippet: "Rejected one-off velocity override; split ownership cleanly with Devon Park (Risk Eng)…",
+    icon: `<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" fill="#e2efe9"/><rect x="7" y="10" width="2.2" height="4" rx="1.1" fill="#1d5c48"/><rect x="10.9" y="6.5" width="2.2" height="11" rx="1.1" fill="#1d5c48"/><rect x="14.8" y="8.5" width="2.2" height="7" rx="1.1" fill="#b46525"/></svg>`,
+  },
+  {
+    id: "calendar",
+    label: "Calendar & Rollout Notes",
+    short: "Calendar",
+    snippet: "Bi-weekly Executive Readiness Forum · standardized the 14-day shadow gate org-wide…",
+    icon: `<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="17" rx="3" fill="#fff" stroke="#4285F4" stroke-width="1.6"/><path d="M3 7a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v1.5H3V7z" fill="#4285F4"/><rect x="16" y="15.5" width="5" height="5.5" rx="1.5" fill="#34A853"/><text x="9.6" y="16.5" text-anchor="middle" font-family="ui-sans-serif,sans-serif" font-size="8.2" font-weight="800" fill="#1967D2">31</text></svg>`,
+  },
+];
+
+// State
+const FILED = []; // ordered array of source ids
+let TIER = "L1";  // 'L1' (private raw terms) or 'L2' (confidential-safe stamped)
+let SCRUB_PCT = 0; // 0 = full Vault answer visible, 100 = full Resume-only baseline visible
+let SCRUB_USED = false;
+let SOUND_ON = true;
+let AUDIO_CTX = null;
+let DEMO_ABORT = null;
+let TOAST_T = null;
+
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(TOAST_T);
+  TOAST_T = setTimeout(() => el.classList.remove("show"), 2600);
+}
+
+/* Subtle Synthesized Archival Audio (Web Audio API — zero audio files, silent until gesture) */
+function playTone(kind) {
+  if (!SOUND_ON) return;
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    if (!AUDIO_CTX) AUDIO_CTX = new Ctx();
+    if (AUDIO_CTX.state === "suspended") AUDIO_CTX.resume();
+    const now = AUDIO_CTX.currentTime;
+    const osc = AUDIO_CTX.createOscillator();
+    const gain = AUDIO_CTX.createGain();
+    osc.connect(gain);
+    gain.connect(AUDIO_CTX.destination);
+
+    if (kind === "drop") {
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(195, now);
+      osc.frequency.exponentialRampToValueAtTime(92, now + 0.085);
+      gain.gain.setValueAtTime(0.11, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.095);
+      osc.start(now); osc.stop(now + 0.1);
+    } else if (kind === "shutter") {
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(420, now);
+      osc.frequency.exponentialRampToValueAtTime(640, now + 0.09);
+      gain.gain.setValueAtTime(0.075, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+      osc.start(now); osc.stop(now + 0.12);
+    } else if (kind === "stamp") {
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(140, now);
+      osc.frequency.exponentialRampToValueAtTime(62, now + 0.13);
+      gain.gain.setValueAtTime(0.09, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+      osc.start(now); osc.stop(now + 0.15);
+    } else if (kind === "tick") {
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(520, now);
+      gain.gain.setValueAtTime(0.03, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+      osc.start(now); osc.stop(now + 0.035);
+    }
+  } catch (_) {}
+}
+
+function tok(l1Text, l2Text, animateStamp = false) {
+  const isL2 = TIER === "L2";
+  const cls = `tok ${isL2 ? "safe" : "secret"}${animateStamp ? " stamped" : ""}`;
+  return `<span class="${cls}">${isL2 ? l2Text : l1Text}</span>`;
+}
+
+function renderBaselineHTML() {
+  return `
+    <div class="pane-kicker">Resume only · 1 bullet available</div>
+    <div class="answer-body">
+      <p>Based on Maya’s resume, she led checkout risk modernization across European banking deployments and reduced false declines by 38%.</p>
+      <p>She appears experienced in payments operations and cross-functional delivery, though the resume does not specify what trade-offs she weighed, what alternatives she rejected, or which parts of the system she owned directly versus her engineering partners.</p>
+    </div>
+    <div class="missing-note">
+      <strong>What the AI has to guess:</strong> Why the old rule failed, whether she pushed for a risky shortcut or a durable fix, and how credit was actually split with Risk Engineering.
+    </div>`;
+}
+
+function renderVaultAnswerHTML(animateStamp = false) {
+  if (!FILED.length) return renderBaselineHTML();
+  const hasSlack = FILED.includes("slack");
+  const hasTrans = FILED.includes("transcript");
+  const hasCal = FILED.includes("calendar");
+
+  const tClient = tok("AcmeBank", "a Tier-1 European bank", animateStamp);
+  const tArr = tok("$14.2M ARR prospect", "an eight-figure enterprise deal", animateStamp);
+  const tRule = tok("&gt;4 retries/10m per BIN rule", "legacy velocity thresholds", animateStamp);
+  const tChan = tok("#risk-checkout", "a cross-functional risk channel", animateStamp);
+  const tPerson = tok("Devon Park", "Risk Engineering", animateStamp);
+
+  const kicker = TIER === "L2"
+    ? `<div class="pane-kicker vault-kicker">L2 Share-Safe Context Pack · ${FILED.length} source${FILED.length > 1 ? "s" : ""} verified · 0 leaks</div>`
+    : `<div class="pane-kicker" style="color:var(--danger)">L1 Private Working Draft · ${FILED.length} source${FILED.length > 1 ? "s" : ""} · contains confidential details</div>`;
+
+  let lead = "";
+  if (hasSlack) {
+    lead = `<p>When ${tClient} (${tArr}) hit <strong>11.4% false declines</strong> under the ${tRule}, Maya avoided guessing in production. In ${tChan}, she paired with ${tPerson} to ship a shadow-mode evaluator that replayed live EU traffic for six weeks—cutting false declines <strong>38% with zero fraud-loss regression</strong>.</p>`;
+  } else if (hasTrans) {
+    lead = `<p>Under commercial pressure on ${tClient}, Maya explicitly <strong>rejected a one-off merchant velocity override</strong>. Instead, she scoped a reusable 14-day shadow evaluation gate with ${tPerson}, keeping fraud exposure bounded before enforcement.</p>`;
+  } else {
+    lead = `<p>Rather than treating checkout launches as one-off escalations, Maya ran a bi-weekly Executive Readiness Forum across VP Product, Risk Engineering, and Solutions—turning a single merchant save into a standardized <strong>14-day shadow launch gate</strong>.</p>`;
+  }
+
+  const bullets = [];
+  if (hasTrans) {
+    bullets.push(`<strong>Trade-off &amp; discipline:</strong> Refused an ad-hoc override for ${tClient}; insisted on a reusable shadow evaluation gate.`);
+    bullets.push(`<strong>Honest shared credit:</strong> ${tPerson} owned the streaming replay pipeline; Maya owned merchant impact scoring, stakeholder sign-off, and rollout governance.`);
+  } else if (hasSlack) {
+    bullets.push(`<strong>Evidence-backed result:</strong> 38% drop in European cohort false declines over 6 weeks with zero fraud regression.`);
+  }
+  if (hasCal) {
+    bullets.push(`<strong>Org-wide leverage:</strong> Standardized the 14-day shadow gate across all Tier-1 banking launches via the bi-weekly Executive Readiness Forum.`);
+  }
+  if (hasSlack && !hasTrans) {
+    bullets.push(`<strong>Add the Transcript</strong> to see the exact shortcut she rejected and how credit split with ${tPerson}.`);
+  }
+
+  return `
+    ${kicker}
+    <div class="answer-body">
+      ${lead}
+      ${bullets.length ? `<ul class="answer-proof-list">${bullets.map(b => `<li>${b}</li>`).join("")}</ul>` : ""}
+    </div>`;
+}
+
+function syncShutterThumb() {
+  const sw = document.getElementById("shutter-switch");
+  const thumb = document.getElementById("shutter-thumb");
+  const activeBtn = sw.querySelector("button.on");
+  if (!activeBtn || !thumb) return;
+  const sRect = sw.getBoundingClientRect();
+  const bRect = activeBtn.getBoundingClientRect();
+  if (!bRect.width) return;
+  thumb.style.width = bRect.width + "px";
+  thumb.style.transform = `translateX(${bRect.left - sRect.left - 4}px)`;
+}
+
+function applyScrub(pct) {
+  SCRUB_PCT = Math.max(0, Math.min(100, pct));
+  const before = document.getElementById("before-pane");
+  const handle = document.getElementById("scrub-handle");
+  const readout = document.getElementById("compare-readout");
+  if (!FILED.length) {
+    before.style.display = "none";
+    handle.style.display = "none";
+    readout.textContent = "Add a folder to compare";
+    return;
+  }
+  before.style.display = "block";
+  handle.style.display = "flex";
+  before.style.clipPath = `inset(0 ${100 - SCRUB_PCT}% 0 0)`;
+  handle.style.left = SCRUB_PCT <= 1 ? "16px" : (SCRUB_PCT >= 99 ? "calc(100% - 16px)" : `${SCRUB_PCT}%`);
+  handle.setAttribute("aria-valuenow", String(Math.round(SCRUB_PCT)));
+  if (SCRUB_PCT <= 4) {
+    readout.textContent = "Showing: Local Vault · drag handle → for Before";
+  } else if (SCRUB_PCT >= 96) {
+    readout.textContent = "Showing: 1-Page Resume only (Before)";
+  } else {
+    readout.textContent = `Comparing: ${Math.round(SCRUB_PCT)}% Resume / ${Math.round(100 - SCRUB_PCT)}% Vault`;
+  }
+}
+
+function renderAll({ wipe = false, stamp = false } = {}) {
+  // 1. Live Recipe Headline & Interactive Token Bar
+  const h1 = document.getElementById("recipe-headline");
+  if (!FILED.length) {
+    h1.textContent = "A 1-page resume leaves out 95% of the proof.";
+  } else if (TIER === "L1") {
+    h1.textContent = FILED.length === 3
+      ? "Same question. Three real records. Now pull the privacy shutter."
+      : "Same question. Real records replace guesses immediately.";
+  } else {
+    h1.textContent = "Same depth. Zero confidential leaks.";
+  }
+
+  const tokens = [
+    `<span>Same question +</span>`,
+    `<span class="r-token">1-Page Resume</span>`,
+  ];
+  if (!FILED.length) {
+    tokens.push(`<span>+</span><button type="button" class="r-token slot" id="slot-trigger">▢ Drop a work record</button>`);
+  } else {
+    FILED.forEach(id => {
+      const s = SOURCES.find(x => x.id === id);
+      tokens.push(`<span>+</span><button type="button" class="r-token filled" data-proxy="${id}" title="Click to remove from vault">${s.short} ×</button>`);
+    });
+    if (TIER === "L2") {
+      tokens.push(`<span>+</span><span class="r-token shield">L2 Privacy Shutter</span>`);
+    }
+  }
+  const bar = document.getElementById("recipe-bar");
+  bar.innerHTML = tokens.join("");
+
+  const slotTrig = document.getElementById("slot-trigger");
+  if (slotTrig) slotTrig.onclick = () => fileSource("slack", slotTrig);
+
+  bar.querySelectorAll("[data-proxy]").forEach(btn => {
+    const sid = btn.dataset.proxy;
+    btn.addEventListener("mouseenter", () => {
+      const card = document.querySelector(`.source-folder[data-id="${sid}"]`);
+      if (card) card.classList.add("proxy-lit");
+    });
+    btn.addEventListener("mouseleave", () => {
+      const card = document.querySelector(`.source-folder[data-id="${sid}"]`);
+      if (card) card.classList.remove("proxy-lit");
+    });
+    btn.onclick = () => unfileSource(sid);
+  });
+
+  // 2. Local Vault Tray
+  const slotsEl = document.getElementById("vault-slots");
+  if (!FILED.length) {
+    slotsEl.innerHTML = `<span class="vault-empty-hint">Drop or click a work folder below to file it here.</span>`;
+  } else {
+    slotsEl.innerHTML = FILED.map(id => {
+      const s = SOURCES.find(x => x.id === id);
+      return `<span class="filed-chip">${s.short} <button type="button" aria-label="Remove ${s.label}" onclick="unfileSource('${id}')">×</button></span>`;
+    }).join("");
+  }
+  document.getElementById("vault-count-label").textContent = `${FILED.length} of ${SOURCES.length} records filed`;
+  document.querySelectorAll("#vault-dots i").forEach((dot, i) => dot.classList.toggle("on", i < FILED.length));
+
+  // 3. Source Folder Cards (only highlight next focal cue at Beat 0)
+  const firstUnfiled = SOURCES.find(s => !FILED.includes(s.id))?.id;
+  const stack = document.getElementById("folders-stack");
+  stack.innerHTML = SOURCES.map(s => {
+    const used = FILED.includes(s.id);
+    const spot = !FILED.length && s.id === firstUnfiled;
+    return `
+    <button type="button" class="source-folder ${used ? "used" : ""} ${spot ? "spotlight" : ""}" data-id="${s.id}" draggable="${!used}">
+      <div class="sf-top">
+        <span class="sf-brand">${s.icon}<span>${s.label}</span></span>
+        <span class="sf-cue">${used ? "Filed ✓" : (spot ? "Drop into vault" : "+ File")}</span>
+      </div>
+      <div class="sf-snippet">${s.snippet}</div>
+    </button>`;
+  }).join("");
+
+  stack.querySelectorAll(".source-folder").forEach(card => {
+    const sid = card.dataset.id;
+    card.onclick = () => {
+      if (FILED.includes(sid)) unfileSource(sid);
+      else fileSource(sid, card);
+    };
+    card.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("text/plain", sid);
+      e.dataTransfer.effectAllowed = "move";
+    });
+  });
+
+  // 4. Answer Sheet & Header Pill
+  const titleEl = document.getElementById("answer-title");
+  const pillEl = document.getElementById("tier-pill");
+  if (!FILED.length) {
+    titleEl.textContent = "AI answer · Resume only";
+    pillEl.textContent = "Baseline";
+    pillEl.className = "tier-pill";
+  } else if (TIER === "L1") {
+    titleEl.textContent = "AI answer · Local Vault (Private)";
+    pillEl.textContent = "L1 Private · Raw terms";
+    pillEl.className = "tier-pill l1";
+  } else {
+    titleEl.textContent = "AI answer · L2 Share-Safe Pack";
+    pillEl.textContent = "L2 Leak-Checked ✓";
+    pillEl.className = "tier-pill l2";
+  }
+
+  document.getElementById("before-pane").innerHTML = renderBaselineHTML();
+  document.getElementById("after-pane").innerHTML = renderVaultAnswerHTML(stamp);
+
+  if (wipe) {
+    const wf = document.getElementById("wipe-flash");
+    wf.classList.remove("run");
+    void wf.offsetWidth;
+    wf.classList.add("run");
+  }
+
+  // 5. Beat 3 Privacy Shutter Card (progressive disclosure: appears only after Beat 1!)
+  const shutterCard = document.getElementById("shutter-card");
+  const sw = document.getElementById("shutter-switch");
+  const testLeakBtn = document.getElementById("test-leak-btn");
+  if (!FILED.length) {
+    shutterCard.classList.add("hidden");
+  } else {
+    shutterCard.classList.remove("hidden");
+    shutterCard.classList.toggle("active-cue", TIER === "L1");
+    sw.classList.toggle("is-l2", TIER === "L2");
+    document.getElementById("btn-l1").classList.toggle("on", TIER === "L1");
+    document.getElementById("btn-l2").classList.toggle("on", TIER === "L2");
+    document.getElementById("shutter-heading").textContent = TIER === "L2"
+      ? "L2 Privacy Shutter is closed — safe to share"
+      : "Pull the L2 privacy shutter";
+    document.getElementById("shutter-sub").textContent = TIER === "L2"
+      ? "Client names, revenue, and #channels are generalized; decisions and proof stay intact."
+      : "Notice the red confidential items above? Flip to L2 to strip them without losing depth.";
+    testLeakBtn.style.display = TIER === "L2" ? "inline-flex" : "none";
+    requestAnimationFrame(syncShutterThumb);
+  }
+
+  applyScrub(SCRUB_PCT);
+}
+
+/* Physical Fly-to-Vault Choreography */
+function animateFlyToVault(sourceEl, label, onImpact) {
+  const tray = document.getElementById("vault-tray");
+  if (!sourceEl || !tray || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    onImpact();
+    return;
+  }
+  const sRect = sourceEl.getBoundingClientRect();
+  const tRect = tray.getBoundingClientRect();
+  const ghost = document.createElement("div");
+  ghost.className = "fly-folder";
+  ghost.textContent = label;
+  ghost.style.left = `${sRect.left + 16}px`;
+  ghost.style.top = `${sRect.top + 10}px`;
+  document.body.appendChild(ghost);
+
+  const dx = (tRect.left + tRect.width * 0.42) - (sRect.left + 16);
+  const dy = (tRect.top + tRect.height * 0.42) - (sRect.top + 10);
+  requestAnimationFrame(() => {
+    ghost.style.transform = `translate(${dx}px, ${dy}px) scale(0.76) rotate(-5deg)`;
+    ghost.style.opacity = "0.18";
+  });
+
+  setTimeout(() => {
+    ghost.remove();
+    tray.classList.remove("impact");
+    void tray.offsetWidth;
+    tray.classList.add("impact");
+    onImpact();
+  }, 240);
+}
+
+function fileSource(id, sourceEl = null) {
+  if (FILED.includes(id)) return;
+  const s = SOURCES.find(x => x.id === id);
+  animateFlyToVault(sourceEl, s.label, () => {
+    FILED.push(id);
+    SCRUB_PCT = 0;
+    playTone("drop");
+    renderAll({ wipe: true });
+  });
+}
+
+window.unfileSource = (id) => {
+  const idx = FILED.indexOf(id);
+  if (idx === -1) return;
+  FILED.splice(idx, 1);
+  if (!FILED.length) {
+    TIER = "L1";
+    SCRUB_PCT = 0;
+  }
+  playTone("tick");
+  renderAll({ wipe: true });
+};
+
+function setTier(nextTier) {
+  if (TIER === nextTier || !FILED.length) return;
+  TIER = nextTier;
+  SCRUB_PCT = 0;
+  playTone("shutter");
+  renderAll({ wipe: true, stamp: true });
+}
+
+/* Drag & Drop onto Local Vault Tray */
+const trayEl = document.getElementById("vault-tray");
+trayEl.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  trayEl.classList.add("drag-over");
+});
+trayEl.addEventListener("dragleave", () => trayEl.classList.remove("drag-over"));
+trayEl.addEventListener("drop", (e) => {
+  e.preventDefault();
+  trayEl.classList.remove("drag-over");
+  const id = e.dataTransfer.getData("text/plain");
+  if (id && SOURCES.some(s => s.id === id)) fileSource(id, null);
+});
+
+/* Before / After Brass Handle Drag + Keyboard Scrub */
+const scrubHandle = document.getElementById("scrub-handle");
+const answerStage = document.getElementById("answer-stage");
+let lastNotch = -1;
+
+function updateScrubFromClientX(clientX) {
+  const rect = answerStage.getBoundingClientRect();
+  const pct = ((clientX - rect.left) / rect.width) * 100;
+  const notch = Math.floor(pct / 25);
+  if (notch !== lastNotch) {
+    lastNotch = notch;
+    playTone("tick");
+  }
+  if (!SCRUB_USED && pct > 6) {
+    SCRUB_USED = true;
+    document.getElementById("scrub-hint").classList.add("retired");
+  }
+  applyScrub(pct);
+}
+
+scrubHandle.addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  scrubHandle.setPointerCapture(e.pointerId);
+  scrubHandle.classList.add("dragging");
+  const move = (ev) => updateScrubFromClientX(ev.clientX);
+  const up = () => {
+    scrubHandle.classList.remove("dragging");
+    scrubHandle.removeEventListener("pointermove", move);
+    scrubHandle.removeEventListener("pointerup", up);
+    scrubHandle.removeEventListener("pointercancel", up);
+  };
+  scrubHandle.addEventListener("pointermove", move);
+  scrubHandle.addEventListener("pointerup", up);
+  scrubHandle.addEventListener("pointercancel", up);
+});
+scrubHandle.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowRight") { e.preventDefault(); applyScrub(SCRUB_PCT + 15); }
+  if (e.key === "ArrowLeft") { e.preventDefault(); applyScrub(SCRUB_PCT - 15); }
+});
+
+/* L2 Privacy Shutter & Leak Test Stamp */
+document.getElementById("btn-l1").onclick = () => setTier("L1");
+document.getElementById("btn-l2").onclick = () => setTier("L2");
+
+document.getElementById("test-leak-btn").onclick = () => {
+  const stamp = document.getElementById("leak-stamp");
+  stamp.classList.remove("slam");
+  void stamp.offsetWidth;
+  stamp.classList.add("slam");
+  playTone("stamp");
+  toast("Deterministic leak check blocked \"AcmeBank\" before export");
+};
+
+/* Utility Strip */
+function toggleInspect() {
+  const el = document.getElementById("inspect-drawer");
+  el.classList.toggle("hidden");
+  if (!el.classList.contains("hidden")) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+document.getElementById("inspect-btn").onclick = toggleInspect;
+document.getElementById("peek-inputs-btn").onclick = toggleInspect;
+
+document.getElementById("sound-btn").onclick = (e) => {
+  SOUND_ON = !SOUND_ON;
+  e.target.textContent = SOUND_ON ? "Sound: On" : "Sound: Off";
+};
+
+function resetExperiment() {
+  FILED.length = 0;
+  TIER = "L1";
+  SCRUB_PCT = 0;
+  SCRUB_USED = false;
+  document.getElementById("scrub-hint").classList.remove("retired");
+  renderAll();
+}
+document.getElementById("reset-btn").onclick = resetExperiment;
+
+/* Copy CLI commands */
+document.querySelectorAll(".cmd-copy").forEach(btn => {
+  btn.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(btn.dataset.copy);
+      toast("Copied command");
+    } catch (_) { toast("Copy failed"); }
+  };
+});
+
+/* Watch Demo — Real Synthetic Cursor Driving Controls (Yields Instantly on User Touch) */
+async function runDemo() {
+  if (DEMO_ABORT) { DEMO_ABORT.abort(); return; }
+  const ctrl = new AbortController();
+  DEMO_ABORT = ctrl;
+  const cursor = document.getElementById("demo-cursor");
+  const demoBtn = document.getElementById("demo-btn");
+  demoBtn.textContent = "■ Stop demo";
+
+  const stopOnUser = (e) => {
+    if (e.isTrusted && e.target !== demoBtn) ctrl.abort();
+  };
+  window.addEventListener("pointerdown", stopOnUser, { capture: true });
+  window.addEventListener("keydown", stopOnUser, { capture: true });
+
+  const wait = (ms) => new Promise((res, rej) => {
+    const t = setTimeout(res, ms);
+    ctrl.signal.addEventListener("abort", () => { clearTimeout(t); rej(new Error("abort")); }, { once: true });
+  });
+  const moveTo = async (el) => {
+    const r = el.getBoundingClientRect();
+    cursor.style.left = `${r.left + r.width / 2}px`;
+    cursor.style.top = `${r.top + r.height / 2}px`;
+    cursor.classList.add("show");
+    await wait(620);
+  };
+  const tap = async (el) => {
+    await moveTo(el);
+    cursor.classList.add("press");
+    await wait(140);
+    cursor.classList.remove("press");
+    el.click();
+    await wait(850);
+  };
+
+  try {
+    resetExperiment();
+    await wait(350);
+    await tap(document.querySelector('.source-folder[data-id="slack"]'));
+    await tap(document.querySelector('.source-folder[data-id="transcript"]'));
+
+    // Smooth Before/After scrub demonstration
+    const stageRect = answerStage.getBoundingClientRect();
+    cursor.style.left = `${stageRect.left + 8}px`;
+    cursor.style.top = `${stageRect.top + stageRect.height / 2}px`;
+    await wait(450);
+    for (const pct of [35, 72, 42, 0]) {
+      applyScrub(pct);
+      cursor.style.left = `${stageRect.left + (stageRect.width * pct) / 100}px`;
+      await wait(420);
+    }
+
+    // Flip L2 Privacy Shutter + Test Leak
+    await tap(document.getElementById("btn-l2"));
+    await tap(document.getElementById("test-leak-btn"));
+    await wait(900);
+  } catch (_) {
+    // Clean yield on user interaction
+  } finally {
+    cursor.classList.remove("show", "press");
+    demoBtn.textContent = "▶ Watch demo";
+    window.removeEventListener("pointerdown", stopOnUser, { capture: true });
+    window.removeEventListener("keydown", stopOnUser, { capture: true });
+    DEMO_ABORT = null;
+  }
+}
+document.getElementById("demo-btn").onclick = runDemo;
+
+window.addEventListener("resize", () => requestAnimationFrame(syncShutterThumb));
+
+renderAll();
+</script>
+</body>
+</html>
