@@ -104,24 +104,36 @@ nav {
   display: inline-flex; align-items: center; gap: 2px; flex-wrap: nowrap;
   padding: 3px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
 }
-.nav-glider {
+.nav-hover {
   position: absolute; top: 3px; bottom: 3px; left: 0; z-index: 0;
+  border-radius: 9px; background: color-mix(in srgb, var(--accent) 10%, transparent);
+  transition: transform 200ms var(--ease-spring), width 200ms var(--ease-spring), opacity 140ms ease;
+  pointer-events: none; opacity: 0;
+}
+.nav-glider {
+  position: absolute; top: 3px; bottom: 3px; left: 0; z-index: 1;
   border-radius: 9px; background: var(--paper);
   box-shadow: 0 1px 4px rgba(27, 37, 84, 0.14);
   transition: transform 260ms var(--ease-spring), width 260ms var(--ease-spring), opacity 160ms ease;
   pointer-events: none; opacity: 0;
 }
 nav button {
-  position: relative; z-index: 1;
+  position: relative; z-index: 2;
   background: transparent; color: var(--muted); border: 0; border-radius: 9px;
   padding: 0.4rem 0.68rem; cursor: pointer; font: 600 0.8rem/1.2 var(--sans);
-  white-space: nowrap; transition: color 160ms ease;
+  white-space: nowrap; transition: color 160ms ease, transform 140ms var(--ease-spring);
 }
 nav button:hover { color: var(--ink); }
+nav button:active { transform: translateY(1px); }
 nav button.active { color: var(--accent); }
 
 .owner-box { display: flex; align-items: center; gap: 0.55rem; flex-shrink: 0; }
-.owner-meta { text-align: right; line-height: 1.25; }
+.owner-meta {
+  text-align: right; line-height: 1.25; cursor: pointer;
+  padding: 0.25rem 0.55rem; border-radius: 10px;
+  transition: background-color 150ms ease, transform 160ms var(--ease-spring);
+}
+.owner-meta:hover { background: var(--wash); transform: translateY(-1px); }
 .owner-meta strong { display: block; font-size: 0.82rem; font-weight: 650; white-space: nowrap; }
 .owner-meta span { font-size: 0.7rem; color: var(--muted); white-space: nowrap; }
 .theme-btn {
@@ -599,21 +611,56 @@ dialog::backdrop {
   background: repeating-linear-gradient(151deg, transparent 0 44px, rgba(255,255,255,0.06) 45px, transparent 46px);
   mask-image: linear-gradient(90deg, transparent 22%, black 78%);
 }
+.landing-hero::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(420px circle at var(--mx, 78%) var(--my, 35%), rgba(144, 238, 193, 0.18), transparent 65%);
+  opacity: 0; transition: opacity 280ms ease;
+}
+.landing-hero:hover::after { opacity: 1; }
 .landing-hero h2 { margin: 0.55rem 0 0.7rem; font-size: clamp(1.8rem, 2.9vw, 2.55rem); line-height: 1.08; letter-spacing: -0.045em; max-width: 20ch; }
 .landing-hero p { margin: 0; max-width: 56ch; font-size: 0.96rem; line-height: 1.6; color: #ece9ff; }
 
-/* Authored MCP Convergence Diagram inside Hero */
+/* Interactive Authored MCP Convergence Diagram inside Hero */
 .hero-diagram {
   background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px; padding: 14px 14px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 16px; padding: 14px 14px 10px;
   backdrop-filter: blur(8px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 12px 28px -12px rgba(24, 18, 82, 0.45);
+  transition: border-color 200ms ease, background-color 200ms ease;
 }
+.hero-diagram:hover { border-color: rgba(144, 238, 193, 0.48); background: rgba(255, 255, 255, 0.1); }
 .hero-diagram svg { width: 100%; height: auto; display: block; overflow: visible; }
-.flow-pulse {
-  stroke-dasharray: 5 11;
-  animation: flow-dash 2.2s linear infinite;
+.diag-wire {
+  fill: none; stroke: rgba(255, 255, 255, 0.28); stroke-width: 1.5;
+  transition: stroke 180ms ease, stroke-width 180ms ease, opacity 180ms ease;
+}
+.diag-pulse {
+  fill: none; stroke: #90eec1; stroke-width: 1.8;
+  stroke-dasharray: 5 11; animation: flow-dash 2.1s linear infinite;
+  transition: opacity 180ms ease, stroke-width 180ms ease;
+}
+.diag-pulse.idle-off { opacity: 0; }
+.hero-diagram[data-active] .diag-wire { opacity: 0.16; }
+.hero-diagram[data-active] .diag-pulse { opacity: 0; }
+.hero-diagram[data-active] .diag-wire.lit { opacity: 0.9; stroke: rgba(144, 238, 193, 0.65); stroke-width: 2.1; }
+.hero-diagram[data-active] .diag-pulse.lit { opacity: 1; stroke-width: 2.4; }
+.diag-node { cursor: pointer; outline: none; transition: transform 180ms var(--ease-spring), opacity 180ms ease, filter 180ms ease; }
+.diag-node:hover, .diag-node:focus-visible, .diag-node.lit { transform: translateY(-2px); filter: drop-shadow(0 6px 12px rgba(20, 14, 74, 0.38)); }
+.diag-node .node-bg { transition: fill 160ms ease, stroke 160ms ease, stroke-width 160ms ease; }
+.diag-node:hover .node-bg, .diag-node:focus-visible .node-bg, .diag-node.lit .node-bg { stroke: #90eec1; stroke-width: 1.8; }
+.diag-node.ch-pill:hover .node-bg, .diag-node.ch-pill.lit .node-bg { fill: rgba(255, 255, 255, 0.26); }
+.hero-diagram[data-active] .diag-node.dim { opacity: 0.45; }
+.diag-trace {
+  margin-top: 8px; padding: 6px 10px; border-radius: 9px;
+  background: rgba(20, 15, 68, 0.36); border: 1px solid rgba(255, 255, 255, 0.14);
+  font: 600 0.75rem/1.35 var(--sans); color: #edeaff;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  min-height: 29px;
+}
+.diag-trace .dot-live {
+  width: 7px; height: 7px; border-radius: 50%; background: #90eec1; flex: none;
+  box-shadow: 0 0 8px #90eec1;
 }
 @keyframes flow-dash { to { stroke-dashoffset: -32; } }
 
@@ -752,6 +799,7 @@ dialog::backdrop {
       <h1>Career Context</h1>
     </div>
     <nav id="main-nav">
+      <div class="nav-hover" id="nav-hover"></div>
       <div class="nav-glider" id="nav-glider"></div>
       <button class="active" data-tab="overview">Overview</button>
       <button data-tab="studio">Studio</button>
@@ -762,7 +810,7 @@ dialog::backdrop {
       <button data-tab="assistant">AI</button>
     </nav>
     <div class="owner-box">
-      <div class="owner-meta">
+      <div class="owner-meta" onclick="switchTab('experience')" title="View Roles & Profile">
         <strong id="owner-name">Career Vault</strong>
         <span id="owner-sub">Local SQLite · Live Save</span>
       </div>
@@ -774,8 +822,8 @@ dialog::backdrop {
 <main>
   <!-- TAB 0: TEMPO-CRAFT OVERVIEW & INTERACTIVE PROCESS GUIDE -->
   <section id="tab-overview" class="tab-view">
-    <!-- Chapter 1: Asymmetric Hero + Authored MCP Convergence Diagram -->
-    <div class="landing-hero">
+    <!-- Chapter 1: Asymmetric Hero + Interactive MCP Convergence Diagram -->
+    <div class="landing-hero" id="landing-hero">
       <div>
         <span class="pill" style="background:rgba(255,255,255,0.18);color:#fff">Self-Hosted Local Vault · Bring Your Own AI</span>
         <h2>Build your own local career database</h2>
@@ -794,7 +842,7 @@ dialog::backdrop {
         </div>
       </div>
 
-      <div class="hero-diagram" aria-label="Work channels converge via MCP into a local SQLite vault and project cleanly to L2 and L3">
+      <div class="hero-diagram" id="hero-diagram" aria-label="Interactive architecture diagram: hover or click any channel, Local Vault, L2 Safe, or L3 Public">
         <svg viewBox="0 0 420 226" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="vaultGrad" x1="0" y1="0" x2="1" y2="1">
@@ -802,79 +850,105 @@ dialog::backdrop {
               <stop offset="100%" stop-color="#ede9ff"/>
             </linearGradient>
           </defs>
-          <!-- Converging Bezier Rails (Channels -> Vault) -->
-          <g fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="1.5">
-            <path d="M 108 26 C 148 26, 152 108, 190 108"/>
-            <path d="M 108 62 C 148 62, 152 108, 190 108"/>
-            <path d="M 108 98 C 148 98, 152 110, 190 110"/>
-            <path d="M 108 134 C 148 134, 152 114, 190 114"/>
-            <path d="M 108 170 C 148 170, 152 118, 190 118"/>
-            <path d="M 108 202 C 148 202, 152 120, 190 120"/>
+          <!-- Incoming Bezier Rails (Channels -> Vault) -->
+          <g>
+            <path class="diag-wire" data-wire="slack" d="M 108 26 C 148 26, 152 108, 190 108"/>
+            <path class="diag-wire" data-wire="notion" d="M 108 62 C 148 62, 152 108, 190 108"/>
+            <path class="diag-wire" data-wire="calendar" d="M 108 98 C 148 98, 152 110, 190 110"/>
+            <path class="diag-wire" data-wire="transcript" d="M 108 134 C 148 134, 152 114, 190 114"/>
+            <path class="diag-wire" data-wire="gdoc" d="M 108 170 C 148 170, 152 118, 190 118"/>
+            <path class="diag-wire" data-wire="github" d="M 108 202 C 148 202, 152 120, 190 120"/>
           </g>
-          <!-- Animated Signal Pulses -->
-          <g fill="none" stroke="#90eec1" stroke-width="1.8" class="flow-pulse">
-            <path d="M 108 26 C 148 26, 152 108, 190 108"/>
-            <path d="M 108 98 C 148 98, 152 110, 190 110"/>
-            <path d="M 108 170 C 148 170, 152 118, 190 118"/>
+          <!-- Animated Pulses (Incoming) -->
+          <g>
+            <path class="diag-pulse" data-pulse="slack" d="M 108 26 C 148 26, 152 108, 190 108"/>
+            <path class="diag-pulse idle-off" data-pulse="notion" d="M 108 62 C 148 62, 152 108, 190 108"/>
+            <path class="diag-pulse" data-pulse="calendar" d="M 108 98 C 148 98, 152 110, 190 110"/>
+            <path class="diag-pulse idle-off" data-pulse="transcript" d="M 108 134 C 148 134, 152 114, 190 114"/>
+            <path class="diag-pulse" data-pulse="gdoc" d="M 108 170 C 148 170, 152 118, 190 118"/>
+            <path class="diag-pulse idle-off" data-pulse="github" d="M 108 202 C 148 202, 152 120, 190 120"/>
           </g>
           <!-- Outgoing Projection Rails (Vault -> L2 / L3) -->
-          <g fill="none" stroke="rgba(255,255,255,0.34)" stroke-width="1.6">
-            <path d="M 294 106 C 318 106, 320 74, 336 74"/>
-            <path d="M 294 122 C 318 122, 320 152, 336 152"/>
-          </g>
-          <g fill="none" stroke="#90eec1" stroke-width="1.8" class="flow-pulse">
-            <path d="M 294 106 C 318 106, 320 74, 336 74"/>
+          <g>
+            <path class="diag-wire" data-wire="l2" d="M 294 106 C 318 106, 320 74, 336 74"/>
+            <path class="diag-wire" data-wire="l3" d="M 294 122 C 318 122, 320 152, 336 152"/>
+            <path class="diag-pulse" data-pulse="l2" d="M 294 106 C 318 106, 320 74, 336 74"/>
+            <path class="diag-pulse idle-off" data-pulse="l3" d="M 294 122 C 318 122, 320 152, 336 152"/>
           </g>
 
-          <!-- Source Channel Pills with Real Mini Marks -->
+          <!-- Interactive Source Channel Pills -->
           <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5" font-weight="600" fill="#ffffff">
-            <rect x="6" y="12" width="102" height="27" rx="8" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.22)"/>
-            <circle cx="21" cy="25.5" r="3" fill="#36C5F0"/><circle cx="26" cy="25.5" r="3" fill="#2EB67D"/><circle cx="21" cy="20.5" r="2.2" fill="#E01E5A"/><circle cx="26" cy="30.5" r="2.2" fill="#ECB22E"/>
-            <text x="35" y="29">Slack</text>
+            <g class="diag-node ch-pill" data-node="slack" tabindex="0" role="button" aria-label="Slack channel">
+              <rect class="node-bg" x="6" y="12" width="102" height="27" rx="8" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.24)"/>
+              <circle cx="21" cy="25.5" r="3" fill="#36C5F0"/><circle cx="26" cy="25.5" r="3" fill="#2EB67D"/><circle cx="21" cy="20.5" r="2.2" fill="#E01E5A"/><circle cx="26" cy="30.5" r="2.2" fill="#ECB22E"/>
+              <text x="35" y="29">Slack</text>
+            </g>
 
-            <rect x="6" y="48" width="102" height="27" rx="8" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.22)"/>
-            <rect x="16" y="55" width="13" height="13" rx="2.5" fill="#fff"/><text x="19.5" y="65" fill="#182643" font-size="9" font-weight="800">N</text>
-            <text x="35" y="65">Notion</text>
+            <g class="diag-node ch-pill" data-node="notion" tabindex="0" role="button" aria-label="Notion channel">
+              <rect class="node-bg" x="6" y="48" width="102" height="27" rx="8" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.24)"/>
+              <rect x="16" y="55" width="13" height="13" rx="2.5" fill="#fff"/><text x="19.5" y="65" fill="#182643" font-size="9" font-weight="800">N</text>
+              <text x="35" y="65">Notion</text>
+            </g>
 
-            <rect x="6" y="84" width="102" height="27" rx="8" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.22)"/>
-            <rect x="16" y="91" width="13" height="13" rx="2.5" fill="#4285F4"/><rect x="16" y="91" width="13" height="4" rx="1" fill="#1967D2"/><text x="18.2" y="102" fill="#fff" font-size="7" font-weight="800">31</text>
-            <text x="35" y="101">Calendar</text>
+            <g class="diag-node ch-pill" data-node="calendar" tabindex="0" role="button" aria-label="Calendar channel">
+              <rect class="node-bg" x="6" y="84" width="102" height="27" rx="8" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.24)"/>
+              <rect x="16" y="91" width="13" height="13" rx="2.5" fill="#4285F4"/><rect x="16" y="91" width="13" height="4" rx="1" fill="#1967D2"/><text x="18.2" y="102" fill="#fff" font-size="7" font-weight="800">31</text>
+              <text x="35" y="101">Calendar</text>
+            </g>
 
-            <rect x="6" y="120" width="102" height="27" rx="8" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.22)"/>
-            <rect x="16" y="131" width="2.2" height="5" rx="1" fill="#90eec1"/><rect x="20" y="128" width="2.2" height="11" rx="1" fill="#90eec1"/><rect x="24" y="130" width="2.2" height="7" rx="1" fill="#90eec1"/>
-            <text x="35" y="137">Transcripts</text>
+            <g class="diag-node ch-pill" data-node="transcript" tabindex="0" role="button" aria-label="Meeting transcripts channel">
+              <rect class="node-bg" x="6" y="120" width="102" height="27" rx="8" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.24)"/>
+              <rect x="16" y="131" width="2.2" height="5" rx="1" fill="#90eec1"/><rect x="20" y="128" width="2.2" height="11" rx="1" fill="#90eec1"/><rect x="24" y="130" width="2.2" height="7" rx="1" fill="#90eec1"/>
+              <text x="35" y="137">Transcripts</text>
+            </g>
 
-            <rect x="6" y="156" width="102" height="27" rx="8" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.22)"/>
-            <rect x="16" y="162.5" width="12" height="14" rx="2" fill="#4285F4"/><line x1="19" y1="168" x2="25" y2="168" stroke="#fff" stroke-width="1.3"/><line x1="19" y1="171.5" x2="24" y2="171.5" stroke="#fff" stroke-width="1.3"/>
-            <text x="35" y="173">Docs &amp; Drive</text>
+            <g class="diag-node ch-pill" data-node="gdoc" tabindex="0" role="button" aria-label="Google Docs and Drive channel">
+              <rect class="node-bg" x="6" y="156" width="102" height="27" rx="8" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.24)"/>
+              <rect x="16" y="162.5" width="12" height="14" rx="2" fill="#4285F4"/><line x1="19" y1="168" x2="25" y2="168" stroke="#fff" stroke-width="1.3"/><line x1="19" y1="171.5" x2="24" y2="171.5" stroke="#fff" stroke-width="1.3"/>
+              <text x="35" y="173">Docs &amp; Drive</text>
+            </g>
 
-            <rect x="6" y="189" width="102" height="27" rx="8" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.22)"/>
-            <circle cx="22" cy="202.5" r="6.5" fill="#182643"/><circle cx="22" cy="201" r="2.6" fill="#fff"/><path d="M 18 207 C 19.5 204.5, 24.5 204.5, 26 207" stroke="#fff" stroke-width="1.5" fill="none"/>
-            <text x="35" y="206">GitHub</text>
+            <g class="diag-node ch-pill" data-node="github" tabindex="0" role="button" aria-label="GitHub channel">
+              <rect class="node-bg" x="6" y="189" width="102" height="27" rx="8" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.24)"/>
+              <circle cx="22" cy="202.5" r="6.5" fill="#182643"/><circle cx="22" cy="201" r="2.6" fill="#fff"/><path d="M 18 207 C 19.5 204.5, 24.5 204.5, 26 207" stroke="#fff" stroke-width="1.5" fill="none"/>
+              <text x="35" y="206">GitHub</text>
+            </g>
           </g>
 
-          <!-- MCP Junction Label -->
-          <rect x="131" y="99" width="44" height="18" rx="9" fill="#2d277d" stroke="#90eec1" stroke-width="1.2"/>
-          <text x="153" y="111.5" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="9" font-weight="700" fill="#90eec1">MCP</text>
+          <!-- MCP Junction Badge -->
+          <g class="diag-node" data-node="mcp" tabindex="0" role="button" aria-label="MCP connector junction">
+            <rect class="node-bg" x="131" y="99" width="44" height="18" rx="9" fill="#2d277d" stroke="#90eec1" stroke-width="1.2"/>
+            <text x="153" y="111.5" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="9" font-weight="700" fill="#90eec1">MCP</text>
+          </g>
 
           <!-- Central Local SQLite Vault Node -->
-          <rect x="190" y="72" width="104" height="82" rx="14" fill="url(#vaultGrad)" stroke="#c5bdfa" stroke-width="1.5"/>
-          <text x="242" y="96" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="11.5" font-weight="800" fill="#182643">Local Vault</text>
-          <text x="242" y="111" text-anchor="middle" font-family="ui-monospace,monospace" font-size="9" font-weight="600" fill="#5141bd">career.sqlite</text>
-          <rect x="203" y="122" width="78" height="20" rx="6" fill="#eae7ff"/>
-          <text x="242" y="135.5" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="9" font-weight="700" fill="#3c2c94">L0 + L1 Private</text>
+          <g class="diag-node" data-node="vault" tabindex="0" role="button" aria-label="Local SQLite Vault">
+            <rect class="node-bg" x="190" y="72" width="104" height="82" rx="14" fill="url(#vaultGrad)" stroke="#c5bdfa" stroke-width="1.5"/>
+            <text x="242" y="96" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="11.5" font-weight="800" fill="#182643">Local Vault</text>
+            <text x="242" y="111" text-anchor="middle" font-family="ui-monospace,monospace" font-size="9" font-weight="600" fill="#5141bd">career.sqlite</text>
+            <rect x="203" y="122" width="78" height="20" rx="6" fill="#eae7ff"/>
+            <text x="242" y="135.5" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="9" font-weight="700" fill="#3c2c94">L0 + L1 Private</text>
+          </g>
 
-          <!-- Output Tiers (L2 & L3) -->
-          <rect x="336" y="48" width="78" height="52" rx="11" fill="rgba(216,246,233,0.96)" stroke="#299475" stroke-width="1.2"/>
-          <text x="375" y="68" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="11" font-weight="800" fill="#105947">L2 Safe</text>
-          <text x="375" y="82" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="8.5" font-weight="600" fill="#105947">Hiring · MCP</text>
-          <text x="375" y="93" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="8" fill="#105947">Leak-checked</text>
+          <!-- Interactive Output Tiers (L2 & L3) -->
+          <g class="diag-node" data-node="l2" tabindex="0" role="button" aria-label="L2 Safe export">
+            <rect class="node-bg" x="336" y="48" width="78" height="52" rx="11" fill="rgba(216,246,233,0.96)" stroke="#299475" stroke-width="1.2"/>
+            <text x="375" y="68" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="11" font-weight="800" fill="#105947">L2 Safe</text>
+            <text x="375" y="82" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="8.5" font-weight="600" fill="#105947">Hiring · AI Pack</text>
+            <text x="375" y="93" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="8" fill="#105947">Leak-checked</text>
+          </g>
 
-          <rect x="336" y="126" width="78" height="52" rx="11" fill="rgba(255,255,255,0.95)" stroke="#c5bdfa" stroke-width="1.2"/>
-          <text x="375" y="146" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="11" font-weight="800" fill="#182643">L3 Public</text>
-          <text x="375" y="160" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="8.5" font-weight="600" fill="#5141bd">Profile · Bio</text>
-          <text x="375" y="171" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="8" fill="#5a657d">Zero-JS HTML</text>
+          <g class="diag-node" data-node="l3" tabindex="0" role="button" aria-label="L3 Public export">
+            <rect class="node-bg" x="336" y="126" width="78" height="52" rx="11" fill="rgba(255,255,255,0.95)" stroke="#c5bdfa" stroke-width="1.2"/>
+            <text x="375" y="146" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="11" font-weight="800" fill="#182643">L3 Public</text>
+            <text x="375" y="160" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="8.5" font-weight="600" fill="#5141bd">Profile · Bio</text>
+            <text x="375" y="171" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="8" fill="#5a657d">Zero-JS HTML</text>
+          </g>
         </svg>
+        <div class="diag-trace" id="diag-trace">
+          <span style="display:inline-flex;align-items:center;gap:7px;min-width:0"><span class="dot-live"></span><span id="diag-trace-text" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Hover any channel, Local Vault, or L2 / L3 to trace the data path</span></span>
+          <span id="diag-trace-cta" style="color:#90eec1;flex-shrink:0">Click to open →</span>
+        </div>
       </div>
     </div>
 
@@ -1411,6 +1485,149 @@ function syncNavGlider() {
   const nav = document.getElementById("main-nav");
   positionGlider(nav, nav.querySelector("button.active"), document.getElementById("nav-glider"));
 }
+
+/* Magnetic hover ghost pill inside top nav */
+(() => {
+  const nav = document.getElementById("main-nav");
+  const ghost = document.getElementById("nav-hover");
+  if (!nav || !ghost) return;
+  nav.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("mouseenter", () => positionGlider(nav, btn, ghost));
+    btn.addEventListener("focus", () => positionGlider(nav, btn, ghost));
+  });
+  nav.addEventListener("mouseleave", () => { ghost.style.opacity = "0"; });
+  nav.addEventListener("focusout", (e) => { if (!nav.contains(e.relatedTarget)) ghost.style.opacity = "0"; });
+})();
+
+/* Subtle pointer sheen on Hero + Interactive MCP Convergence Diagram */
+(() => {
+  const hero = document.getElementById("landing-hero");
+  if (hero) {
+    hero.addEventListener("pointermove", (e) => {
+      const r = hero.getBoundingClientRect();
+      hero.style.setProperty("--mx", `${((e.clientX - r.left) / r.width) * 100}%`);
+      hero.style.setProperty("--my", `${((e.clientY - r.top) / r.height) * 100}%`);
+    });
+  }
+
+  const diag = document.getElementById("hero-diagram");
+  if (!diag) return;
+  const traceText = document.getElementById("diag-trace-text");
+  const traceCta = document.getElementById("diag-trace-cta");
+  const DEFAULT_TRACE = "Hover any channel, Local Vault, or L2 / L3 to trace the data path";
+  const CHANNEL_MATCH = {
+    slack: ["slack", "chat", "teams", "discord"],
+    notion: ["notion", "wiki", "confluence"],
+    calendar: ["calendar"],
+    transcript: ["transcript", "transcripts", "meeting", "voice_note", "granola", "gong", "fireflies", "otter", "zoom"],
+    gdoc: ["gdoc", "doc", "resume", "note"],
+    github: ["github", "git", "linear", "jira"],
+  };
+  const CHANNEL_LABELS = {
+    slack: "Slack", notion: "Notion", calendar: "Google Calendar",
+    transcript: "Meeting Transcripts", gdoc: "Google Docs & Drive", github: "GitHub",
+  };
+
+  function countFor(node) {
+    if (!STATE) return 0;
+    const keys = CHANNEL_MATCH[node] || [];
+    return (STATE.sources || []).filter(s => keys.includes(s.channel)).length;
+  }
+
+  function highlightDiagram(node) {
+    diag.dataset.active = node;
+    const allNodes = diag.querySelectorAll(".diag-node");
+    const allWires = diag.querySelectorAll(".diag-wire");
+    const allPulses = diag.querySelectorAll(".diag-pulse");
+    allNodes.forEach(n => { n.classList.remove("lit", "dim"); });
+    allWires.forEach(w => w.classList.remove("lit"));
+    allPulses.forEach(p => p.classList.remove("lit"));
+
+    const litNodes = new Set([node]);
+    const litWires = new Set();
+
+    if (CHANNEL_MATCH[node]) {
+      litNodes.add("mcp"); litNodes.add("vault");
+      litWires.add(node);
+      const n = countFor(node);
+      traceText.textContent = `${CHANNEL_LABELS[node]} → MCP → Local Vault · ${n} ${n === 1 ? 'item' : 'items'} saved locally (L0 never exported)`;
+      traceCta.textContent = "Open in Vault →";
+    } else if (node === "mcp") {
+      Object.keys(CHANNEL_MATCH).forEach(k => { litNodes.add(k); litWires.add(k); });
+      litNodes.add("vault");
+      traceText.textContent = "Your AI assistant sweeps authorized channels via MCP straight into career.sqlite";
+      traceCta.textContent = "Copy MCP Prompt →";
+    } else if (node === "vault") {
+      Object.keys(CHANNEL_MATCH).forEach(k => { litNodes.add(k); litWires.add(k); });
+      litNodes.add("mcp"); litNodes.add("l2"); litNodes.add("l3");
+      litWires.add("l2"); litWires.add("l3");
+      const sc = STATE?.status?.counts;
+      traceText.textContent = sc
+        ? `career.sqlite · ${sc.sources} L0 sources · ${sc.episodes} private L1 stories · 100% on your disk`
+        : "career.sqlite · Private L0 raw vault + L1 synthesis on your disk";
+      traceCta.textContent = "Open Studio →";
+    } else if (node === "l2") {
+      litNodes.add("vault"); litWires.add("l2");
+      const g = STATE?.status?.granularity?.L2;
+      traceText.textContent = g
+        ? `L2 Safe · ${g.ready}/${g.total} leak-checked · Raw L0 stays sealed · Brief or AI Context Pack`
+        : "L2 Safe · Confidential-safe brief or exhaustive AI Context Pack (leak-checked)";
+      traceCta.textContent = "Preview L2 ↗";
+    } else if (node === "l3") {
+      litNodes.add("vault"); litWires.add("l3");
+      const g = STATE?.status?.granularity?.L3;
+      traceText.textContent = g
+        ? `L3 Public · ${g.ready}/${g.total} ready · Short summaries & approved links · Zero JS`
+        : "L3 Public · Short open-web summaries & approved links (zero JavaScript)";
+      traceCta.textContent = "Preview L3 ↗";
+    }
+
+    allNodes.forEach(n => {
+      const k = n.dataset.node;
+      if (litNodes.has(k)) n.classList.add("lit");
+      else n.classList.add("dim");
+    });
+    allWires.forEach(w => { if (litWires.has(w.dataset.wire)) w.classList.add("lit"); });
+    allPulses.forEach(p => { if (litWires.has(p.dataset.pulse)) p.classList.add("lit"); });
+  }
+
+  function clearDiagram() {
+    delete diag.dataset.active;
+    diag.querySelectorAll(".diag-node").forEach(n => n.classList.remove("lit", "dim"));
+    diag.querySelectorAll(".diag-wire, .diag-pulse").forEach(el => el.classList.remove("lit"));
+    traceText.textContent = DEFAULT_TRACE;
+    traceCta.textContent = "Click to open →";
+  }
+
+  function activateNode(node) {
+    if (CHANNEL_MATCH[node]) {
+      switchTab("vault");
+      const sel = document.getElementById("source-channel-filter");
+      if (sel) {
+        const matchOpt = [...sel.options].find(o => CHANNEL_MATCH[node].includes(o.value));
+        if (matchOpt) { sel.value = matchOpt.value; renderSourcesList(); }
+      }
+    } else if (node === "mcp") {
+      copyMcpSetup();
+    } else if (node === "vault") {
+      switchTab("studio");
+    } else if (node === "l2") {
+      previewExport("L2");
+    } else if (node === "l3") {
+      previewExport("L3");
+    }
+  }
+
+  diag.querySelectorAll(".diag-node").forEach(el => {
+    const node = el.dataset.node;
+    el.addEventListener("mouseenter", () => highlightDiagram(node));
+    el.addEventListener("focus", () => highlightDiagram(node));
+    el.addEventListener("click", () => activateNode(node));
+    el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activateNode(node); } });
+  });
+  diag.addEventListener("mouseleave", clearDiagram);
+  diag.addEventListener("focusout", (e) => { if (!diag.contains(e.relatedTarget)) clearDiagram(); });
+})();
 
 function syncSegControl(segEl) {
   if (!segEl) return;
