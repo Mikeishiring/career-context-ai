@@ -1550,35 +1550,35 @@ function syncNavGlider() {
       litNodes.add("mcp"); litNodes.add("vault");
       litWires.add(node);
       const n = countFor(node);
-      traceText.textContent = `${CHANNEL_LABELS[node]} → MCP → Local Vault · ${n} ${n === 1 ? 'item' : 'items'} saved locally (L0 never exported)`;
+      traceText.textContent = `${CHANNEL_LABELS[node]} → MCP → Local Vault · ${n} ${n === 1 ? 'item' : 'items'} (L0 local)`;
       traceCta.textContent = "Open in Vault →";
     } else if (node === "mcp") {
       Object.keys(CHANNEL_MATCH).forEach(k => { litNodes.add(k); litWires.add(k); });
       litNodes.add("vault");
-      traceText.textContent = "Your AI assistant sweeps authorized channels via MCP straight into career.sqlite";
-      traceCta.textContent = "Copy MCP Prompt →";
+      traceText.textContent = "MCP sweeps your authorized tools into local career.sqlite";
+      traceCta.textContent = "Copy MCP →";
     } else if (node === "vault") {
       Object.keys(CHANNEL_MATCH).forEach(k => { litNodes.add(k); litWires.add(k); });
       litNodes.add("mcp"); litNodes.add("l2"); litNodes.add("l3");
       litWires.add("l2"); litWires.add("l3");
       const sc = STATE?.status?.counts;
       traceText.textContent = sc
-        ? `career.sqlite · ${sc.sources} L0 sources · ${sc.episodes} private L1 stories · 100% on your disk`
-        : "career.sqlite · Private L0 raw vault + L1 synthesis on your disk";
+        ? `career.sqlite · ${sc.sources} L0 sources · ${sc.episodes} L1 stories (local)`
+        : "career.sqlite · Local L0 raw vault + private L1 synthesis";
       traceCta.textContent = "Open Studio →";
     } else if (node === "l2") {
       litNodes.add("vault"); litWires.add("l2");
       const g = STATE?.status?.granularity?.L2;
       traceText.textContent = g
-        ? `L2 Safe · ${g.ready}/${g.total} leak-checked · Raw L0 stays sealed · Brief or AI Context Pack`
-        : "L2 Safe · Confidential-safe brief or exhaustive AI Context Pack (leak-checked)";
+        ? `L2 Safe · ${g.ready}/${g.total} leak-checked · Raw L0 stays sealed`
+        : "L2 Safe · Confidential-safe brief or AI Pack (leak-checked)";
       traceCta.textContent = "Preview L2 ↗";
     } else if (node === "l3") {
       litNodes.add("vault"); litWires.add("l3");
       const g = STATE?.status?.granularity?.L3;
       traceText.textContent = g
-        ? `L3 Public · ${g.ready}/${g.total} ready · Short summaries & approved links · Zero JS`
-        : "L3 Public · Short open-web summaries & approved links (zero JavaScript)";
+        ? `L3 Public · ${g.ready}/${g.total} ready · Short summaries · Zero JS`
+        : "L3 Public · Open-web summaries & links (zero JS)";
       traceCta.textContent = "Preview L3 ↗";
     }
 
