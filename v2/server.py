@@ -10,8 +10,10 @@ from __future__ import annotations
 import base64
 import json
 import secrets
+import sys
 import urllib.error
 import urllib.request
+from datetime import datetime, timezone
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -198,6 +200,43 @@ class StudioApp:
                     mt, data = self.vault.get_artifact_bytes(digest)
                     return 200, {"Content-Type": mt, "Cache-Control": "private, max-age=3600"}, data
 
+                if parsed.path == "/api/backup":
+                    snap = self.vault.export_backup_bytes()
+                    stamp = datetime.now(timezone.utc).strftime("%Y%m%d")
+                    return 200, {
+                        "Content-Type": "application/octet-stream",
+                        "Content-Disposition": f'attachment; filename="career-vault-backup-{stamp}.sqlite"',
+                        "Cache-Control": "no-store",
+                    }, snap
+
+                if parsed.path == "/api/mcp-config":
+                    resolved_db = str(Path(self.vault.path).expanduser().absolute())
+                    repo_root = str(Path(__file__).absolute().parent.parent)
+                    py_exe = sys.executable
+                    return self._json({
+                        "db_path": resolved_db,
+                        "python": py_exe,
+                        "cwd": repo_root,
+                        "private_mcp": {
+                            "mcpServers": {
+                                "career-context-private": {
+                                    "command": py_exe,
+                                    "args": ["-m", "v2.career", "mcp", resolved_db, "--tier", "L1", "--rw"],
+                                    "cwd": repo_root,
+                                }
+                            }
+                        },
+                        "share_mcp": {
+                            "mcpServers": {
+                                "career-context-shareable": {
+                                    "command": py_exe,
+                                    "args": ["-m", "v2.career", "mcp", resolved_db, "--tier", "L2"],
+                                    "cwd": repo_root,
+                                }
+                            }
+                        },
+                    })
+
                 if parsed.path == "/api/export":
                     tier = (qs.get("tier") or ["L2"])[0]
                     fmt = (qs.get("format") or ["html"])[0]
@@ -306,11 +345,24 @@ class StudioApp:
                         except ValueError as err:
                             blocked.append({"episode_id": ep["id"], "error": str(err)})
                     return self._json({"tier": tier, "saved": saved, "skipped": skipped, "blocked": blocked})
+                if parsed.path == "/api/demo/load":
+                    return self._json(self.vault.seed_demo_vault(force=False))
                 if parsed.path == "/api/embeddings/sync":
                     if not (self.model_dir and (self.model_dir / "model.onnx").is_file()):
-                        return self._json({"error": "Local .semantic-model not found; FTS5 search still works offline."}, int(HTTPStatus.BAD_REQUEST))
-                    from .semantic import sync_embeddings
-                    return self._json(sync_embeddings(self.vault, self.model_dir))
+                        return self._json({
+                            "available": False,
+                            "message": "Instant FTS5 keyword search is active. Optional semantic vectors require downloading .semantic-model.",
+                        })
+                    try:
+                        from .semantic import sync_embeddings
+                        res = sync_embeddings(self.vault, self.model_dir)
+                        res["available"] = True
+                        return self._json(res)
+                    except (RuntimeError, ImportError) as err:
+                        return self._json({
+                            "available": False,
+                            "message": f"Instant FTS5 keyword search is active ({err})",
+                        })
                 if parsed.path == "/api/llm/proxy":
                     # Stateless BYO-API proxy: never writes API key to disk or logs
                     provider = body.get("provider", "openai")

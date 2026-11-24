@@ -13,6 +13,7 @@ import hashlib
 import json
 import re
 import sqlite3
+import tempfile
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,8 +23,9 @@ APPLICATION_ID = 0x43435632  # 'CCV2'
 SCHEMA_VERSION = 3
 
 VALID_CHANNELS = {
-    "resume", "github", "slack", "notion", "gdocs", "linkedin",
-    "x", "substack", "blog", "doc", "voice_note", "email", "other",
+    "resume", "github", "slack", "notion", "gdocs", "gdoc", "linkedin",
+    "x", "substack", "blog", "doc", "voice_note", "email", "gmail",
+    "calendar", "transcript", "linear", "slides", "figma", "youtube", "other",
 }
 VALID_TIERS = ("L0", "L1", "L2", "L3")
 EXPORTABLE_TIERS = ("L1", "L2", "L3")
@@ -1512,19 +1514,25 @@ class CareerVault:
 
         for ep in episodes:
             for cap in ep.get("capabilities") or []:
-                name = (cap.get("name") or "").strip()
+                if isinstance(cap, str):
+                    cap_obj: dict[str, Any] = {"name": cap}
+                elif isinstance(cap, dict):
+                    cap_obj = cap
+                else:
+                    continue
+                name = (cap_obj.get("name") or "").strip()
                 if not name:
                     continue
                 key = name.lower()
                 entry = cap_map.setdefault(key, {
                     "name": name,
-                    "kind": cap.get("kind", "practice"),
+                    "kind": cap_obj.get("kind", "practice"),
                     "episodes": [],
                     "applications": [],
                 })
                 entry["episodes"].append({"id": ep["id"], "title": ep["title"], "period": ep["period_label"]})
-                if cap.get("application"):
-                    entry["applications"].append(cap["application"])
+                if cap_obj.get("application"):
+                    entry["applications"].append(cap_obj["application"])
             for tag in ep.get("tags") or []:
                 tag_map.setdefault(tag, []).append({"id": ep["id"], "title": ep["title"], "period": ep["period_label"]})
             for d in ep.get("decisions") or []:
@@ -2314,6 +2322,279 @@ class CareerVault:
             "omitted_count": len(skipped_episodes),
             "leak_checked": True,
         }
+
+    # ── Backups & Fictional Sample Vault ────────────────────────────────────
+
+    def export_backup_bytes(self) -> bytes:
+        """Create a consistent point-in-time SQLite backup snapshot (safe during WAL writes)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            dest_path = Path(tmp) / "career-backup.sqlite"
+            dst = sqlite3.connect(str(dest_path))
+            try:
+                self.conn.backup(dst)
+                dst.commit()
+            finally:
+                dst.close()
+            return dest_path.read_bytes()
+
+    def seed_demo_vault(self, *, force: bool = False) -> dict[str, Any]:
+        """Populate an empty vault with a 100% fictional cross-functional sample career vault."""
+        # Ensure schema exists before checking counts (supports fresh DBs & --demo)
+        if not self.conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='person'").fetchone():
+            self.init()
+        counts = self.get_status()["counts"]
+        if not force and (counts["sources"] > 0 or counts["episodes"] > 0 or counts["roles"] > 0):
+            raise ValueError("Vault already contains data. Launch with --demo or use an empty vault to load the sample.")
+
+        self.init(
+            name="Maya Lin (Sample Vault)",
+            headline="Product & Operations Lead · Payments, Risk Systems & Cross-Functional Delivery",
+            goal="Explore how a populated local Career Context vault organizes roles, stories, L2/L3 sharing, and raw sources.",
+        )
+        self.update_person(
+            overview_l1=(
+                "Product and operations lead who pairs hands-on analytical prototyping with cross-functional delivery. "
+                "Led enterprise checkout risk modernization at Northstar Pay (including the AcmeBank rollout), rebuilt hiring "
+                "and onboarding cadences across 40+ hires, and ran design-to-engineering launch programs at Harbor Health."
+            ),
+            overview_l2=(
+                "Product and operations lead combining hands-on prototyping with high-stakes cross-functional execution. "
+                "Modernized enterprise checkout risk workflows across European banking deployments, rebuilt structured hiring "
+                "and onboarding systems for 40+ hires, and led regulated product launches from discovery through rollout."
+            ),
+            overview_l3=(
+                "Product & Operations Lead focused on turning ambiguous operational bottlenecks into clear, measurable systems "
+                "across fintech and health-tech teams."
+            ),
+        )
+
+        # Roles
+        r1 = self.upsert_role(
+            role_id="role-northstar",
+            title="Staff Product & Operations Lead",
+            organization="Northstar Pay",
+            start_date="2023-03",
+            is_current=True,
+            summary_l1="Own checkout risk operations, enterprise launch readiness, and cross-functional planning across Product, Risk Eng, and Solutions.",
+        )
+        r2 = self.upsert_role(
+            role_id="role-harbor",
+            title="Senior Product Operations Manager",
+            organization="Harbor Health",
+            start_date="2020-06",
+            end_date="2023-02",
+            summary_l1="Built launch readiness playbooks, clinician onboarding ops, and quarterly planning workflows during Series B-to-C scale.",
+        )
+
+        # Sources (mix of Slack, Notion, Transcript, Calendar, Slides, Doc — including 2 unlinked inbox docs)
+        s1 = self.ingest_source(
+            title="#risk-checkout — AcmeBank false-decline spike & shadow evaluator rollout",
+            channel="slack",
+            event_date="2024-09-18",
+            author="Maya Lin, Devon Park",
+            raw_text=(
+                "Maya Lin: AcmeBank ($14.2M ARR prospect) hit 11.4% false declines under our legacy >4 retries/10m per BIN rule.\n"
+                "Devon Park: If we ship a shadow-mode evaluator first, we can replay live EU traffic for 6 weeks without gating shoppers.\n"
+                "Maya Lin: Agreed—let's pair on the shadow dashboard and review weekly false-decline rates with Risk Eng before cutting over.\n"
+                "Result after 6 weeks: EU cohort false declines dropped 38% with zero fraud-loss regression."
+            ),
+            sensitivity="L0",
+        )
+        s2 = self.ingest_source(
+            title="Weekly Risk & Launch Readiness Review (Transcript)",
+            channel="transcript",
+            event_date="2024-10-04",
+            author="Maya Lin",
+            raw_text=(
+                "Meeting notes from Risk & Launch Readiness Review:\n"
+                "- Decided against a blanket retry limit override for AcmeBank; standardized the shadow evaluator for all Tier-1 merchants.\n"
+                "- Devon Park owned the streaming replay pipeline; Maya Lin owned merchant impact scoring, stakeholder sign-off, and rollout playbook.\n"
+                "- Cut rollout risk by requiring a 14-day shadow comparison before any rule moves to enforcement."
+            ),
+            sensitivity="L0",
+        )
+        s3 = self.ingest_source(
+            title="Q1–Q3 Structured Hiring & Onboarding Playbook",
+            channel="notion",
+            event_date="2024-04-12",
+            author="Maya Lin",
+            raw_text=(
+                "Rebuilt intake rubrics, work-sample scorecards, and 30-60-90 onboarding checklists across Product, Ops, and Solutions.\n"
+                "Partnered with Elena Ortiz (Recruiting Lead) and 6 hiring managers.\n"
+                "Outcome: cut time-to-decision from 34 days to 19 days across 42 hires while improving 90-day manager ramp ratings from 3.6 to 4.5/5."
+            ),
+            sensitivity="L0",
+        )
+        s4 = self.ingest_source(
+            title="Harbor Health Clinic Rollout Deck & Postmortem",
+            channel="slides",
+            event_date="2022-11-08",
+            author="Maya Lin",
+            raw_text=(
+                "Slide 4 — Bottleneck: Clinic onboarding stalled at 6 weeks because EHR mapping and staff training ran sequentially.\n"
+                "Slide 7 — Change: Split onboarding into parallel readiness tracks with an automated pre-flight checklist.\n"
+                "Slide 11 — Result: Cut median clinic launch time from 42 days to 16 days across 28 clinics; co-led with Clinical Ops."
+            ),
+            sensitivity="L0",
+        )
+        # 2 Unlinked inbox sources so Inbox Triage & Vault linking work right away
+        self.ingest_source(
+            title="Q4 Executive Planning Forum (Calendar Series)",
+            channel="calendar",
+            event_date="2025-01-15",
+            author="Maya Lin",
+            raw_text=(
+                "Recurring bi-weekly forum: Q4/Q1 Enterprise Readiness & Risk Roadmap.\n"
+                "Facilitated agenda across VP Product, Risk Engineering, and Enterprise Solutions. "
+                "Tracked launch blockers for European banking deployments and quarterly hiring capacity."
+            ),
+            sensitivity="L0",
+        )
+        self.ingest_source(
+            title="Prototype note — Automated Postmortem Digest Script",
+            channel="doc",
+            event_date="2025-02-02",
+            author="Maya Lin",
+            raw_text=(
+                "Built a lightweight Python script over a weekend to summarize weekly incident notes into a 1-page digest for leadership. "
+                "Adopted by 3 adjacent ops teams; shelved the Slack bot version after IT tightened webhook rules."
+            ),
+            sensitivity="L0",
+        )
+
+        # Registered blocked terms
+        self.add_sensitive_term("AcmeBank", replacement="a Tier-1 European bank", category="customer")
+        self.add_sensitive_term("$14.2M ARR", replacement="an eight-figure enterprise deal", category="metric")
+        self.add_sensitive_term(">4 retries/10m per BIN", replacement="legacy velocity thresholds", category="proprietary")
+        self.add_sensitive_term("Devon Park", replacement="Risk Engineering", category="person")
+
+        # Tracked channel scans
+        self.upsert_channel_scan(channel="slack", label="Slack", access_method="mcp", status="scanned", date_range_covered="2024–2025")
+        self.upsert_channel_scan(channel="notion", label="Notion", access_method="mcp", status="scanned", date_range_covered="2023–2025")
+        self.upsert_channel_scan(channel="transcript", label="Meeting Transcripts", access_method="mcp", status="scanning", date_range_covered="2024", remaining_notes="Add Q1 2025 reviews")
+        self.upsert_channel_scan(channel="calendar", label="Google Calendar", access_method="mcp", status="declared")
+
+        # Episodes (Flagship + Core + Proof Point)
+        ep1 = self.upsert_episode(
+            episode_id="ep-shadow-risk",
+            role_id=r1["id"],
+            title="Shadow-mode checkout risk evaluator for AcmeBank",
+            start_date="2024-08",
+            end_date="2024-11",
+            status="shipped",
+            importance=3,
+            summary_l1=(
+                "When AcmeBank ($14.2M ARR prospect) hit 11.4% false declines under our >4 retries/10m per BIN rule, "
+                "I partnered with Devon Park in Risk Engineering to replace blind rule launches with a shadow-mode evaluator "
+                "that replayed live traffic before enforcement."
+            ),
+            decisions=[
+                "Refused a one-off merchant override and built a reusable 14-day shadow evaluation gate for all enterprise launches.",
+                "Paired quantitative false-decline replay metrics with weekly merchant sign-off reviews.",
+            ],
+            shared_credit_l1="Co-built with Devon Park (Risk Engineering built the streaming replay pipeline; I led impact modeling, merchant readiness, and rollout governance).",
+            outcome_l1="Cut European cohort false declines by 38% over 6 weeks with zero fraud-loss regression and unblocked the enterprise launch.",
+            tags=["risk-systems", "enterprise-delivery", "experimentation"],
+            capabilities=["Cross-Functional Launch", "Risk Operations", "Experiment Design"],
+            source_refs=[s1["id"], s2["id"]],
+        )
+        ep2 = self.upsert_episode(
+            episode_id="ep-hiring-ops",
+            role_id=r1["id"],
+            title="Structured hiring & 90-day onboarding system",
+            start_date="2024-01",
+            end_date="2024-07",
+            status="shipped",
+            importance=3,
+            summary_l1=(
+                "Inconsistent interview loops were stretching hiring past 5 weeks across Product and Ops. "
+                "I redesigned role intake rubrics, work-sample scorecards, and 30-60-90 onboarding checklists alongside our Recruiting Lead."
+            ),
+            decisions=[
+                "Replaced open-ended culture chats with anchored work-sample scorecards tied to first-90-day deliverables.",
+                "Made intake calibration mandatory before opening any requisition.",
+            ],
+            shared_credit_l1="Partnered with Recruiting Lead Elena Ortiz and 6 hiring managers.",
+            outcome_l1="Cut median time-to-decision from 34 to 19 days across 42 hires and lifted 90-day manager ramp scores from 3.6 to 4.5/5.",
+            tags=["hiring", "operations", "org-design"],
+            capabilities=["Hiring Operations", "Operating Cadences"],
+            source_refs=[s3["id"]],
+        )
+        ep3 = self.upsert_episode(
+            episode_id="ep-clinic-rollout",
+            role_id=r2["id"],
+            title="Parallelized multi-clinic launch playbook",
+            start_date="2022-05",
+            end_date="2022-11",
+            status="shipped",
+            importance=2,
+            summary_l1=(
+                "Clinic launches at Harbor Health were taking 6 weeks because EHR integration and staff training ran sequentially. "
+                "I restructured rollout into parallel readiness tracks with an automated pre-flight checklist."
+            ),
+            decisions=[
+                "Decoupled technical EHR mapping from clinician workflow training via a shared readiness gate.",
+            ],
+            shared_credit_l1="Co-led with Clinical Operations and Solutions Engineering.",
+            outcome_l1="Reduced median clinic launch time from 42 days to 16 days across 28 clinics.",
+            tags=["onboarding", "playbooks", "health-tech"],
+            capabilities=["Program Delivery", "Process Redesign"],
+            source_refs=[s4["id"]],
+        )
+
+        # Anchored claim
+        self.upsert_claim(
+            episode_id=ep1["id"],
+            statement="EU cohort false declines dropped 38% over 6 weeks with zero fraud-loss regression.",
+            kind="fact",
+            status="supported",
+            evidence_quotes=[{"source_id": s1["id"], "quote": "EU cohort false declines dropped 38% with zero fraud-loss regression."}],
+        )
+
+        # Pre-polished L2 & L3 tiers for ep1 and ep2 (leaving ep3 ready to demonstrate polishing!)
+        self.set_tier_projection(
+            episode_id=ep1["id"],
+            tier="L2",
+            title="Shadow-mode checkout risk evaluator for enterprise banking",
+            summary=(
+                "When elevated false declines threatened an eight-figure enterprise deal with a Tier-1 European bank, "
+                "I replaced blind rule launches under legacy velocity thresholds with a reusable shadow-mode evaluator "
+                "co-built with Risk Engineering—cutting European cohort false declines by 38% over six weeks with zero fraud regression."
+            ),
+            decisions=ep1["decisions"],
+            outcome="Cut European cohort false declines by 38% over 6 weeks with zero fraud-loss regression.",
+            shared_credit="Co-built with Risk Engineering (pipeline engineering) while I led impact modeling, merchant readiness, and launch governance.",
+            approved=True,
+        )
+        self.set_tier_projection(
+            episode_id=ep1["id"],
+            tier="L3",
+            title="Enterprise checkout risk modernization",
+            summary="Built a shadow-mode risk evaluator with Risk Engineering so teams could validate checkout rules on live traffic before enforcement—cutting false declines 38% across a European rollout.",
+            approved=True,
+        )
+        self.set_tier_projection(
+            episode_id=ep2["id"],
+            tier="L2",
+            title="Structured hiring & 90-day onboarding system across 40+ hires",
+            summary=(
+                "To fix 5-week hiring bottlenecks across Product and Operations, I partnered with Recruiting and 6 hiring managers "
+                "to replace ad-hoc loops with calibrated intake rubrics, work-sample scorecards, and 30-60-90 ramp plans—cutting "
+                "time-to-decision from 34 to 19 days across 42 hires and lifting 90-day ramp scores from 3.6 to 4.5/5."
+            ),
+            decisions=ep2["decisions"],
+            outcome="Cut time-to-decision from 34 to 19 days across 42 hires; 90-day ramp scores rose from 3.6 to 4.5/5.",
+            shared_credit="Partnered with Recruiting Leadership and 6 hiring managers.",
+            approved=True,
+        )
+        self.set_tier_projection(
+            episode_id=ep2["id"],
+            tier="L3",
+            title="Structured hiring & onboarding at scale",
+            summary="Redesigned interview scorecards and 90-day onboarding across 42 hires, cutting time-to-decision by 44% while raising new-hire ramp scores.",
+            approved=True,
+        )
+        return {"loaded": True, "counts": self.get_status()["counts"]}
 
     # ── Helpers ──────────────────────────────────────────────────────────────
 

@@ -46,6 +46,36 @@ def _print(data: Any) -> None:
     print(json.dumps(data, indent=2, ensure_ascii=False))
 
 
+def build_mcp_config(db_path: str | Path) -> dict[str, Any]:
+    """Generate exact OS-aware MCP JSON configs for private L1 (--rw) and shareable L2 (read-only)."""
+    resolved_db = str(Path(db_path).expanduser().absolute())
+    repo_root = str(Path(__file__).absolute().parent.parent)
+    py_exe = sys.executable
+    return {
+        "db_path": resolved_db,
+        "python": py_exe,
+        "cwd": repo_root,
+        "private_mcp": {
+            "mcpServers": {
+                "career-context-private": {
+                    "command": py_exe,
+                    "args": ["-m", "v2.career", "mcp", resolved_db, "--tier", "L1", "--rw"],
+                    "cwd": repo_root,
+                }
+            }
+        },
+        "share_mcp": {
+            "mcpServers": {
+                "career-context-shareable": {
+                    "command": py_exe,
+                    "args": ["-m", "v2.career", "mcp", resolved_db, "--tier", "L2"],
+                    "cwd": repo_root,
+                }
+            }
+        },
+    }
+
+
 def _parse_quote_args(items: list[str] | None) -> list[dict[str, str]]:
     out = []
     for raw in items or []:
@@ -221,12 +251,32 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--tier", default="L2", choices=["L1", "L2", "L3"])
     s.add_argument("--rw", action="store_true")
 
+    # mcp-config
+    s = sub.add_parser("mcp-config", help="Print ready-to-paste OS-aware MCP JSON config for Claude Desktop / Cursor")
+    s.add_argument("db", nargs="?", default=str(Path.home() / ".career-context" / "career.sqlite"))
+    s.add_argument("--mode", default="both", choices=["both", "private", "share"])
+
+    # backup
+    s = sub.add_parser("backup", help="Write a consistent live SQLite backup snapshot")
+    s.add_argument("db")
+    s.add_argument("--out", required=True)
+
     return p
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
+        if args.cmd == "mcp-config":
+            cfg = build_mcp_config(args.db)
+            if args.mode == "private":
+                _print(cfg["private_mcp"])
+            elif args.mode == "share":
+                _print(cfg["share_mcp"])
+            else:
+                _print(cfg)
+            return 0
+
         if args.cmd == "mcp":
             srv = CareerMCPServer(args.db, tier=args.tier, read_write=args.rw)
             try:
@@ -325,6 +375,12 @@ def main(argv: list[str] | None = None) -> int:
                     _print(vault.suggest_sensitive_terms(limit=args.limit))
             elif args.cmd == "compact":
                 _print({"bytes": vault.compact()})
+            elif args.cmd == "backup":
+                data = vault.export_backup_bytes()
+                out = Path(args.out).expanduser().resolve()
+                out.parent.mkdir(parents=True, exist_ok=True)
+                out.write_bytes(data)
+                _print({"backup_path": str(out), "bytes": len(data)})
             elif args.cmd == "knowledge":
                 _print(vault.get_knowledge_graph())
             elif args.cmd == "triage":

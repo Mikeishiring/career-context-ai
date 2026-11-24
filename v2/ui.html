@@ -878,6 +878,53 @@ body.dark .l1-ref-details { background: linear-gradient(115deg, #1d1b38, #191e30
 }
 .attach-bar select { height: 34px; font-size: 0.81rem; padding: 0.25rem 0.6rem; flex: 1; min-width: 190px; }
 
+/* Day-1 Empty Vault Starter & Last-Mile Handoff Prompts */
+.empty-starter {
+  background: var(--paper); border: 1.5px solid #c5bdfa; border-radius: 18px;
+  padding: 1.6rem 1.8rem; margin-bottom: 3rem; box-shadow: var(--raised);
+}
+.starter-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1rem; margin-top: 1.1rem;
+}
+.starter-card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  padding: 1.15rem 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;
+  transition: transform 180ms var(--ease-spring), border-color 150ms ease, background-color 150ms ease;
+}
+.starter-card:hover { transform: translateY(-2px); border-color: #9c8ee4; background: var(--paper); }
+.starter-card strong { font-size: 0.95rem; letter-spacing: -0.02em; }
+.starter-card p { margin: 0; font-size: 0.82rem; color: var(--muted); line-height: 1.48; flex: 1; }
+
+.privacy-checklist {
+  display: flex; align-items: flex-start; gap: 0.75rem;
+  padding: 0.95rem 1.15rem; border-radius: 13px; margin-bottom: 1.5rem;
+  background: var(--amber-bg); border: 1px solid color-mix(in srgb, var(--amber) 24%, transparent);
+  color: var(--ink); font-size: 0.84rem; line-height: 1.5;
+}
+.privacy-checklist strong { color: var(--amber); }
+
+.handoff-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.9rem; margin-top: 0.85rem;
+}
+.handoff-card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 13px;
+  padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.45rem;
+}
+.handoff-card strong { font-size: 0.89rem; letter-spacing: -0.015em; }
+.handoff-card p { margin: 0; font-size: 0.8rem; color: var(--muted); line-height: 1.45; flex: 1; }
+
+.source-ref-wrap { display: flex; align-items: center; gap: 0.38rem; }
+.source-ref-wrap .source-ref-row { flex: 1; min-width: 0; }
+.unlink-btn {
+  border: 1px solid var(--line); background: var(--surface); color: var(--muted);
+  border-radius: 9px; width: 32px; height: 34px; flex: none; cursor: pointer;
+  font: 700 0.85rem var(--sans); display: inline-grid; place-items: center;
+  transition: color 140ms ease, border-color 140ms ease, background-color 140ms ease;
+}
+.unlink-btn:hover { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, var(--line)); background: var(--danger-bg); }
+
 @media (max-width: 960px) {
   .landing-hero, .pipeline-spotlight, .aperture-shell, .split-shell, .mcp-dock { grid-template-columns: 1fr; }
   .split-pane { border-left: 0; border-top: 1px solid var(--line); }
@@ -1059,6 +1106,37 @@ body.dark .l1-ref-details { background: linear-gradient(115deg, #1d1b38, #191e30
       </div>
     </div>
 
+    <!-- Day-1 Empty Vault Welcome Card (only visible when vault has 0 sources & 0 stories) -->
+    <div id="empty-vault-banner" class="empty-starter hidden sheet-animate">
+      <div class="split" style="align-items:center">
+        <div>
+          <span class="pill ok">New Local Vault Ready</span>
+          <h3 style="margin:0.45rem 0 0.2rem;font-size:1.25rem;letter-spacing:-0.025em">Start in 2 minutes—pick whichever fits your setup</h3>
+          <p class="meta" style="margin:0">Works with MCP connectors, regular web AI chats (ChatGPT / Claude / Gemini), or offline files on a locked work laptop.</p>
+        </div>
+      </div>
+      <div class="starter-grid">
+        <div class="starter-card">
+          <strong>1. Drop your Resume or LinkedIn PDF</strong>
+          <p>Ingest a .pdf, .docx, LinkedIn export, or brag doc straight into your local L0 vault—no AI connector required.</p>
+          <div><button class="btn sm" onclick="switchTab('vault');toggleUploadDrawer(true)">Upload file →</button></div>
+        </div>
+        <div class="starter-card">
+          <strong>2. Use Claude / ChatGPT / Gemini Web</strong>
+          <p>No MCP setup or work laptop locked down? Copy a starter prompt to turn your notes into clean L1 stories.</p>
+          <div class="row">
+            <button class="btn secondary sm" onclick="copyNoMcpPrompt()">Copy Web AI Prompt</button>
+            <button class="btn secondary sm" onclick="copyMcpJson()">Copy MCP JSON</button>
+          </div>
+        </div>
+        <div class="starter-card">
+          <strong>3. Explore a Fictional Sample Vault</strong>
+          <p>Load Maya Lin's fictional sample vault (roles, stories, blocked terms, and L2/L3 exports) to see how everything fits together.</p>
+          <div><button class="btn secondary sm" onclick="loadDemoVault()">Load sample vault</button></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Chapter 2: Connected 5-Stage Live Pipeline + Joined Spotlight -->
     <div class="section-head">
       <h3>How it works · five live stages</h3>
@@ -1091,7 +1169,8 @@ body.dark .l1-ref-details { background: linear-gradient(115deg, #1d1b38, #191e30
         <div id="overview-channels-dock" class="brand-pills-wrap"></div>
       </div>
       <div class="row" style="flex-shrink:0">
-        <button class="btn secondary sm" onclick="copyMcpSetup()">Copy MCP Prompt</button>
+        <button class="btn secondary sm" onclick="copyMcpJson()">Copy MCP JSON</button>
+        <button class="btn secondary sm" onclick="copyNoMcpPrompt()">No-MCP Prompt</button>
         <button class="btn sm" onclick="switchTab('vault')">Open Vault →</button>
       </div>
     </div>
@@ -1333,6 +1412,13 @@ body.dark .l1-ref-details { background: linear-gradient(115deg, #1d1b38, #191e30
 
     <!-- SUB-VIEW 3: EXPORT & HAND OFF (HUMANS vs. SOMEONE ELSE'S AI) -->
     <div id="share-view-export" class="hidden sheet-animate">
+      <div class="privacy-checklist">
+        <span style="font-size:1rem;line-height:1.2">🛡️</span>
+        <div>
+          <strong>10-second pre-share check:</strong> Every L2/L3 export automatically blocks your registered terms, emails, API keys, and Slack <code>#channels</code>. Before sending externally, scan once for unpublished revenue figures, indirect client clues, or NDA-restricted details.
+        </div>
+      </div>
+
       <div class="split-shell" style="margin-bottom:2rem">
         <div class="split-pane">
           <span class="pill">Succinct · Zero JS</span>
@@ -1428,6 +1514,32 @@ body.dark .l1-ref-details { background: linear-gradient(115deg, #1d1b38, #191e30
           </div>
         </div>
       </div>
+
+      <div class="card">
+        <div class="split" style="align-items:center">
+          <div>
+            <h3>Ready-to-copy handoff prompts</h3>
+            <p class="meta" style="margin:0.15rem 0 0">Attach or paste your <strong>L2 AI Context Pack</strong> into any AI along with one of these prompts.</p>
+          </div>
+        </div>
+        <div class="handoff-grid">
+          <div class="handoff-card">
+            <strong>Tailor resume for a specific job</strong>
+            <p>Selects the best matching roles, outcomes, and wording for a job description without inventing facts.</p>
+            <div><button class="btn secondary sm" onclick="copyHandoffPrompt('resume')">Copy prompt</button></div>
+          </div>
+          <div class="handoff-card">
+            <strong>Realistic behavioral interview prep</strong>
+            <p>Turns your flagship stories, trade-offs, and shared credit into sharp interview questions and pushback.</p>
+            <div><button class="btn secondary sm" onclick="copyHandoffPrompt('interview')">Copy prompt</button></div>
+          </div>
+          <div class="handoff-card">
+            <strong>Share with a hiring manager's AI</strong>
+            <p>Instructs an external AI to answer questions strictly from your L2 pack without speculating beyond it.</p>
+            <div><button class="btn secondary sm" onclick="copyHandoffPrompt('external')">Copy prompt</button></div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1439,6 +1551,7 @@ body.dark .l1-ref-details { background: linear-gradient(115deg, #1d1b38, #191e30
         <span class="pill" id="vault-summary-pill">L0 Local</span>
       </div>
       <div class="row">
+        <a class="btn secondary sm" href="/api/backup" title="Download a complete point-in-time SQLite backup">Backup .sqlite ↓</a>
         <button class="btn secondary" id="triage-btn">Inbox Triage</button>
         <button class="btn" id="toggle-upload-btn">+ Add File / Note</button>
       </div>
@@ -1450,7 +1563,7 @@ body.dark .l1-ref-details { background: linear-gradient(115deg, #1d1b38, #191e30
         <h3>Drop any career file</h3>
         <div id="dropzone" class="dropzone" style="margin-top:0.6rem">
           <div><strong>Drop files here or click to browse</strong></div>
-          <div class="meta">Auto-detects .docx, .md, .txt, LinkedIn CSVs, X tweets.js, Substack XML, Slack/GitHub JSON, or v1 HTML</div>
+          <div class="meta">Auto-detects .pdf, .docx, .md, .txt, LinkedIn PDF/CSVs, X tweets.js, Substack XML, Slack/GitHub JSON, or v1 HTML</div>
           <input id="file-input" type="file" multiple style="display:none">
         </div>
         <div class="row" style="margin-top:0.65rem">
@@ -2032,7 +2145,9 @@ async function refresh() {
     </div>`;
   }).join("") || '<p class="meta">No timeline events yet.</p>';
 
-  // Stories, Share, and Vault summary pills
+  // Stories, Share, and Vault summary pills + Day-1 Empty Vault Starter
+  const isEmptyVault = (c.sources === 0 && c.episodes === 0);
+  document.getElementById("empty-vault-banner").classList.toggle("hidden", !isEmptyVault);
   document.getElementById("stories-count-pill").textContent = `${c.episodes} private stories · L1`;
   document.getElementById("share-blocked-count").textContent = sensitive_terms.length;
   document.getElementById("vault-summary-pill").textContent = `${c.sources} sources · ${c.unlinked_sources} unlinked`;
@@ -2212,23 +2327,81 @@ function renderOverview() {
 }
 
 window.copyMcpSetup = async () => {
-  const txt = [
-    "Follow v2/SKILL.md to build and deepen my local Career Context vault.",
-    "1) Connect to my local vault MCP server: python -m v2.career mcp private/career.sqlite --tier L1 --rw",
-    "2) First ask what work channels I use (Slack, Notion, Google Calendar, Meeting Transcripts, Google Docs, GitHub, Linear, Gmail, LinkedIn, X, Substack) and check which MCP connectors are active.",
-    "3) Log each channel with career_log_channel_scan, run time-sliced sweeps into L0, synthesize L1 roles & stories, and run career_audit_gaps before stopping.",
-  ].join("\n");
   try {
+    const cfg = await api("/api/mcp-config");
+    const txt = [
+      "Follow v2/SKILL.md to build and deepen my local Career Context vault.",
+      `1) Connect to my local vault MCP server (${cfg.db_path}):`,
+      JSON.stringify(cfg.private_mcp, null, 2),
+      "2) First ask what work channels I use (Slack, Notion, Google Calendar, Meeting Transcripts, Google Docs, GitHub, Linear, Gmail, Slides/Figma, LinkedIn, X, Substack) and check which MCP connectors are active.",
+      "3) Log each channel with career_log_channel_scan, run time-sliced sweeps into L0, synthesize L1 roles & stories (honest human voice, shared credit), and run career_audit_gaps before stopping.",
+    ].join("\n\n");
     await navigator.clipboard.writeText(txt);
-    toast("Copied MCP setup & starter prompt for your AI agent");
+    toast("Copied exact OS-aware MCP setup & starter prompt");
   } catch (err) { toast("Copy failed: " + err.message); }
 };
 
-window.copyShareMcp = async () => {
-  const cmd = "python -m v2.career mcp private/career.sqlite --tier L2";
+window.copyMcpJson = async () => {
   try {
-    await navigator.clipboard.writeText(cmd);
-    toast("Copied read-only leak-checked L2 MCP server command");
+    const cfg = await api("/api/mcp-config");
+    await navigator.clipboard.writeText(JSON.stringify(cfg.private_mcp, null, 2));
+    toast("Copied exact Claude Desktop / Cursor MCP JSON (L1 private)");
+  } catch (err) { toast("Copy failed: " + err.message); }
+};
+
+window.copyNoMcpPrompt = async () => {
+  const txt = [
+    "Help me turn my resume, work notes, and project memories into clean, honest career stories for my local Career Context vault.",
+    "Rules:",
+    "- Write in a sharp, natural human voice (Stakes -> Key Decision -> Concrete Result). Avoid buzzwords like 'spearheaded transformative paradigm shifts'.",
+    "- Preserve shared credit honestly (who partnered with me vs. what I owned) and keep proposals, pilots, shipped work, and shelved prototypes distinct.",
+    "- Never invent metrics or copy proprietary source code / customer PII.",
+    "Start by asking me to paste my resume or describe 1–2 roles, then interview me with 3 focused questions per role to draft Flagship stories (Title, Period, Summary, 2–3 Key Decisions, Outcome, Shared Credit).",
+  ].join("\n");
+  try {
+    await navigator.clipboard.writeText(txt);
+    toast("Copied No-MCP Web AI prompt — paste into ChatGPT, Claude, or Gemini web");
+  } catch (err) { toast("Copy failed: " + err.message); }
+};
+
+window.loadDemoVault = async () => {
+  try {
+    await api("/api/demo/load", {});
+    toast("Loaded fictional sample vault (Maya Lin)");
+    await refresh();
+    switchTab("studio");
+  } catch (err) { toast(err.message); }
+};
+
+window.copyShareMcp = async () => {
+  try {
+    const cfg = await api("/api/mcp-config");
+    await navigator.clipboard.writeText(JSON.stringify(cfg.share_mcp, null, 2));
+    toast("Copied exact read-only L2 MCP JSON config");
+  } catch (err) { toast("Copy failed: " + err.message); }
+};
+
+window.copyHandoffPrompt = async (kind) => {
+  const prompts = {
+    resume: [
+      "I'm attaching my leak-checked L2 Career Context Pack and a target job description below.",
+      "Draft a tailored 1-page resume strictly grounded in the facts, outcomes, and shared credit in my L2 pack.",
+      "Rules: prioritize the most relevant Flagship stories, keep scope honest (never inflate or invent metrics), and list any real gaps between the JD and my background separately so I can prepare for them.",
+      "\nTarget Job Description:\n[PASTE JOB DESCRIPTION HERE]",
+    ].join("\n"),
+    interview: [
+      "Act as a sharp hiring manager interviewing me based on the attached L2 Career Context Pack.",
+      "Ask me one behavioral or trade-off question at a time rooted in my actual Flagship stories and key decisions.",
+      "Push back gently on scope, shared credit, and what I would do differently today. Give concise, specific feedback after each answer.",
+    ].join("\n"),
+    external: [
+      "Attached is a confidential-safe (L2) Career Context Pack summarizing my roles, flagship stories, key decisions, and outcomes.",
+      "Answer questions about my background strictly from this file. Preserve shared credit, distinguish shipped work from pilots/prototypes, and if something isn't covered here, say so rather than guessing.",
+    ].join("\n"),
+  };
+  try {
+    await navigator.clipboard.writeText(prompts[kind] || prompts.external);
+    toast("Copied handoff prompt — paste alongside your L2 AI Context Pack");
   } catch (err) { toast("Copy failed: " + err.message); }
 };
 
@@ -2536,14 +2709,17 @@ function renderStorySheet() {
         ${linkedSources.length ? `
           <div class="source-ref-list">
             ${linkedSources.slice(0, 8).map(s => `
-              <button type="button" class="source-ref-row" onclick="openSourceInVault('${esc(s.id)}')">
-                <span style="display:inline-flex;align-items:center;gap:0.55rem;min-width:0">
-                  <span style="width:16px;height:16px;flex:none;display:inline-grid;place-items:center">${getBrandIcon(s.channel)}</span>
-                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.title)}</span>
-                  ${s.event_date ? `<span class="meta" style="flex-shrink:0">· ${esc(s.event_date)}</span>` : ''}
-                </span>
-                <span class="go">Read →</span>
-              </button>`).join("")}
+              <div class="source-ref-wrap">
+                <button type="button" class="source-ref-row" onclick="openSourceInVault('${esc(s.id)}')">
+                  <span style="display:inline-flex;align-items:center;gap:0.55rem;min-width:0">
+                    <span style="width:16px;height:16px;flex:none;display:inline-grid;place-items:center">${getBrandIcon(s.channel)}</span>
+                    <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.title)}</span>
+                    ${s.event_date ? `<span class="meta" style="flex-shrink:0">· ${esc(s.event_date)}</span>` : ''}
+                  </span>
+                  <span class="go">Read →</span>
+                </button>
+                <button type="button" class="unlink-btn" title="Unlink source from this story" onclick="unlinkSource('${esc(ep.id)}','${esc(s.id)}')">×</button>
+              </div>`).join("")}
             ${linkedSources.length > 8 ? `<div class="meta" style="padding:0.2rem 0.4rem">+ ${linkedSources.length - 8} more linked sources in Vault</div>` : ''}
           </div>` : `<p class="meta" style="margin:0.45rem 0 0">No raw sources linked yet. Open any document in Vault to attach it to this story.</p>`}
       </div>
@@ -2651,9 +2827,12 @@ function buildStoryFormHTML(ep) {
     <label>Tags (comma-separated)</label>
     <input id="ep-tags" value="${esc((ep?.tags || []).join(', '))}" placeholder="hiring, ai-tooling, leadership">
 
-    <div class="row" style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--line)">
-      <button class="btn" id="save-episode-btn">${isNew ? 'Create L1 story' : 'Save changes'}</button>
-      <button class="btn secondary" onclick="${isNew ? 'cancelNewStory()' : "setStoryMode('read')"}">Cancel</button>
+    <div class="split" style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--line);align-items:center">
+      <div class="row">
+        <button class="btn" id="save-episode-btn">${isNew ? 'Create L1 story' : 'Save changes'}</button>
+        <button class="btn secondary" onclick="${isNew ? 'cancelNewStory()' : "setStoryMode('read')"}">Cancel</button>
+      </div>
+      ${!isNew ? `<button type="button" class="btn danger sm" onclick="deleteStory('${esc(ep.id)}')">Delete story</button>` : ''}
     </div>`;
 }
 
@@ -2981,7 +3160,10 @@ function renderSourceReader(s) {
           </div>
           <h3>${esc(s.title)}</h3>
         </div>
-        <button type="button" class="btn secondary sm" style="flex-shrink:0" onclick="toggleDocMono()">${VAULT_DOC_MONO ? 'Readable view' : 'Monospace'}</button>
+        <div class="row" style="flex-shrink:0">
+          <button type="button" class="btn secondary sm" onclick="toggleDocMono()">${VAULT_DOC_MONO ? 'Readable view' : 'Monospace'}</button>
+          <button type="button" class="btn danger sm" onclick="deleteSource('${esc(s.id)}')">Delete</button>
+        </div>
       </div>
 
       <!-- Linked Stories + 1-Click Attach Bar -->
@@ -3069,7 +3251,37 @@ window.batchSanitize = async (tier) => {
   await refresh();
 };
 
-window.delRole = async (id) => { await api("/api/roles/delete", { id }); toast("Removed role"); await refresh(); };
+window.delRole = async (id) => {
+  if (!confirm("Remove this role? Attached stories stay in your vault.")) return;
+  await api("/api/roles/delete", { id });
+  toast("Removed role");
+  await refresh();
+};
+
+window.deleteStory = async (id) => {
+  if (!confirm("Delete this story and its L2/L3 drafts? Raw backing sources stay safely in Vault.")) return;
+  await api("/api/episodes/delete", { id });
+  STORY_MODE = "read";
+  ACTIVE_STORY_ID = null;
+  toast("Deleted story");
+  await refresh();
+};
+
+window.unlinkSource = async (episode_id, source_id) => {
+  await api("/api/episodes/unlink", { episode_id, source_id });
+  toast("Unlinked source from story");
+  await refresh();
+};
+
+window.deleteSource = async (id) => {
+  if (!confirm("Permanently remove this raw document from your local L0 vault?")) return;
+  await api("/api/sources/delete", { id });
+  ACTIVE_SOURCE_ID = null;
+  ACTIVE_SOURCE_OBJ = null;
+  document.getElementById("source-reader").innerHTML = '<div class="meta" style="text-align:center;padding:3.25rem 1.25rem">Select any document on the left to read its full text and attach it to a story.</div>';
+  toast("Deleted document from Vault");
+  await refresh();
+};
 
 window.copyResume = async (tier) => {
   try {
@@ -3232,9 +3444,13 @@ document.getElementById("triage-btn").onclick = async () => {
 
 document.getElementById("sync-emb-btn").onclick = async () => {
   try {
-    toast("Syncing local float16 semantic cache...");
+    toast("Checking local search index...");
     const r = await api("/api/embeddings/sync", {});
-    toast(`Semantic cache synced: ${r.newly_embedded} new, ${r.cached} cached (${r.elapsed_ms} ms)`);
+    if (r.available === false) {
+      toast(r.message || "Instant FTS5 keyword search is active.");
+    } else {
+      toast(`Semantic cache synced: ${r.newly_embedded} new, ${r.cached} cached (${r.elapsed_ms} ms)`);
+    }
   } catch (err) { toast(err.message); }
 };
 

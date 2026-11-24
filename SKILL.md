@@ -11,8 +11,23 @@ You are helping the user turn their scattered work across live communication and
 - **You (the user's trusted LLM + their connected MCP servers)** own channel discovery, systematic live MCP scanning (Slack, Notion, Google Docs/Drive, GitHub, Linear/Jira, Gmail, Calendar, social/public channels), cross-source reasoning, contradiction spotting, iterative deepening, and human storytelling.
 - **The local Python tools (`python -m v2.career ...` or the `career-context-v2` MCP server)** own local SQLite storage, channel scan tracking, SHA-256 hashing, verbatim quote-to-offset anchoring, FTS5/hybrid search, deterministic gap auditing (`audit-gaps`), staleness tracking, and confidential leak blocking. Never compute hashes or character offsets by hand.
 
-> **Trust & Model-Training Notice (State Clearly Before Scanning):**
-> Local SQLite keeps the user's archive on their own machine, **not** their LLM inference session. Before scanning internal work channels, remind the user to run this only with an **LLM provider and plan they trust—ideally with model training disabled / zero-data-retention** (e.g., API, Team/Enterprise with training opted out, or local models)—and only across channels and workspaces they are authorized to read.
+> **Trust, Employer IP & Model-Training Notice (State Clearly Before Scanning):**
+> Local SQLite keeps the user's archive on their own machine, **not** their LLM inference session. Before scanning internal work channels:
+> 1. Remind the user to run this only with an **LLM provider and plan they trust—ideally with model training disabled / zero-data-retention** (e.g., API, Team/Enterprise with training opted out, or local models).
+> 2. Respect **employer IP and NDA boundaries**: only read channels the user is authorized to access, and **never** ingest proprietary source code, customer PII tables, credentials, or confidential board financials. When in doubt, summarize the user's own role, decisions, and outcomes in their own words rather than copying raw corporate documents.
+
+---
+
+## Works for Every Role & Setup (Not Just MCP or Tech)
+
+- **No-MCP / Corporate-Locked Fallback:** Many users use web chat (ChatGPT / Claude.ai / Gemini web) or have corporate IT policies blocking MCP connectors. Never fail or stall if MCP tools aren't connected—switch smoothly to **offline files** (PDF/DOCX resumes, LinkedIn exports, brag docs, performance reviews, decks, meeting notes) or a focused **3-questions-per-role interview** while keeping the exact same `L0–L3` quality bar.
+- **Cross-Discipline Artifact Map (Adapt to the User's Craft):**
+  - **Engineering / Data:** PRs, RFCs, incident postmortems, architecture diagrams, benchmarks, on-call/reliability improvements.
+  - **Product / Program / Ops:** PRDs, launch readiness checklists, QBR/OKR reviews, stakeholder escalations, operating cadences, trade-off memos.
+  - **Design / Research:** Figma critiques, user research syntheses, design systems, prototypes shipped vs. shelved, usability test wins.
+  - **Recruiting / People / HR:** Hiring plans, intake rubrics, time-to-fill/conversion shifts, onboarding programs, org redesigns, agency/comp negotiations.
+  - **Sales / Marketing / Partnerships:** Deal reviews, renewal/expansion wins, campaign postmortems, positioning decks, GTM launches, partner playbooks.
+  - **Founders / Executives:** Fundraising narratives, pivots, key hires, board memos, crisis calls, bets killed early.
 
 ---
 
@@ -84,24 +99,33 @@ Autonomously close **at least one full round of high-severity gaps** before hand
    - `2` = **Core Delivery** (solid operational/engineering proof)
    - `1` = **Proof Point / Experiment** (focused tool, side project, or prototype)
    - `0` = **Background**
-2. **Write stories, not legal depositions (Honest Without Legalese):**
+2. **Write stories, not AI slop or legal depositions (Voice Calibration):**
    - Structure L2 narratives around **Stakes → Tension → Your Decision → Concrete Proof**.
    - Keep scope honest and credit shared naturally; keep methodological footnotes inside `limits` and `claims`—never bleed courtroom phrases (*"the selected record establishes..."*, *"does not constitute independent verification"*) into L2/L3 summaries (`audit-gaps` flags these automatically).
+   - **Avoid AI slop (weak example):** *"Spearheaded a transformative, cross-functional paradigm shift in checkout reliability, driving 10x alignment and delivering seamless enterprise excellence."*
+   - **Aim for sharp human operator prose (strong example):** *"When false declines threatened an eight-figure enterprise deal with a Tier-1 European bank, I partnered with Risk Engineering to replace blind rule launches with a 14-day shadow-mode evaluator—cutting European cohort false declines by 38% over six weeks with zero fraud regression."*
 3. **Register confidential terms & enforce leak safety:**
    - Run `sensitive suggest DB` and register customer names, internal revenue/metrics, proprietary thresholds, and private coworker names (`career_add_sensitive_term`).
    - Draft (`career_draft_tier`), rewrite into natural prose, and save (`career_set_tier` — blocks any remaining sensitive term, email, token, or Slack `#channel`).
+   - Remind the user to do a **10-second human pre-share scan** for indirect client clues or unpublished revenue figures that regex cannot detect.
    - Re-run `audit-gaps` and `leak-check --tier L2` until clean.
 
 ---
 
-## Live Studio, Exports (Human Brief vs. Exhaustive AI Pack), & MCP
-- **Live Browser Studio (review, edit, check gaps, preview & export locally):**
-  `python -m v2.launch PRIVATE/career.sqlite --open`
+## Live Studio, Backups, Exports (Human Brief vs. Exhaustive AI Pack), & MCP
+- **Live Browser Studio (defaults safely to `~/.career-context/career.sqlite` outside any git repo; auto-picks free port if 8765 is busy):**
+  `python -m v2.launch --open`
+- **Try a fictional sample vault immediately (temporary session, touches nothing real):**
+  `python -m v2.launch --demo --open`
+- **Print exact OS-aware MCP JSON config for Claude Desktop / Cursor:**
+  `python -m v2.career mcp-config`
+- **Consistent online SQLite backup:**
+  `python -m v2.career backup DB --out career-backup.sqlite`
 - **Succinct human exports (zero JS, strict CSP, leak-checked):**
   `python -m v2.career export DB --tier L2 --format html|resume --out OUTPUT`
 - **Exhaustive AI Context Pack (designed to be dropped straight into someone else's AI—full leak-checked L2 stories, decisions, roles & skills):**
   `python -m v2.career export DB --tier L2 --format agent_pack|agent_json --out OUTPUT`
 - **Private read/write MCP endpoint (for your own assistant):**
-  `python -m v2.career mcp PRIVATE/career.sqlite --tier L1 --rw`
+  `python -m v2.career mcp ~/.career-context/career.sqlite --tier L1 --rw`
 - **External read-only MCP endpoint (for hiring managers / external agents — leak-checked L2/L3 only):**
-  `python -m v2.career mcp PRIVATE/career.sqlite --tier L2`
+  `python -m v2.career mcp ~/.career-context/career.sqlite --tier L2`

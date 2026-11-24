@@ -660,6 +660,87 @@ class TestCareerVaultV2(unittest.TestCase):
         self.assertEqual(gaps_after["summary"]["legalese_hits_count"], 0)
         self.assertGreater(gaps_after["depth_score"], initial_score)
 
+    def test_pdf_upload_demo_vault_backup_mcp_config_and_deletes(self) -> None:
+        import base64
+        import zlib
+        from v2.career import build_mcp_config
+
+        app = StudioApp(self.db_path)
+        try:
+            hdrs = {"Content-Type": "application/json", "X-Career-Token": app.token}
+
+            # 1. Empty vault can load fictional sample vault via /api/demo/load
+            st, _, body = app.dispatch("POST", "/api/demo/load", hdrs, b"{}")
+            self.assertEqual(st, 200)
+            demo = json.loads(body)
+            self.assertTrue(demo["loaded"])
+            self.assertGreaterEqual(demo["counts"]["episodes"], 3)
+            self.assertGreaterEqual(demo["counts"]["sources"], 5)
+
+            # Verify full /api/state hydrates cleanly after loading sample vault
+            st_state, _, state_body = app.dispatch("GET", "/api/state")
+            self.assertEqual(st_state, 200)
+            state_data = json.loads(state_body)
+            self.assertEqual(state_data["person"]["name"], "Maya Lin (Sample Vault)")
+            self.assertGreaterEqual(len(state_data["knowledge"]["capabilities"]), 4)
+
+            # Second /api/demo/load refuses cleanly so real user data is never overwritten
+            st2, _, body2 = app.dispatch("POST", "/api/demo/load", hdrs, b"{}")
+            self.assertEqual(st2, 400)
+            self.assertIn("already contains data", json.loads(body2)["error"])
+
+            # 2. Pure-stdlib PDF upload works (FlateDecode text stream)
+            stream = zlib.compress(b"BT /F1 12 Tf (Maya Lin - Staff Product Lead Resume 2026) Tj [(Led checkout ) -50 (modernization)] TJ ET")
+            fake_pdf = b"%PDF-1.4\n1 0 obj\n<< /Length " + str(len(stream)).encode() + b" /Filter /FlateDecode >>\nstream\n" + stream + b"\nendstream\nendobj\n%%EOF"
+            st, _, body = app.dispatch(
+                "POST", "/api/ingest/upload", hdrs,
+                json.dumps({
+                    "filename": "Maya_Lin_Resume.pdf",
+                    "content_base64": base64.b64encode(fake_pdf).decode("ascii"),
+                }).encode(),
+            )
+            self.assertEqual(st, 200)
+            up = json.loads(body)
+            self.assertEqual(up["importer"], "pdf_upload")
+            pdf_src_id = up["items"][0]["id"]
+            self.assertEqual(up["items"][0]["channel"], "resume")
+
+            # Verify extracted PDF text is stored & searchable
+            st, _, src_body = app.dispatch("GET", f"/api/source/{pdf_src_id}")
+            self.assertEqual(st, 200)
+            self.assertIn("Staff Product Lead Resume 2026", json.loads(src_body)["raw_text"])
+
+            # 3. Online SQLite backup endpoint returns a valid SQLite 3 database snapshot
+            st, b_hdrs, snap = app.dispatch("GET", "/api/backup")
+            self.assertEqual(st, 200)
+            self.assertTrue(snap.startswith(b"SQLite format 3\x00"))
+            self.assertIn("career-vault-backup-", b_hdrs["Content-Disposition"])
+
+            # 4. OS-aware /api/mcp-config and build_mcp_config() return both L1 & L2 servers
+            st, _, mcp_body = app.dispatch("GET", "/api/mcp-config")
+            self.assertEqual(st, 200)
+            mcp_cfg = json.loads(mcp_body)
+            self.assertIn("career-context-private", mcp_cfg["private_mcp"]["mcpServers"])
+            self.assertIn("career-context-shareable", mcp_cfg["share_mcp"]["mcpServers"])
+            self.assertEqual(mcp_cfg["db_path"], build_mcp_config(self.db_path)["db_path"])
+
+            # 5. Calm embeddings sync when optional .semantic-model is absent
+            app.model_dir = None
+            st, _, emb_body = app.dispatch("POST", "/api/embeddings/sync", hdrs, b"{}")
+            self.assertEqual(st, 200)
+            self.assertFalse(json.loads(emb_body)["available"])
+
+            # 6. Safety rail deletes/unlinks work cleanly (source delete + episode delete)
+            st, _, del_src = app.dispatch("POST", "/api/sources/delete", hdrs, json.dumps({"id": pdf_src_id}).encode())
+            self.assertEqual(st, 200)
+            self.assertTrue(json.loads(del_src)["deleted"])
+
+            st, _, del_ep = app.dispatch("POST", "/api/episodes/delete", hdrs, json.dumps({"id": "ep-clinic-rollout"}).encode())
+            self.assertEqual(st, 200)
+            self.assertTrue(json.loads(del_ep)["deleted"])
+        finally:
+            app.close()
+
 
 if __name__ == "__main__":
     unittest.main()

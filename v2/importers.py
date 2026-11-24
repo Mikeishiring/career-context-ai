@@ -19,10 +19,12 @@ import html
 import io
 import json
 import re
+import shutil
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
 import zipfile
+import zlib
 from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
@@ -30,8 +32,146 @@ from typing import Any
 
 from .db import CareerVault
 
-TEXT_EXTENSIONS = {".md", ".markdown", ".txt", ".rst", ".org", ".html", ".htm", ".json", ".csv", ".docx"}
+TEXT_EXTENSIONS = {".md", ".markdown", ".txt", ".rst", ".org", ".html", ".htm", ".json", ".csv", ".docx", ".pdf"}
 NOTION_ID_SUFFIX = re.compile(r"\s+[0-9a-f]{32}$", re.IGNORECASE)
+
+
+def _decode_pdf_literal(raw: bytes) -> str:
+    """Unescape a PDF literal string (...) into clean Unicode text."""
+    out = bytearray()
+    i = 0
+    n = len(raw)
+    while i < n:
+        ch = raw[i]
+        if ch == 92 and i + 1 < n:  # backslash
+            nxt = raw[i + 1]
+            escapes = {ord("n"): 10, ord("r"): 13, ord("t"): 9, ord("b"): 8, ord("f"): 12, 40: 40, 41: 41, 92: 92}
+            if nxt in escapes:
+                out.append(escapes[nxt])
+                i += 2
+            elif nxt in (10, 13):  # line continuation
+                i += 2
+                if nxt == 13 and i < n and raw[i] == 10:
+                    i += 1
+            elif 48 <= nxt <= 55:  # octal \ddd
+                oct_digits = bytes([nxt])
+                i += 2
+                for _ in range(2):
+                    if i < n and 48 <= raw[i] <= 55:
+                        oct_digits += bytes([raw[i]])
+                        i += 1
+                    else:
+                        break
+                out.append(int(oct_digits, 8) & 0xFF)
+            else:
+                out.append(nxt)
+                i += 2
+        else:
+            out.append(ch)
+            i += 1
+    b = bytes(out)
+    if b.startswith(b"\xfe\xff"):
+        return b[2:].decode("utf-16-be", errors="ignore")
+    if b.startswith(b"\xff\xfe"):
+        return b[2:].decode("utf-16-le", errors="ignore")
+    try:
+        return b.decode("utf-8")
+    except UnicodeDecodeError:
+        return b.decode("latin-1", errors="ignore")
+
+
+def _extract_pdf_text_stdlib(data: bytes) -> str:
+    """Pure-stdlib fallback PDF text extractor for uncompressed & FlateDecode text streams."""
+    chunks: list[bytes] = []
+    for m in re.finditer(rb"stream\r?\n(.*?)\r?\nendstream", data, re.S):
+        stream = m.group(1)
+        for candidate in (stream,):
+            try:
+                chunks.append(zlib.decompress(candidate))
+            except Exception:
+                try:
+                    chunks.append(zlib.decompress(candidate, -zlib.MAX_WBITS))
+                except Exception:
+                    if b"BT" in candidate and b"ET" in candidate:
+                        chunks.append(candidate)
+    if not chunks and b"BT" in data:
+        chunks.append(data)
+
+    lines: list[str] = []
+    for content in chunks:
+        for block in re.findall(rb"BT\b(.*?)\bET", content, re.S):
+            parts: list[str] = []
+            # Match TJ arrays [(...) -120 (...)] TJ or single literal (...) Tj / ' / "
+            for tok in re.finditer(
+                rb"\[((?:\\.|[^\]])*?)\]\s*TJ|\(((?:\\.|[^\)])*?)\)\s*(?:Tj|'|\"|\s*Tj)",
+                block,
+                re.S,
+            ):
+                if tok.group(1) is not None:
+                    arr_parts = [_decode_pdf_literal(lit) for lit in re.findall(rb"\(((?:\\.|[^\)])*?)\)", tok.group(1), re.S)]
+                    piece = "".join(arr_parts)
+                else:
+                    piece = _decode_pdf_literal(tok.group(2) or b"")
+                piece = piece.replace("\x00", "")
+                if piece:
+                    parts.append(piece)
+            joined = " ".join(p.strip() for p in parts if p.strip())
+            if joined:
+                lines.append(joined)
+    text = "\n".join(lines)
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
+    return text
+
+
+def extract_pdf_bytes(data: bytes) -> str:
+    """Extract readable text from a PDF using optional PDF libraries, pdftotext, or pure Python stdlib."""
+    if not data.lstrip().startswith(b"%PDF"):
+        raise ValueError("Invalid PDF file header.")
+
+    # 1. Optional installed Python PDF readers (pypdf / PyPDF2 / PyMuPDF)
+    for mod_name in ("pypdf", "PyPDF2"):
+        try:
+            mod = __import__(mod_name)
+            reader = mod.PdfReader(io.BytesIO(data))
+            txt = "\n\n".join((page.extract_text() or "").strip() for page in reader.pages).strip()
+            if len(txt) >= 20:
+                return txt
+        except Exception:
+            pass
+    try:
+        fitz = __import__("fitz")
+        doc = fitz.open(stream=data, filetype="pdf")
+        txt = "\n\n".join(page.get_text("text").strip() for page in doc).strip()
+        if len(txt) >= 20:
+            return txt
+    except Exception:
+        pass
+
+    # 2. Optional system `pdftotext` (poppler) if available on PATH
+    if shutil.which("pdftotext"):
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                in_pdf = Path(tmp) / "in.pdf"
+                in_pdf.write_bytes(data)
+                proc = subprocess.run(
+                    ["pdftotext", "-layout", str(in_pdf), "-"],
+                    capture_output=True, text=True, timeout=20, check=False,
+                )
+                if proc.returncode == 0 and len(proc.stdout.strip()) >= 20:
+                    return proc.stdout.strip()
+        except Exception:
+            pass
+
+    # 3. Pure Python stdlib FlateDecode + BT/ET text operator fallback
+    txt = _extract_pdf_text_stdlib(data)
+    if len(txt) >= 20:
+        return txt
+
+    raise ValueError(
+        "Could not extract selectable text from this PDF (it may be a scanned image or use custom font encoding). "
+        "Tip: install `pip install pypdf`, export as .docx/.txt, or paste the text into Quick Note."
+    )
 
 
 def extract_docx_bytes(data: bytes) -> str:
@@ -132,6 +272,8 @@ def import_folder(
     for path in files:
         if path.suffix.lower() == ".docx":
             raw = extract_docx_bytes(path.read_bytes())
+        elif path.suffix.lower() == ".pdf":
+            raw = extract_pdf_bytes(path.read_bytes())
         else:
             raw = _read_text(path)
             if path.suffix.lower() in (".html", ".htm"):
@@ -284,6 +426,8 @@ def import_slack(
                 if name not in authors:
                     authors.append(name)
                 lines.append(f"{name}: {m.get('text', '').strip()}")
+            if len(msgs) == 1 and len((msgs[0].get("text") or "").strip()) < 25:
+                continue  # Skip ultra-short chatter ("sounds good!", "joining now")
             event_date = _iso_date(thread_ts)
             first_line = msgs[0].get("text", "")[:72].replace("\n", " ")
             res = vault.ingest_source(
@@ -722,6 +866,22 @@ def import_uploaded_file(
             sensitivity=sensitivity,
         )
         return {"importer": "docx_upload", "count": 1, "items": [item]}
+
+    if ext == ".pdf":
+        text = extract_pdf_bytes(raw_bytes)
+        ch = (
+            "linkedin" if "linkedin" in low
+            else ("resume" if ("resume" in low or "cv" in low or "profile" in low) else (channel_hint if channel_hint != "auto" else "doc"))
+        )
+        item = vault.ingest_source(
+            title=Path(safe_name).stem.replace("_", " ").replace("-", " ").strip(),
+            raw_text=text,
+            channel=ch,
+            locator=f"upload:{safe_name}",
+            scope=f"Browser uploaded PDF ({safe_name})",
+            sensitivity=sensitivity,
+        )
+        return {"importer": "pdf_upload", "count": 1, "items": [item]}
 
     with tempfile.TemporaryDirectory() as tmp:
         p = Path(tmp) / safe_name
