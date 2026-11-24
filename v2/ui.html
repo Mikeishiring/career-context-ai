@@ -694,52 +694,46 @@ dialog::backdrop {
 .mark-secret { background: var(--danger-bg); color: var(--danger); padding: 0.05rem 0.38rem; border-radius: 5px; font-weight: 650; }
 .mark-safe { background: var(--mint-bg); color: var(--mint); padding: 0.05rem 0.38rem; border-radius: 5px; font-weight: 650; }
 
-/* Chapter 4: Editorial Concepts Seam Strip + Branded Channel Ledger */
-.concepts-strip {
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-  background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
-  box-shadow: var(--raised); overflow: hidden; margin-bottom: 2.2rem;
-}
-.concept-col { padding: 1.2rem 1.35rem; border-left: 1px solid var(--line); }
-.concept-col:first-child { border-left: 0; }
-.concept-col h4 { margin: 0.45rem 0 0.35rem; font-size: 0.98rem; font-weight: 700; letter-spacing: -0.02em; }
-.concept-col p { margin: 0; font-size: 0.84rem; color: var(--muted); line-height: 1.55; }
-
-.channel-ledger-table {
+/* Unified Tempo Split Shell & Compact MCP Dock (reused across Overview, Experience, Share, AI) */
+.split-shell {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-  background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
-  box-shadow: var(--raised); overflow: hidden;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 18px;
+  box-shadow: var(--raised); overflow: hidden; margin-bottom: 1.5rem;
 }
-.channel-row {
-  display: grid; grid-template-columns: 36px minmax(0, 1fr) auto;
-  align-items: center; gap: 0.85rem; padding: 0.9rem 1.15rem;
-  border-top: 1px solid var(--line); border-left: 1px solid var(--line);
-  transition: background-color 150ms ease;
+.split-pane { padding: 1.25rem 1.45rem; border-left: 1px solid var(--line); min-width: 0; }
+.split-pane:first-child { border-left: 0; }
+.split-pane h3 { margin: 0 0 0.35rem; font-size: 1.06rem; font-weight: 700; letter-spacing: -0.025em; }
+
+.mcp-dock {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 1.25rem;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 18px;
+  padding: 1.15rem 1.4rem; box-shadow: var(--raised);
 }
-.channel-row:nth-child(odd) { border-left: 0; }
-.channel-row:nth-child(-n+2) { border-top: 0; }
-.channel-row:hover { background: var(--wash); }
-.brand-badge {
-  width: 34px; height: 34px; border-radius: 9px;
+.brand-pills-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 0.65rem; }
+.brand-chip {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  padding: 0.34rem 0.68rem; border-radius: 10px;
   background: var(--surface); border: 1px solid var(--line);
-  display: grid; place-items: center; flex-shrink: 0;
-  transition: transform 180ms var(--ease-spring);
+  font: 600 0.8rem var(--sans); color: var(--ink);
+  transition: transform 160ms var(--ease-spring), border-color 150ms ease, background-color 150ms ease;
 }
-.channel-row:hover .brand-badge { transform: scale(1.07); }
-.brand-badge svg { width: 19px; height: 19px; display: block; }
-.channel-row-meta { min-width: 0; }
-.channel-row-title { display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; }
-.channel-row-title strong { font-size: 0.92rem; }
-.channel-row-desc { font-size: 0.79rem; color: var(--muted); line-height: 1.42; margin-top: 0.15rem; }
+.brand-chip:hover { transform: translateY(-2px); border-color: #9c8ee4; background: var(--paper); }
+.brand-chip.active { border-color: color-mix(in srgb, var(--mint-bar) 55%, var(--line)); background: var(--paper); }
+.brand-chip svg { width: 16px; height: 16px; flex: none; display: block; }
+.brand-chip .cnt { font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.brand-chip.active .cnt { color: var(--mint); font-weight: 700; }
+
+.hero-trust-note {
+  margin-top: 0.95rem; font-size: 0.78rem; color: rgba(236, 233, 255, 0.84);
+  display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;
+}
 
 @media (max-width: 960px) {
-  .landing-hero, .pipeline-spotlight, .aperture-shell, .concepts-strip, .channel-ledger-table { grid-template-columns: 1fr; }
+  .landing-hero, .pipeline-spotlight, .aperture-shell, .split-shell, .mcp-dock { grid-template-columns: 1fr; }
+  .split-pane { border-left: 0; border-top: 1px solid var(--line); }
+  .split-pane:first-child { border-top: 0; }
   .spotlight-side { align-items: flex-start; padding-left: 0; border-left: 0; border-top: 1px solid var(--line); padding-top: 0.9rem; }
   .aperture-rail { border-right: 0; border-bottom: 1px solid var(--line); }
-  .concept-col { border-left: 0; border-top: 1px solid var(--line); }
-  .concept-col:first-child { border-top: 0; }
-  .channel-row { border-left: 0; }
-  .channel-row:nth-child(2) { border-top: 1px solid var(--line); }
   .pipeline-rail { grid-template-columns: repeat(5, minmax(110px, 1fr)); overflow-x: auto; }
 }
 
@@ -787,13 +781,18 @@ dialog::backdrop {
     <!-- Chapter 1: Asymmetric Hero + Authored MCP Convergence Diagram -->
     <div class="landing-hero">
       <div>
-        <span class="pill" style="background:rgba(255,255,255,0.18);color:#fff">Local-First Career Knowledge System</span>
-        <h2>Turn years of scattered work into a living career vault</h2>
-        <p>Resumes compress years of real judgment, projects, and leadership into twenty generic bullets. Career Context connects your trusted AI assistant to your live work tools through MCP—building a private local database you can share safely at any level of detail.</p>
+        <span class="pill" style="background:rgba(255,255,255,0.18);color:#fff">Local SQLite Vault + MCP Server</span>
+        <h2>Turn scattered work into a living career vault</h2>
+        <p>Your trusted AI assistant connects to your work tools via MCP, builds one private local database, and lets you share clean, leak-checked views at any depth.</p>
         <div class="hero-actions">
-          <button class="hero-cta" onclick="switchTab('studio')">Open my Studio <span class="arrow">→</span></button>
+          <button class="hero-cta" onclick="switchTab('studio')">Open Studio <span class="arrow">→</span></button>
           <button class="hero-cta ghost" onclick="switchTab('experience')">Roles &amp; Experience</button>
-          <button class="hero-cta ghost" onclick="previewExport('L2')">Preview L2 Share ↗</button>
+          <button class="hero-cta ghost" onclick="previewExport('L2')">Preview L2 ↗</button>
+        </div>
+        <div class="hero-trust-note">
+          <span>🔒 Local SQLite on your machine</span>
+          <span>·</span>
+          <span>Use a trusted LLM with model training disabled</span>
         </div>
       </div>
 
@@ -895,43 +894,28 @@ dialog::backdrop {
 
     <!-- Chapter 3: Interactive Confidentiality Aperture (See L0 -> L1 -> L2 -> L3 Transform Live) -->
     <div class="section-head">
-      <h3>See how confidentiality tiers work (L0 to L3)</h3>
-      <span class="meta">Click each tier to watch the same example transform from raw notes to public highlight</span>
+      <h3>How confidentiality tiers work (L0 to L3)</h3>
+      <span class="meta">Click any tier to see the exact same record transform</span>
     </div>
     <div class="aperture-shell">
       <div class="aperture-rail" id="aperture-rail"></div>
       <div class="aperture-stage" id="aperture-stage"></div>
     </div>
 
-    <!-- Chapter 4: Plain-English Concepts & Trust Strip -->
-    <div class="section-head">
-      <h3>Key terms and trust model</h3>
-      <span class="meta">How MCP, BYO-LLM privacy, and self-deepening fit together</span>
-    </div>
-    <div class="concepts-strip">
-      <div class="concept-col">
-        <span class="pill">MCP · Live Connectors</span>
-        <h4>What is MCP?</h4>
-        <p><strong>Model Context Protocol</strong> lets your AI assistant read directly across Slack, Notion, Google Calendar, meeting transcripts, Google Docs, GitHub, and Linear—so you don't export ZIP files by hand. It also exposes a read-only, leak-checked <strong>L2</strong> view to other agents.</p>
+    <!-- Chapter 4: Compact Branded MCP Channels Dock -->
+    <div class="mcp-dock">
+      <div>
+        <div class="row" style="gap:0.55rem">
+          <strong style="font-size:1.02rem">Work channels scanned by your MCP agent</strong>
+          <span class="meta">Local SQLite is itself an MCP server (L1 private or L2 read-only)</span>
+        </div>
+        <div id="overview-channels-dock" class="brand-pills-wrap"></div>
       </div>
-      <div class="concept-col">
-        <span class="pill warn">BYO-LLM · Trust Model</span>
-        <h4>Privacy and zero-training LLMs</h4>
-        <p>Your SQLite database stays 100% on your machine—zero hosted Career Context servers and zero telemetry. Because scanned excerpts pass through your chosen LLM during a session, use an <strong>LLM provider and plan you trust with model training disabled / zero-data-retention</strong>, and only scan channels you are authorized to read.</p>
-      </div>
-      <div class="concept-col">
-        <span class="pill ok">Self-Deepening Audit</span>
-        <h4>Why Deepening Radar exists</h4>
-        <p>Most AI sessions stop after five obvious files and leave you asking <em>"what else did I miss?"</em>. Our deterministic gap engine tracks unscanned channels, empty roles, long unlinked docs, thin stories, and robotic legal phrasing so depth happens systematically.</p>
+      <div class="row" style="flex-shrink:0">
+        <button class="btn secondary sm" onclick="copyMcpSetup()">Copy MCP Prompt</button>
+        <button class="btn sm" onclick="switchTab('vault')">Open Vault →</button>
       </div>
     </div>
-
-    <!-- Chapter 5: Connected Work Channels Ledger with Real Brand Logos -->
-    <div class="section-head">
-      <h3>Work channels your agent can scan via MCP</h3>
-      <button class="btn secondary sm" onclick="switchTab('vault')">Open Vault &amp; Scan Ledger →</button>
-    </div>
-    <div id="overview-channels-ledger" class="channel-ledger-table"></div>
   </section>
 
   <!-- TAB 1: STUDIO COMMAND CENTER (HERO, FLAGSHIPS & DEEPENING RADAR) -->
@@ -980,22 +964,19 @@ dialog::backdrop {
     </div>
     <div id="flagship-grid" class="story-grid"></div>
 
-    <!-- Live Deepening Radar ("What Else Have I Missed?") -->
+    <!-- Live Deepening Radar -->
     <div class="card" id="deepening-radar" style="margin-bottom:1.5rem">
       <div class="split" style="align-items:center;margin-bottom:0.75rem">
-        <div>
-          <div class="row" style="margin-bottom:0.2rem">
-            <h3 style="margin:0">Deepening radar · what else have you missed?</h3>
-            <span class="pill ok" id="depth-score-pill">Depth 0/100</span>
-          </div>
-          <p class="meta" style="margin:0">Deterministic audit of unscanned MCP channels, uncovered roles, long unlinked docs, thin stories, voice quality, and sharing safety.</p>
+        <div class="row" style="gap:0.6rem">
+          <h3 style="margin:0">Deepening radar</h3>
+          <span class="pill ok" id="depth-score-pill">Depth 0/100</span>
         </div>
         <div class="row">
-          <button class="btn secondary sm" id="copy-deepening-btn">Copy AI deepening prompt</button>
-          <button class="btn sm" id="send-deepening-ai-btn">Deepen with Browser AI →</button>
+          <button class="btn secondary sm" id="copy-deepening-btn">Copy agent prompt</button>
+          <button class="btn sm" id="send-deepening-ai-btn">Deepen with AI →</button>
         </div>
       </div>
-      <div id="depth-pillars" class="row" style="margin-bottom:0.8rem"></div>
+      <div id="depth-pillars" class="row" style="margin-bottom:0.75rem"></div>
       <div id="gap-actions-list"></div>
     </div>
   </section>
@@ -1066,16 +1047,14 @@ dialog::backdrop {
       <div id="role-sheet" class="sheet-panel"></div>
     </div>
 
-    <div class="grid-2">
-      <div class="card">
-        <h3>Dynamic career timeline</h3>
-        <p class="meta">Chronological view across Roles, Stories, and unlinked dated sources. Click any story to open it.</p>
-        <div id="timeline-list"></div>
+    <div class="split-shell">
+      <div class="split-pane">
+        <h3>Career timeline</h3>
+        <div id="timeline-list" style="margin-top:0.75rem;max-height:520px;overflow-y:auto;padding-right:0.4rem"></div>
       </div>
-      <div class="card">
-        <h3>Knowledge &amp; skills graph</h3>
-        <p class="meta">Capabilities, recurring themes, and key decisions aggregated across your stories.</p>
-        <div id="knowledge-graph"></div>
+      <div class="split-pane">
+        <h3>Skills &amp; decisions</h3>
+        <div id="knowledge-graph" style="margin-top:0.75rem"></div>
       </div>
     </div>
   </section>
@@ -1119,48 +1098,43 @@ dialog::backdrop {
       </div>
     </div>
 
-    <div class="grid-2" style="margin-bottom:1.15rem">
-      <div class="card" style="margin-bottom:0">
-        <div class="split">
-          <div>
-            <h3>Sensitive terms registry</h3>
-            <p class="meta" style="margin:0.2rem 0 0">Blocks confidential names, metrics, and internal terms from L2/L3 exports &amp; MCP.</p>
-          </div>
+    <div class="split-shell">
+      <div class="split-pane">
+        <div class="split" style="align-items:center">
+          <h3>Sensitive terms</h3>
           <button class="btn secondary sm" id="st-suggest-btn">Scan &amp; suggest</button>
         </div>
-        <div class="row" style="margin-top:0.75rem">
-          <input id="st-term" placeholder="Confidential term..." style="flex:2;min-width:140px">
-          <input id="st-repl" placeholder="Safe replacement..." style="flex:2;min-width:140px">
-          <select id="st-cat" style="flex:1;min-width:110px"><option>customer</option><option>metric</option><option>proprietary</option><option>person</option><option>internal_id</option><option>other</option></select>
+        <div class="row" style="margin-top:0.65rem">
+          <input id="st-term" placeholder="Confidential term..." style="flex:2;min-width:130px">
+          <input id="st-repl" placeholder="Safe replacement..." style="flex:2;min-width:130px">
+          <select id="st-cat" style="flex:1;min-width:105px"><option>customer</option><option>metric</option><option>proprietary</option><option>person</option><option>internal_id</option><option>other</option></select>
           <button class="btn sm" id="st-add">Add</button>
         </div>
-        <div id="suggested-terms" style="margin-top:0.65rem"></div>
-        <div id="sensitive-list" style="margin-top:0.65rem;max-height:190px;overflow-y:auto"></div>
+        <div id="suggested-terms" style="margin-top:0.55rem"></div>
+        <div id="sensitive-list" style="margin-top:0.55rem;max-height:175px;overflow-y:auto"></div>
       </div>
 
-      <div class="card" style="margin-bottom:0">
+      <div class="split-pane">
         <div class="split" style="align-items:center">
-          <div>
-            <h3>Overviews &amp; clean static exports</h3>
-            <p class="meta" style="margin:0.2rem 0 0">Zero JS, strict CSP, deterministically leak-checked.</p>
-          </div>
+          <h3>Exports &amp; read-only MCP</h3>
           <div class="row">
             <button class="btn secondary sm" onclick="batchSanitize('L2')">Auto-Sanitize L2</button>
             <button class="btn secondary sm" onclick="batchSanitize('L3')">Auto-Sanitize L3</button>
           </div>
         </div>
-        <div class="row" style="margin-top:0.85rem">
+        <div class="row" style="margin-top:0.75rem">
           <a class="btn secondary sm" href="/api/export?tier=L2&format=html">L2 HTML ↓</a>
           <a class="btn secondary sm" href="/api/export?tier=L3&format=html">L3 HTML ↓</a>
-          <a class="btn secondary sm" href="/api/export?tier=L2&format=resume">L2 Resume ↓</a>
-          <a class="btn secondary sm" href="/api/export?tier=L2&format=markdown">L2 Markdown ↓</a>
-          <a class="btn secondary sm" href="/api/export?tier=L3&format=json">L3 JSON ↓</a>
+          <a class="btn secondary sm" href="/api/export?tier=L2&format=resume">Resume ↓</a>
+          <a class="btn secondary sm" href="/api/export?tier=L2&format=markdown">Markdown ↓</a>
+          <a class="btn secondary sm" href="/api/export?tier=L3&format=json">JSON ↓</a>
+          <button class="btn secondary sm" onclick="copyShareMcp()">Copy L2 MCP</button>
         </div>
         <details style="margin-top:0.85rem">
           <summary class="meta" style="cursor:pointer;font-weight:650;color:var(--accent)">Edit L2 &amp; L3 top-level overviews</summary>
-          <label>L2 Confidential-Safe Overview (Hiring Managers)</label><textarea id="p-l2" style="min-height:76px"></textarea>
-          <label>L3 Public Overview</label><textarea id="p-l3" style="min-height:76px"></textarea>
-          <button class="btn sm" id="save-overviews" style="margin-top:0.6rem">Save overviews</button>
+          <label>L2 Confidential-Safe Overview</label><textarea id="p-l2" style="min-height:72px"></textarea>
+          <label>L3 Public Overview</label><textarea id="p-l3" style="min-height:72px"></textarea>
+          <button class="btn sm" id="save-overviews" style="margin-top:0.55rem">Save overviews</button>
         </details>
       </div>
     </div>
@@ -1223,11 +1197,14 @@ dialog::backdrop {
     <!-- Connected Work Channels & MCP Scan Ledger -->
     <div class="card" style="margin-bottom:1rem">
       <div class="split" style="align-items:center;margin-bottom:0.55rem">
-        <div>
-          <h3 style="margin:0">Work channels &amp; MCP scan ledger</h3>
-          <p class="meta" style="margin:0.15rem 0 0">Your AI agent connects to your own MCP servers (Slack, Notion, Google Docs, GitHub, Linear, Gmail, etc.) to scan authorized work directly into this vault. Declare every channel you work on so <strong>Deepening Radar</strong> tracks what's still unscanned.</p>
+        <div class="row" style="gap:0.5rem">
+          <h3 style="margin:0">Channels &amp; MCP scan ledger</h3>
+          <span class="meta">Scanned by your agent via MCP · upload files offline anytime</span>
         </div>
-        <button class="btn secondary sm" id="toggle-ch-form">+ Declare channel</button>
+        <div class="row">
+          <button class="btn secondary sm" onclick="copyMcpSetup()">Copy sweep prompt</button>
+          <button class="btn secondary sm" id="toggle-ch-form">+ Track channel</button>
+        </div>
       </div>
       <div id="ch-form" class="hidden sheet-animate" style="padding:0.75rem;margin-bottom:0.75rem;background:var(--surface);border:1px solid var(--line);border-radius:12px">
         <div class="form-row">
@@ -1284,12 +1261,12 @@ dialog::backdrop {
   <!-- TAB 5: BROWSER BYO-API ASSISTANT -->
   <section id="tab-assistant" class="tab-view hidden">
     <div class="page-head">
-      <h2>Browser AI (BYO-API)</h2>
+      <h2>Browser AI</h2>
     </div>
-    <div class="grid-2">
-      <div class="card">
-        <h3>Connect your own LLM API</h3>
-        <p class="meta">Use an LLM provider and plan you trust — ideally with <strong>model training disabled / zero-data-retention</strong> — before sending work context. Keys stay strictly in browser <code>sessionStorage</code> and are never written to SQLite.</p>
+    <div class="split-shell">
+      <div class="split-pane">
+        <h3>API connection</h3>
+        <p class="meta">Use a trusted provider with model training disabled. Keys stay in tab <code>sessionStorage</code> only.</p>
         <div class="form-row">
           <div>
             <label>Provider</label>
@@ -1301,28 +1278,27 @@ dialog::backdrop {
           </div>
           <div><label>Model</label><input id="llm-model" value="gpt-4o-mini"></div>
         </div>
-        <label>Optional Custom Base URL</label>
+        <label>Custom Base URL (optional)</label>
         <input id="llm-url" placeholder="e.g. http://localhost:11434/v1/chat/completions">
-        <label>API Key (sessionStorage only)</label>
+        <label>API Key</label>
         <input id="llm-key" type="password" placeholder="sk-... / sk-ant-... / AIza...">
         <div class="row" style="margin-top:0.85rem">
-          <button class="btn" id="llm-save-cfg">Save for this tab</button>
+          <button class="btn" id="llm-save-cfg">Save for tab</button>
           <button class="btn danger" id="llm-clear-cfg">Clear key</button>
         </div>
       </div>
-      <div class="card">
-        <h3>Ask your career vault (local RAG)</h3>
-        <p class="meta">Retrieves only the top matching local excerpts and runs them against your own API.</p>
-        <div class="row" style="margin:0.5rem 0 0.2rem">
+      <div class="split-pane">
+        <h3>Ask your vault</h3>
+        <div class="row" style="margin:0.55rem 0 0.25rem">
           <span class="pill ok clickable" onclick="loadDeepeningPrompt()">Deepen what I missed</span>
           <span class="pill clickable" onclick="setAiPrompt('Summarize the recurring leadership and systems patterns across my career stories.')">Recurring patterns</span>
-          <span class="pill clickable" onclick="setAiPrompt('Draft a crisp 60-second executive intro grounded in my Flagship stories.')">60s Executive intro</span>
+          <span class="pill clickable" onclick="setAiPrompt('Draft a crisp 60-second executive intro grounded in my Flagship stories.')">60s Intro</span>
           <span class="pill clickable" onclick="setAiPrompt('Spot contradictions or unverified claims between my resume and internal notes.')">Spot contradictions</span>
         </div>
-        <label>Question or drafting request</label>
+        <label>Prompt</label>
         <textarea id="llm-prompt" placeholder="Ask anything across your saved sources and career stories..."></textarea>
         <div class="row" style="margin-top:0.8rem">
-          <button class="btn" id="llm-ask">Retrieve &amp; run via my API</button>
+          <button class="btn" id="llm-ask">Run with local context</button>
         </div>
         <div id="llm-output" style="margin-top:1rem"></div>
       </div>
@@ -1645,8 +1621,8 @@ async function refresh() {
   } else {
     const inferred = Object.entries(countsByCh);
     ledgerEl.innerHTML = inferred.length
-      ? inferred.map(([ch, n]) => `<span class="pill" style="gap:0.38rem;padding:0.24rem 0.65rem"><span style="width:14px;height:14px;display:inline-grid;place-items:center">${getBrandIcon(ch)}</span>${esc(ch)} (${n} saved)</span>`).join("") + '<span class="meta" style="margin-left:0.3rem">Click "+ Declare channel" (or let your MCP agent log channels) to track unscanned work tools.</span>'
-      : '<span class="meta">No work channels declared yet. Click <strong>+ Declare channel</strong> or start your agent session with <code>v2/SKILL.md</code> to map and scan your MCP channels.</span>';
+      ? inferred.map(([ch, n]) => `<span class="pill" style="gap:0.38rem;padding:0.24rem 0.65rem"><span style="width:14px;height:14px;display:inline-grid;place-items:center">${getBrandIcon(ch)}</span>${esc(ch)} (${n} saved)</span>`).join("") + '<span class="meta" style="margin-left:0.3rem">Click "+ Track channel" (or let your MCP agent log channels) to track unscanned work tools.</span>'
+      : '<span class="meta">No work channels tracked yet. Click <strong>+ Track channel</strong> or start your agent session with <code>v2/SKILL.md</code> to map and scan your MCP channels.</span>';
   }
 
   // Populate Vault channel filter dynamically
@@ -1804,35 +1780,40 @@ function renderOverview() {
   // Interactive Confidentiality Aperture (L0 -> L1 -> L2 -> L3)
   renderAperture();
 
-  // Connected Work Channels Seam Table with Authentic Brand SVGs
+  // Compact Branded MCP Channels Dock on Overview
   const counts = {};
   (STATE.sources || []).forEach(s => { counts[s.channel] = (counts[s.channel] || 0) + 1; });
-  const declared = new Map((STATE.channel_scans || []).map(c => [c.channel, c]));
-
-  document.getElementById("overview-channels-ledger").innerHTML = MCP_CHANNEL_CATALOG.map(ch => {
+  document.getElementById("overview-channels-dock").innerHTML = MCP_CHANNEL_CATALOG.map(ch => {
     const n = ch.match.reduce((acc, k) => acc + (counts[k] || 0), 0);
-    const ledger = declared.get(ch.key);
-    const statusPill = ledger
-      ? `<span class="pill ${ledger.status === 'scanned' ? 'ok' : 'warn'}">${esc(ledger.status)}</span>`
-      : (n > 0 ? `<span class="pill ok">${n} ${n === 1 ? 'item' : 'items'}</span>` : '<span class="pill">Not scanned</span>');
     return `
-    <div class="channel-row">
-      <div class="brand-badge" aria-hidden="true">${getBrandIcon(ch.key)}</div>
-      <div class="channel-row-meta">
-        <div class="channel-row-title">
-          <strong>${esc(ch.label)}</strong>
-          ${statusPill}
-        </div>
-        <div class="channel-row-desc">${esc(ch.desc)}</div>
-      </div>
-      <div>
-        ${ledger
-          ? `<button class="btn secondary sm" onclick="switchTab('vault')">In Vault</button>`
-          : `<button class="btn secondary sm" onclick="quickDeclareChannel('${esc(ch.key)}','${esc(ch.label)}')">+ Declare</button>`}
-      </div>
-    </div>`;
+    <span class="brand-chip ${n > 0 ? 'active' : ''}" title="${esc(ch.desc)}">
+      ${getBrandIcon(ch.key)}
+      <span>${esc(ch.label)}</span>
+      ${n > 0 ? `<span class="cnt">${n}</span>` : ''}
+    </span>`;
   }).join("");
 }
+
+window.copyMcpSetup = async () => {
+  const txt = [
+    "Follow v2/SKILL.md to build and deepen my local Career Context vault.",
+    "1) Connect to my local vault MCP server: python -m v2.career mcp private/career.sqlite --tier L1 --rw",
+    "2) First ask what work channels I use (Slack, Notion, Google Calendar, Meeting Transcripts, Google Docs, GitHub, Linear, Gmail, LinkedIn, X, Substack) and check which MCP connectors are active.",
+    "3) Log each channel with career_log_channel_scan, run time-sliced sweeps into L0, synthesize L1 roles & stories, and run career_audit_gaps before stopping.",
+  ].join("\n");
+  try {
+    await navigator.clipboard.writeText(txt);
+    toast("Copied MCP setup & starter prompt for your AI agent");
+  } catch (err) { toast("Copy failed: " + err.message); }
+};
+
+window.copyShareMcp = async () => {
+  const cmd = "python -m v2.career mcp private/career.sqlite --tier L2";
+  try {
+    await navigator.clipboard.writeText(cmd);
+    toast("Copied read-only leak-checked L2 MCP server command");
+  } catch (err) { toast("Copy failed: " + err.message); }
+};
 
 window.selectStage = (num) => {
   STAGE_USER_PICKED = true;
@@ -2375,7 +2356,7 @@ function renderSourcesList() {
 
   document.getElementById("sources-list").innerHTML = list.map(s => `
     <button class="index-item ${s.id === ACTIVE_SOURCE_ID ? 'active' : ''}" onclick="openSource('${esc(s.id)}')">
-      <div class="index-title">${esc(s.title)}</div>
+      <div class="index-title" style="display:flex;align-items:center;gap:0.45rem"><span style="width:15px;height:15px;flex:none;display:inline-grid;place-items:center">${getBrandIcon(s.channel)}</span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.title)}</span></div>
       <div class="index-sub">
         <span class="pill" style="padding:0.1rem 0.45rem">${esc(s.channel)}</span>
         <span class="pill ${s.linked ? 'ok' : 'warn'}" style="padding:0.1rem 0.45rem">${s.linked ? 'linked' : 'inbox'}</span>
