@@ -722,7 +722,10 @@ class TestCareerVaultV2(unittest.TestCase):
             mcp_cfg = json.loads(mcp_body)
             self.assertIn("career-context-private", mcp_cfg["private_mcp"]["mcpServers"])
             self.assertIn("career-context-shareable", mcp_cfg["share_mcp"]["mcpServers"])
-            self.assertEqual(mcp_cfg["db_path"], build_mcp_config(self.db_path)["db_path"])
+            self.assertEqual(
+                Path(mcp_cfg["db_path"]).resolve(),
+                Path(build_mcp_config(self.db_path)["db_path"]).resolve(),
+            )
 
             # 5. Calm embeddings sync when optional .semantic-model is absent
             app.model_dir = None
