@@ -65,7 +65,7 @@ The first run creates `career.sqlite` in a `.career-context` folder in your home
 Open the address the launcher prints rather than the `v2/ui.html` file itself: the page reads your vault through that local server.
 
 ### 3. Let your own AI fill it
-In the Studio, **Overview → Work channels → Copy MCP JSON** gives you a ready-made MCP entry for your assistant, with the right paths for your machine. Or start the private read/write MCP server yourself:
+In the Studio, **Sources → Work channels → Copy MCP JSON** gives you a ready-made MCP entry for your assistant, with the right paths for your machine. Or start the private read/write MCP server yourself:
 ```powershell
 python -m v2.career mcp private/career.sqlite --tier L1 --rw
 ```
@@ -74,13 +74,11 @@ Give your assistant [`SKILL.md`](SKILL.md) (or [`v2/SKILL.md`](v2/SKILL.md)) alo
 
 ### 4. Review, edit and export in the Studio
 Opens **`http://127.0.0.1:8765/`** directly over your local SQLite file:
-- **Overview:** A stage strip with your vault's live counts, the `L0 → L3` tier scene (one record read at four distances), and the work-channel ledger.
-- **Studio:** Flagship stories, readiness progress, and the depth score with its four parts and open gaps.
-- **Experience:** Editorial profile, Master-Detail Roles workbench (see stories per role and `0`-story gaps), Timeline, and Skills.
-- **Stories:** Master-Detail `L1` workbench (`Overview` / `Edit Story` / `+ Claim`, sliding `Flagship / Core / Proof / Background` selector, visual lightbox).
-- **Share:** Sensitive terms registry, `L2 / L3` Tier Studio, succinct human exports (`HTML` / `Resume`), and exhaustive **AI Context Packs** (`agent_pack` Markdown / `agent_json` + read-only `L2` MCP command).
-- **Vault:** MCP scan ledger, FTS5/hybrid search, inbox triage, source reader, and offline file upload drawer.
-- **AI:** Optional direct BYO-API helper (keys stay strictly in tab `sessionStorage`, never written to disk).
+- **Home:** the one next thing to do, taken from the gap check; your vault's live counts stage by stage; your flagship stories; and the depth score. On a new vault it shows three ways to start and explains how the tiers work.
+- **Career:** your stories listed under their roles. Each story page holds its three versions (Private, Confidential-safe, Public) with its sources and verified quotes. Roles, profile, timeline and skills are one switch away.
+- **Sources:** everything collected, by channel, with search, the unlinked inbox, file upload and the work-channel ledger.
+- **Share:** exports for a person (`HTML` brief, resume) or for someone else's AI (**AI Context Packs**, read-only `L2` MCP command), plus the blocked terms and their safe replacements.
+- **Ask your vault:** an optional bring-your-own-key helper in the header (keys stay in tab `sessionStorage`, never written to disk).
 
 ### 5. CLI exports and a read-only MCP server for someone else's agent
 ```powershell

@@ -566,6 +566,31 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
 .diag-trace .dot-live { width: 6px; height: 6px; border-radius: 50%; background: #e6b574; flex: none; }
 @keyframes flow-dash { to { stroke-dashoffset: -32; } }
 
+/* Home: one next step, where the vault stands, and the explanation folded underneath */
+.home-next {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 1.2rem 2rem;
+  padding: clamp(24px, 4vw, 48px); margin-bottom: clamp(2.5rem, 5vw, 3.5rem);
+  border-radius: var(--r-stage); background: var(--deep); color: #f8f5ed;
+}
+.home-next-label { margin: 0 0 0.6rem; font-size: 0.86rem; color: #d5e0d9; }
+.home-next-say { margin: 0; max-width: 24ch; font: 600 clamp(1.5rem, 3.2vw, 2.3rem)/1.12 var(--serif); letter-spacing: -0.02em; text-wrap: balance; }
+.home-next-detail { margin: 0.8rem 0 0; max-width: 62ch; font-size: 0.92rem; line-height: 1.55; color: #d5e0d9; }
+.home-empty #flow, .home-empty .section-head:has(+ #flagship-grid), .home-empty #flagship-grid, .home-empty #deepening-radar { display: none; }
+.explainer { margin-top: clamp(3rem, 6vw, 4.5rem); border-top: 1px solid var(--line); }
+.explainer > summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 64px; cursor: pointer; list-style: none; }
+.explainer > summary::-webkit-details-marker { display: none; }
+.explainer > summary::after { content: "+"; font: 400 1.5rem/1 var(--sans); color: var(--muted); }
+.explainer[open] > summary::after { content: "−"; }
+.explainer > summary .scene-title { margin: 0; }
+.explainer[open] > summary { margin-bottom: 1rem; }
+
+/* Career: stories sit under their roles; one story page holds its three versions */
+.index-group { padding: 1.1rem 0 0.45rem; font-size: 0.82rem; font-weight: 600; color: var(--muted); }
+.index-group:first-child { padding-top: 0; }
+.story-stack { min-width: 0; display: grid; gap: 0.9rem; justify-items: start; }
+.story-stack > .sheet-panel { width: 100%; }
+#tier-sheet #active-tier-seg { display: none; }
+
 /* Overview scenes stand on the page ground: no shells, only the construction */
 .scene-title { margin: 0 0 1.5rem; font-family: var(--serif); font-size: 1.25rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.25; }
 .flow, .tiers { margin-bottom: clamp(3.5rem, 7vw, 5.5rem); }
@@ -833,6 +858,7 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
   nav button { min-height: 44px; font-size: 0.82rem; }
   .nav-glider { bottom: 0; }
   .owner-box { margin-left: auto; flex-shrink: 1; min-width: 0; }
+  .home-next { grid-template-columns: minmax(0, 1fr); }
   .owner-meta { display: none; }
   .depth { grid-template-columns: minmax(0, 1fr); }
   .depth-bars { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -875,19 +901,17 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
     <nav id="main-nav">
       <div class="nav-hover" id="nav-hover"></div>
       <div class="nav-glider" id="nav-glider"></div>
-      <button class="active" data-tab="overview">Overview</button>
-      <button data-tab="studio">Studio</button>
-      <button data-tab="experience">Experience</button>
-      <button data-tab="episodes">Stories</button>
-      <button data-tab="sharing">Share</button>
-      <button data-tab="vault">Vault</button>
-      <button data-tab="assistant">AI</button>
+      <button class="active" data-tab="home">Home</button>
+      <button data-tab="career">Career</button>
+      <button data-tab="sources">Sources</button>
+      <button data-tab="share">Share</button>
     </nav>
     <div class="owner-box">
       <div class="owner-meta" onclick="switchTab('experience')" title="View Roles & Profile">
         <strong id="owner-name">Career Vault</strong>
         <span id="owner-sub">Local SQLite · Live Save</span>
       </div>
+      <button class="btn secondary sm" type="button" onclick="switchTab('assistant')">Ask your vault</button>
       <div class="palette" id="palette-picker" role="radiogroup" aria-label="Colour scheme">
         <button type="button" role="radio" data-palette="forest" aria-label="Forest" title="Forest" style="--sw:#1d5c48"></button>
         <button type="button" role="radio" data-palette="sage" aria-label="Sage" title="Sage" style="--sw:#7fa392"></button>
@@ -901,15 +925,77 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
 
 <main>
   <p class="offline-note" id="offline-note" hidden>Not connected to your vault. Start it with <code>python -m v2.launch --open</code></p>
-  <!-- TAB 0: TEMPO-CRAFT OVERVIEW & INTERACTIVE PROCESS GUIDE -->
-  <section id="tab-overview" class="tab-view">
+  <!-- HOME: what to do next, where the vault stands, then how it works -->
+  <section id="tab-home" class="tab-view">
+    <div class="home-next" id="home-next"></div>
+
+    <!-- Day-1 Empty Vault Welcome Card (only visible when vault has 0 sources & 0 stories) -->
+    <div id="empty-vault-banner" class="empty-starter hidden sheet-animate">
+      <div class="split" style="align-items:center">
+        <div>
+          <h3 class="scene-title" style="margin:0 0 0.3rem">Start in two minutes</h3>
+          <p class="meta" style="margin:0">Works with MCP connectors, regular web AI chats (ChatGPT / Claude / Gemini), or offline files on a locked work laptop.</p>
+        </div>
+      </div>
+      <div class="starter-grid">
+        <div class="starter-card">
+          <strong>1. Drop your Resume or LinkedIn PDF</strong>
+          <p>Ingest a .pdf, .docx, LinkedIn export, or brag doc straight into your local L0 vault—no AI connector required.</p>
+          <div><button class="btn sm" onclick="switchTab('vault');toggleUploadDrawer(true)">Upload file →</button></div>
+        </div>
+        <div class="starter-card">
+          <strong>2. Use Claude / ChatGPT / Gemini Web</strong>
+          <p>No MCP setup or work laptop locked down? Copy a starter prompt to turn your notes into clean L1 stories.</p>
+          <div class="row">
+            <button class="btn secondary sm" onclick="copyNoMcpPrompt()">Copy Web AI Prompt</button>
+            <button class="btn secondary sm" onclick="copyMcpJson()">Copy MCP JSON</button>
+          </div>
+        </div>
+        <div class="starter-card">
+          <strong>3. Explore a Fictional Sample Vault</strong>
+          <p>Load Maya Lin's fictional sample vault (roles, stories, blocked terms, and L2/L3 exports) to see how everything fits together.</p>
+          <div><button class="btn secondary sm" onclick="loadDemoVault()">Load sample vault</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- How it works: the vault's own counts, stage by stage -->
+    <section class="flow" id="flow" aria-labelledby="flow-title">
+      <h3 class="scene-title" id="flow-title">Your vault so far</h3>
+      <div class="flow-stages" id="flow-stages" role="tablist" aria-labelledby="flow-title"></div>
+      <div class="flow-detail" id="flow-detail"></div>
+    </section>
+
+    <div class="section-head">
+      <h3>Flagship stories to lead with</h3>
+      <button class="btn secondary sm" onclick="switchTab('episodes')">All stories →</button>
+    </div>
+    <div id="flagship-grid" class="story-grid"></div>
+
+    <!-- Live Deepening Radar -->
+    <div class="card" id="deepening-radar" style="margin-bottom:1.5rem">
+      <div class="split" style="align-items:center;margin-bottom:0.75rem">
+        <h3 style="margin:0">Deepening radar</h3>
+        <div class="row">
+          <button class="btn secondary sm" id="copy-deepening-btn">Copy agent prompt</button>
+          <button class="btn sm" id="send-deepening-ai-btn">Deepen with AI →</button>
+        </div>
+      </div>
+      <div class="depth">
+        <div class="depth-score"><b id="depth-score-pill">0</b><span>of 100 depth</span></div>
+        <div class="depth-bars" id="depth-pillars"></div>
+      </div>
+      <div id="gap-actions-list"></div>
+    </div>
+    <details class="explainer" id="home-explainer">
+      <summary><span class="scene-title">How Career Context works</span></summary>
     <!-- Chapter 1: Asymmetric Hero + Interactive MCP Convergence Diagram -->
     <div class="landing-hero" id="landing-hero">
       <div>
         <h2>Build your own local career database</h2>
         <p>Your work history on your own machine, organised by your own AI. Export a clean brief for people, or a leak-checked pack for someone else's AI.</p>
         <div class="hero-actions">
-          <button class="hero-cta" onclick="switchTab('studio')">Open Studio <span class="arrow">→</span></button>
+          <button class="hero-cta" onclick="switchTab('sources')">Add your first source <span class="arrow">→</span></button>
           <button class="hero-cta ghost" onclick="previewExport('L2')">Preview L2 ↗</button>
         </div>
         <div class="hero-trust-note">
@@ -1029,43 +1115,6 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
       </div>
     </div>
 
-    <!-- Day-1 Empty Vault Welcome Card (only visible when vault has 0 sources & 0 stories) -->
-    <div id="empty-vault-banner" class="empty-starter hidden sheet-animate">
-      <div class="split" style="align-items:center">
-        <div>
-          <h3 class="scene-title" style="margin:0 0 0.3rem">Start in two minutes</h3>
-          <p class="meta" style="margin:0">Works with MCP connectors, regular web AI chats (ChatGPT / Claude / Gemini), or offline files on a locked work laptop.</p>
-        </div>
-      </div>
-      <div class="starter-grid">
-        <div class="starter-card">
-          <strong>1. Drop your Resume or LinkedIn PDF</strong>
-          <p>Ingest a .pdf, .docx, LinkedIn export, or brag doc straight into your local L0 vault—no AI connector required.</p>
-          <div><button class="btn sm" onclick="switchTab('vault');toggleUploadDrawer(true)">Upload file →</button></div>
-        </div>
-        <div class="starter-card">
-          <strong>2. Use Claude / ChatGPT / Gemini Web</strong>
-          <p>No MCP setup or work laptop locked down? Copy a starter prompt to turn your notes into clean L1 stories.</p>
-          <div class="row">
-            <button class="btn secondary sm" onclick="copyNoMcpPrompt()">Copy Web AI Prompt</button>
-            <button class="btn secondary sm" onclick="copyMcpJson()">Copy MCP JSON</button>
-          </div>
-        </div>
-        <div class="starter-card">
-          <strong>3. Explore a Fictional Sample Vault</strong>
-          <p>Load Maya Lin's fictional sample vault (roles, stories, blocked terms, and L2/L3 exports) to see how everything fits together.</p>
-          <div><button class="btn secondary sm" onclick="loadDemoVault()">Load sample vault</button></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- How it works: the vault's own counts, stage by stage -->
-    <section class="flow" id="flow" aria-labelledby="flow-title">
-      <h3 class="scene-title" id="flow-title">How it works</h3>
-      <div class="flow-stages" id="flow-stages" role="tablist" aria-labelledby="flow-title"></div>
-      <div class="flow-detail" id="flow-detail"></div>
-    </section>
-
     <!-- Confidentiality tiers: one record, read further and further from home -->
     <section class="tiers" id="tiers" aria-labelledby="tiers-title">
       <h3 class="scene-title" id="tiers-title">Confidentiality tiers</h3>
@@ -1080,87 +1129,16 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
       </div>
     </section>
 
-    <!-- Work channels: where the vault's material came from -->
-    <section class="channels" aria-labelledby="channels-title">
-      <div class="channels-head">
-        <h3 class="scene-title" id="channels-title">Work channels <span class="meta" id="channels-count"></span></h3>
-        <div class="row">
-          <button class="btn secondary sm" onclick="copyMcpJson()">Copy MCP JSON</button>
-          <button class="btn secondary sm" onclick="copyNoMcpPrompt()">No-MCP prompt</button>
-          <button class="btn sm" onclick="switchTab('vault')">Open Vault →</button>
-        </div>
-      </div>
-      <div id="overview-channels-dock" class="channel-ledger"></div>
-    </section>
-  </section>
-
-  <!-- TAB 1: STUDIO COMMAND CENTER (HERO, FLAGSHIPS & DEEPENING RADAR) -->
-  <section id="tab-studio" class="tab-view hidden">
-    <div class="page-head">
-      <h2>Career Studio</h2>
-      <div class="row">
-        <button class="btn secondary" onclick="switchTab('vault');toggleUploadDrawer(true)">Add sources +</button>
-        <button class="btn" onclick="previewExport('L2')">Preview L2 Overview ↗</button>
-      </div>
-    </div>
-
-    <div class="studio-desk">
-      <div class="hero-launch">
-        <div class="hero-copy">
-          <h3>Your stories, ready at every level</h3>
-          <p id="hero-progress-label">No stories yet</p>
-          <div class="progress-track"><div id="hero-progress-fill" class="progress-fill" style="width:0%"></div></div>
-          <div class="hero-actions">
-            <button class="hero-cta" onclick="switchTab('sharing')">Open sharing studio <span class="arrow">→</span></button>
-            <button class="hero-cta ghost" onclick="copyResume('L2')">Copy L2 Resume</button>
-          </div>
-        </div>
-        <div class="story-folder" id="hero-folder" title="Open featured flagship story">
-          <div class="folder-sheet">
-            <div class="folder-period" id="folder-period">Flagship story</div>
-            <div class="folder-title" id="folder-title">Your top career story</div>
-          </div>
-          <div class="folder-pocket"></div>
-        </div>
-      </div>
-
-      <div class="library-card">
-        <h3>Context library</h3>
-        <button class="lib-row" onclick="switchTab('experience')"><span class="lib-icon">R</span><span>Roles &amp; experience</span><strong id="lib-roles">0</strong><span class="chev">›</span></button>
-        <button class="lib-row" onclick="switchTab('episodes')"><span class="lib-icon">S</span><span>Work stories (L1)</span><strong id="lib-episodes">0</strong><span class="chev">›</span></button>
-        <button class="lib-row" onclick="switchTab('vault')"><span class="lib-icon">V</span><span>Saved sources (L0)</span><strong id="lib-sources">0</strong><span class="chev">›</span></button>
-        <button class="lib-row" onclick="switchTab('vault');document.getElementById('triage-btn').click()"><span class="lib-icon">I</span><span>Unlinked inbox</span><strong id="lib-unlinked">0</strong><span class="chev">›</span></button>
-        <button class="lib-row" onclick="switchTab('sharing')"><span class="lib-icon">L2</span><span>Shareable L2 / L3</span><strong id="lib-tiers">0/0</strong><span class="chev">›</span></button>
-      </div>
-    </div>
-
-    <div class="section-head">
-      <h3>Flagship stories to lead with</h3>
-      <button class="btn secondary sm" onclick="switchTab('episodes')">All stories →</button>
-    </div>
-    <div id="flagship-grid" class="story-grid"></div>
-
-    <!-- Live Deepening Radar -->
-    <div class="card" id="deepening-radar" style="margin-bottom:1.5rem">
-      <div class="split" style="align-items:center;margin-bottom:0.75rem">
-        <h3 style="margin:0">Deepening radar</h3>
-        <div class="row">
-          <button class="btn secondary sm" id="copy-deepening-btn">Copy agent prompt</button>
-          <button class="btn sm" id="send-deepening-ai-btn">Deepen with AI →</button>
-        </div>
-      </div>
-      <div class="depth">
-        <div class="depth-score"><b id="depth-score-pill">0</b><span>of 100 depth</span></div>
-        <div class="depth-bars" id="depth-pillars"></div>
-      </div>
-      <div id="gap-actions-list"></div>
-    </div>
+    </details>
   </section>
 
   <!-- TAB 2: DEDICATED EXPERIENCE, ROLES, PROFILE, TIMELINE & KNOWLEDGE GRAPH -->
   <section id="tab-experience" class="tab-view hidden">
     <div class="page-head">
-      <h2>Roles &amp; Experience</h2>
+      <div class="row" style="gap:0.9rem">
+        <h2>Career</h2>
+        <div class="seg-control career-subnav"><div class="seg-thumb"></div><button type="button" onclick="switchTab('episodes')">Stories</button><button type="button" class="active" onclick="switchTab('experience')">Roles &amp; profile</button></div>
+      </div>
       <div class="row">
         <button class="btn" id="toggle-role-form">+ Add role</button>
       </div>
@@ -1238,9 +1216,10 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
   <!-- TAB 2: MY STORIES (L1) — TEMPO MASTER-DETAIL WORKBENCH -->
   <section id="tab-episodes" class="tab-view hidden">
     <div class="page-head">
-      <div class="row" style="gap:0.75rem">
-        <h2>My Stories</h2>
-        <span class="pill" id="stories-count-pill">L1 Private</span>
+      <div class="row" style="gap:0.9rem">
+        <h2>Career</h2>
+        <div class="seg-control career-subnav"><div class="seg-thumb"></div><button type="button" class="active" onclick="switchTab('episodes')">Stories</button><button type="button" onclick="switchTab('experience')">Roles &amp; profile</button></div>
+        <span class="pill" id="stories-count-pill"></span>
       </div>
       <div class="row">
         <button class="btn" id="new-story-btn">+ New story</button>
@@ -1262,28 +1241,35 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
         <div id="story-index-list" class="index-scroll"></div>
       </aside>
 
-      <div id="story-sheet" class="sheet-panel"></div>
+      <div class="story-stack">
+        <div class="seg-control hidden" id="story-tier-seg" role="group" aria-label="Who is reading">
+          <div class="seg-thumb"></div>
+          <button type="button" class="active" data-stier="L1">Private</button>
+          <button type="button" data-stier="L2">Confidential-safe</button>
+          <button type="button" data-stier="L3">Public</button>
+        </div>
+        <div id="story-sheet" class="sheet-panel"></div>
+        <div id="tier-sheet" class="sheet-panel hidden"></div>
+      </div>
     </div>
   </section>
 
   <!-- TAB 3: SHARE & TIERS (L2/L3) — 3-MODE FOCUSED SHARING STUDIO -->
   <section id="tab-sharing" class="tab-view hidden">
     <div class="page-head">
-      <h2>Share &amp; Export</h2>
+      <h2>Share</h2>
       <div class="seg-control" id="share-subnav">
         <div class="seg-thumb"></div>
-        <button class="active" data-sub="polish">1. Polish Stories</button>
-        <button data-sub="blocked">2. Blocked Terms (<span id="share-blocked-count">0</span>)</button>
-        <button data-sub="export">3. Export &amp; Hand Off</button>
+        <button class="active" data-sub="export">Export &amp; hand off</button>
+        <button data-sub="blocked">Blocked terms (<span id="share-blocked-count">0</span>)</button>
       </div>
       <div class="row">
         <button class="btn secondary sm" onclick="previewExport('L2')">Preview L2 ↗</button>
-        <button class="btn sm" onclick="setShareSubtab('export')">Export →</button>
       </div>
     </div>
 
     <!-- SUB-VIEW 1: POLISH STORIES (ONE FOCUSED TIER AT A TIME) -->
-    <div id="share-view-polish" class="sheet-animate">
+    <div id="share-view-polish" class="hidden">
       <div class="workbench">
         <aside class="index-panel">
           <div class="index-controls">
@@ -1301,7 +1287,6 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
           </div>
         </aside>
 
-        <div id="tier-sheet" class="sheet-panel"></div>
       </div>
     </div>
 
@@ -1465,7 +1450,7 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
   <section id="tab-vault" class="tab-view hidden">
     <div class="page-head">
       <div class="row" style="gap:0.75rem">
-        <h2>Raw Vault</h2>
+        <h2>Sources</h2>
         <span class="pill" id="vault-summary-pill">L0 Local</span>
       </div>
       <div class="row">
@@ -1559,12 +1544,24 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
         <div class="meta" style="text-align:center;padding:3.25rem 1.25rem">Select any document on the left to read its full text and attach it to a story.</div>
       </div>
     </div>
+
+    <!-- Work channels: where the vault's material came from -->
+    <section class="channels" aria-labelledby="channels-title">
+      <div class="channels-head">
+        <h3 class="scene-title" id="channels-title">Work channels <span class="meta" id="channels-count"></span></h3>
+        <div class="row">
+          <button class="btn secondary sm" onclick="copyMcpJson()">Copy MCP JSON</button>
+          <button class="btn secondary sm" onclick="copyNoMcpPrompt()">No-MCP prompt</button>
+        </div>
+      </div>
+      <div id="overview-channels-dock" class="channel-ledger"></div>
+    </section>
   </section>
 
   <!-- TAB 5: BROWSER BYO-API ASSISTANT -->
   <section id="tab-assistant" class="tab-view hidden">
     <div class="page-head">
-      <h2>Browser AI</h2>
+      <h2>Ask your vault</h2>
     </div>
     <div class="split-shell">
       <div class="split-pane">
@@ -1643,7 +1640,10 @@ let PENDING_NEW_ROLE_ID = "";
 let STORY_FILTER = "all";
 let ACTIVE_TIER_ID = null;
 let TIER_FILTER = "all";
-let SHARE_SUBTAB = "polish";
+let STORY_TIER = "L1";      // which version of the open story is on screen: L1, L2 or L3
+let CAREER_VIEW = "stories"; // "stories" or "roles"
+let EXPLAINER_SET = false;
+let SHARE_SUBTAB = "export";
 let ACTIVE_SHARE_TIER = "L2";
 let ACTIVE_SOURCE_ID = null;
 let ACTIVE_SOURCE_OBJ = null;
@@ -1905,17 +1905,29 @@ function applyPalette(name) {
   });
 })();
 
-/* Tab switching */
+/* Four places. Older tab names still resolve, so existing links land in the right place. */
+const PLACE_OF = {
+  home: "home", overview: "home", studio: "home",
+  career: "career", episodes: "career", experience: "career", timeline: "career",
+  sources: "sources", vault: "sources", share: "share", sharing: "share", assistant: "assistant",
+};
 function switchTab(tab) {
-  const target = tab === "timeline" ? "studio" : tab;
-  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active", b.dataset.tab === target));
-  document.querySelectorAll("main > section").forEach(s => s.classList.toggle("hidden", s.id !== "tab-" + target));
+  const place = PLACE_OF[tab] || "home";
+  if (tab === "experience" || tab === "timeline") CAREER_VIEW = "roles";
+  if (tab === "episodes") CAREER_VIEW = "stories";
+  const shown = {
+    home: "tab-home", career: CAREER_VIEW === "roles" ? "tab-experience" : "tab-episodes",
+    sources: "tab-vault", share: "tab-sharing", assistant: "tab-assistant",
+  }[place];
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active", b.dataset.tab === place));
+  document.querySelectorAll("main > section").forEach(sec => sec.classList.toggle("hidden", sec.id !== shown));
   window.scrollTo({ top: 0, behavior: "instant" });
-  if (target === "vault" && !ACTIVE_SOURCE_ID && STATE?.sources?.length) {
+  if (place === "sources" && !ACTIVE_SOURCE_ID && STATE?.sources?.length) {
     openSource(STATE.sources[0].id);
   }
   requestAnimationFrame(() => {
     syncNavGlider();
+    if (place === "assistant") document.getElementById("nav-glider").style.opacity = "0";
     document.querySelectorAll(".seg-control").forEach(syncSegControl);
   });
 }
@@ -1931,6 +1943,7 @@ document.getElementById("toggle-upload-btn").onclick = () => toggleUploadDrawer(
 
 /* Share 3-mode sub-navigation */
 window.setShareSubtab = (sub) => {
+  if (sub === "polish") { STORY_TIER = "L2"; switchTab("episodes"); renderStorySheet(); return; }
   SHARE_SUBTAB = sub;
   document.querySelectorAll("#share-subnav button").forEach(b => b.classList.toggle("active", b.dataset.sub === sub));
   ["polish", "blocked", "export"].forEach(k => {
@@ -1941,6 +1954,7 @@ window.setShareSubtab = (sub) => {
 document.querySelectorAll("#share-subnav button").forEach(b => {
   b.onclick = () => setShareSubtab(b.dataset.sub);
 });
+setShareSubtab("export");
 
 /* Profile inline edit switch */
 function setProfileEditing(editing) {
@@ -2002,25 +2016,7 @@ async function refresh() {
   document.getElementById("p-headline-view").textContent = person.headline || "Add your headline...";
   document.getElementById("p-l1-view").textContent = person.overview_l1 || "Add your private L1 overview to anchor your career narrative.";
 
-  // Hero + Context library
   const c = status.counts, g = status.granularity;
-  document.getElementById("lib-roles").textContent = c.roles;
-  document.getElementById("lib-episodes").textContent = c.episodes;
-  document.getElementById("lib-sources").textContent = c.sources;
-  document.getElementById("lib-unlinked").textContent = c.unlinked_sources;
-  document.getElementById("lib-tiers").textContent = `${g.L2.ready}/${g.L3.ready}`;
-  const pct = g.L2.total ? Math.round((g.L2.ready / g.L2.total) * 100) : 0;
-  document.getElementById("hero-progress-label").textContent = g.L2.total
-    ? `${g.L2.ready} of ${g.L2.total} stories ready for confidential-safe L2 sharing (${g.L3.ready} public L3)`
-    : "No stories yet";
-  document.getElementById("hero-progress-fill").style.width = `${pct}%`;
-
-  const topEp = episodes[0];
-  if (topEp) {
-    document.getElementById("folder-period").textContent = shortPeriod(topEp.period_label);
-    document.getElementById("folder-title").textContent = topEp.tiers?.L2?.title || topEp.title;
-    document.getElementById("hero-folder").onclick = () => openStory(topEp.id, "read");
-  }
 
   // Flagship cards on Studio
   const leadEps = episodes.filter(e => e.importance >= 3).slice(0, 6);
@@ -2037,7 +2033,7 @@ async function refresh() {
         <span class="go">Open story →</span>
       </div>
     </div>`;
-  }).join("") || '<p class="meta">No stories yet. Add one from Stories, or load the sample vault from Overview.</p>';
+  }).join("") || '<p class="meta">No stories yet. Add one from Career, or load the sample vault above.</p>';
 
   // Overview Tab: 5 Live Stages & Supported MCP Channels
   renderOverview();
@@ -2435,8 +2431,9 @@ function renderOverview() {
   }
 
   renderFlow();
+  renderHomeNext();
 
-  // Compact Branded MCP Channels Dock on Overview
+  // Work-channel ledger, shown in Sources
   const counts = {};
   (STATE.sources || []).forEach(s => { counts[s.channel] = (counts[s.channel] || 0) + 1; });
   const ledger = MCP_CHANNEL_CATALOG.map(ch => ({ ...ch, n: ch.match.reduce((acc, k) => acc + (counts[k] || 0), 0) }));
@@ -2639,6 +2636,7 @@ window.startStoryForRole = (roleId) => {
 window.openStory = (id, mode = "read") => {
   ACTIVE_STORY_ID = id;
   STORY_MODE = mode;
+  STORY_TIER = "L1";
   switchTab("episodes");
   renderStoriesIndex();
   renderStorySheet();
@@ -2666,7 +2664,7 @@ function getFilteredStories() {
 
 function renderStoriesIndex() {
   const list = getFilteredStories();
-  document.getElementById("story-index-list").innerHTML = list.map(ep => {
+  const item = (ep) => {
     const active = STORY_MODE !== "new" && ep.id === ACTIVE_STORY_ID;
     const l2ok = ep.tiers?.L2 && !ep.tiers.L2.stale && !(ep.tiers.L2.leaks || []).length;
     const l3ok = ep.tiers?.L3 && !ep.tiers.L3.stale && !(ep.tiers.L3.leaks || []).length;
@@ -2682,7 +2680,14 @@ function renderStoriesIndex() {
         </span>
       </div>
     </button>`;
-  }).join("") || '<p class="meta" style="padding:1rem">No matching stories.</p>';
+  };
+  const roles = STATE?.roles || [];
+  const groups = roles.map(r => ({ label: r.title + (r.organization ? ` · ${r.organization}` : ""), eps: list.filter(ep => ep.role_id === r.id) }));
+  const loose = list.filter(ep => !roles.some(r => r.id === ep.role_id));
+  if (loose.length) groups.push({ label: "No role yet", eps: loose });
+  document.getElementById("story-index-list").innerHTML = groups.filter(gr => gr.eps.length)
+    .map(gr => `<div class="index-group">${esc(gr.label)}</div>` + gr.eps.map(item).join("")).join("")
+    || '<p class="meta" style="padding:1rem">No matching stories.</p>';
 }
 
 window.selectStory = (id) => {
@@ -2977,15 +2982,17 @@ window.cancelNewStory = () => {
 
 /* ===== TAB 3: SHARE & TIERS WORKBENCH (FOCUSED 1-TIER-AT-A-TIME) ===== */
 window.openInSharing = (id) => {
-  ACTIVE_TIER_ID = id;
-  switchTab("sharing");
-  setShareSubtab("polish");
-  renderTierWorkbench();
+  ACTIVE_STORY_ID = id;
+  STORY_MODE = "read";
+  STORY_TIER = "L2";
+  switchTab("episodes");
+  renderStoriesIndex();
+  renderStorySheet();
 };
 
 window.setActiveShareTier = (tier) => {
-  ACTIVE_SHARE_TIER = tier;
-  renderTierWorkbench();
+  STORY_TIER = tier;
+  applyStoryTier();
 };
 
 function getFilteredTierStories() {
@@ -3109,9 +3116,63 @@ function renderTierWorkbench() {
 }
 
 window.selectTierStory = (id) => {
-  ACTIVE_TIER_ID = id;
-  renderTierWorkbench();
+  ACTIVE_STORY_ID = id;
+  renderStoriesIndex();
+  renderStorySheet();
 };
+
+/* One story, three versions. The Private sheet and the Confidential-safe / Public editor share the story page. */
+function applyStoryTier() {
+  const seg = document.getElementById("story-tier-seg");
+  const privateSheet = document.getElementById("story-sheet"), tierSheet = document.getElementById("tier-sheet");
+  const reading = STORY_MODE === "read" && !!STATE?.episodes.some(e => e.id === ACTIVE_STORY_ID);
+  if (!reading) STORY_TIER = "L1";
+  seg.classList.toggle("hidden", !reading);
+  seg.querySelectorAll("button").forEach(b => {
+    b.classList.toggle("active", b.dataset.stier === STORY_TIER);
+    b.setAttribute("aria-pressed", b.dataset.stier === STORY_TIER ? "true" : "false");
+  });
+  const isPrivate = STORY_TIER === "L1";
+  privateSheet.classList.toggle("hidden", !isPrivate);
+  tierSheet.classList.toggle("hidden", isPrivate);
+  if (!isPrivate) {
+    ACTIVE_TIER_ID = ACTIVE_STORY_ID;
+    ACTIVE_SHARE_TIER = STORY_TIER;
+    renderTierWorkbench();
+  }
+  requestAnimationFrame(() => syncSegControl(seg));
+}
+const renderPrivateStorySheet = renderStorySheet;
+renderStorySheet = function () { renderPrivateStorySheet(); applyStoryTier(); };
+document.querySelectorAll("#story-tier-seg button").forEach(b => { b.onclick = () => { STORY_TIER = b.dataset.stier; applyStoryTier(); }; });
+
+/* Home leads with the single most useful thing to do, taken from the gap check. */
+function gapJump(a) {
+  if (a.episode_id) return a.target_tab === "sharing" ? `openInSharing('${esc(a.episode_id)}')` : `openStory('${esc(a.episode_id)}','edit')`;
+  return `switchTab('${esc(a.target_tab || "vault")}')`;
+}
+function renderHomeNext() {
+  const host = document.getElementById("home-next");
+  if (!host || !STATE) return;
+  const empty = !((STATE.sources || []).length + (STATE.episodes || []).length);
+  const a = (STATE.gaps?.next_actions || [])[0];
+  let label = "Next", say, detail = "", button = "";
+  if (empty) {
+    label = "Start here"; say = "Your vault is empty. Pick whichever way in fits your setup.";
+  } else if (a) {
+    say = a.title.replace(/story\/stories/g, "stories").replace(/\(s\)/g, "s"); detail = a.detail || "";
+    button = `<button class="hero-cta" onclick="${gapJump(a)}">Resolve <span class="arrow">→</span></button>`;
+  } else {
+    say = "Everything is ready to share.";
+    button = `<button class="hero-cta" onclick="switchTab('share')">Go to Share <span class="arrow">→</span></button>`;
+  }
+  host.innerHTML = `
+    <div><p class="home-next-label">${label}</p><p class="home-next-say">${esc(say)}</p>${detail ? `<p class="home-next-detail">${esc(detail)}</p>` : ""}</div>
+    ${button}`;
+  // A new vault has nothing to count yet, so Home shows only the ways in and the explanation.
+  document.getElementById("tab-home").classList.toggle("home-empty", empty);
+  if (!EXPLAINER_SET) { document.getElementById("home-explainer").open = empty; EXPLAINER_SET = true; }
+}
 
 /* ===== TAB 4: VAULT CHANNEL BAR, SOURCES LIST & READABLE DOCUMENT VIEWER ===== */
 function renderVaultChannelBar() {
@@ -3548,9 +3609,14 @@ document.getElementById("st-suggest-btn").onclick = async () => {
   const res = await api("/api/sensitive/suggest?limit=15");
   document.getElementById("suggested-terms").innerHTML = res.suggestions.length
     ? '<div class="meta" style="margin-bottom:0.35rem">Suggested confidential candidates from L1:</div>' +
-      res.suggestions.map(s => `<span class="pill warn clickable" style="margin:0.2rem" onclick="registerSuggestion('${esc(s.term)}','${esc(s.suggested_replacement)}','${esc(s.category)}')">+ ${esc(s.term)} (${s.episode_count} ep)</span>`).join("")
+      res.suggestions.map(s => `<button type="button" class="pill warn clickable" style="margin:0.2rem" data-term="${esc(s.term)}" data-replacement="${esc(s.suggested_replacement)}" data-category="${esc(s.category)}">+ ${esc(s.term)} (${s.episode_count} ep)</button>`).join("")
     : '<p class="meta">No unregistered candidates found.</p>';
 };
+// Values travel as data attributes, so a term with a quote or line break cannot break the handler.
+document.getElementById("suggested-terms").addEventListener("click", (e) => {
+  const chip = e.target.closest("[data-term]");
+  if (chip) registerSuggestion(chip.dataset.term, chip.dataset.replacement, chip.dataset.category);
+});
 
 document.getElementById("toggle-ch-form").onclick = () => document.getElementById("ch-form").classList.toggle("hidden");
 document.getElementById("cancel-ch-btn").onclick = () => document.getElementById("ch-form").classList.add("hidden");

@@ -1179,7 +1179,8 @@ class CareerVault:
         lowercase_words: set[str] = set()
 
         currency_re = re.compile(r"(?:[$£€]\s?\d[\d,]*(?:\.\d+)?(?:\s?[kKmMbB])?)")
-        multi_proper_re = re.compile(r"\b([A-Z][a-zA-Z0-9]+(?:\s+[A-Z][a-zA-Z0-9]+){1,2})\b")
+        # [ \t]+ rather than \s+: a suggested phrase must not span a line break
+        multi_proper_re = re.compile(r"\b([A-Z][a-zA-Z0-9]+(?:[ \t]+[A-Z][a-zA-Z0-9]+){1,2})\b")
         mid_proper_re = re.compile(r"(?<=[a-z,;(\s]\s)([A-Z][a-zA-Z0-9]{2,}(?:-[A-Z][a-zA-Z0-9]+)?)")
         handle_re = re.compile(r"(?:@[a-zA-Z0-9_]{3,}|#[a-z][a-z0-9_-]{2,})")
 

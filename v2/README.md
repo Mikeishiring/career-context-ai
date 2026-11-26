@@ -59,13 +59,11 @@ Give your assistant [`SKILL.md`](SKILL.md) (or [`v2/SKILL.md`](v2/SKILL.md)) alo
 python -m v2.launch private/career.sqlite --open
 ```
 Opens **`http://127.0.0.1:8765/`** directly over your local SQLite file:
-- **Overview:** Interactive 5-stage tracker, live `L0 → L3` tier preview, and branded MCP channels dock.
-- **Studio:** Flagship stories, readiness progress, and live Deepening Radar.
-- **Experience:** Editorial profile, Master-Detail Roles workbench (see stories per role and `0`-story gaps), Timeline, and Skills.
-- **Stories:** Master-Detail `L1` workbench (`Overview` / `Edit Story` / `+ Claim`, sliding `Flagship / Core / Proof / Background` selector, visual lightbox).
-- **Share:** Sensitive terms registry, `L2 / L3` Tier Studio, succinct human exports (`HTML` / `Resume`), and exhaustive **AI Context Packs** (`agent_pack` Markdown / `agent_json` + read-only `L2` MCP command).
-- **Vault:** MCP scan ledger, FTS5/hybrid search, inbox triage, source reader, and offline file upload drawer.
-- **AI:** Optional direct BYO-API helper (keys stay strictly in tab `sessionStorage`, never written to disk).
+- **Home:** the one next thing to do, taken from the gap check; your vault's live counts stage by stage; your flagship stories; and the depth score. On a new vault it shows three ways to start and explains how the tiers work.
+- **Career:** your stories listed under their roles. Each story page holds its three versions (Private, Confidential-safe, Public) with its sources and verified quotes. Roles, profile, timeline and skills are one switch away.
+- **Sources:** everything collected, by channel, with search, the unlinked inbox, file upload and the work-channel ledger.
+- **Share:** exports for a person (`HTML` brief, resume) or for someone else's AI (**AI Context Packs**, read-only `L2` MCP command), plus the blocked terms and their safe replacements.
+- **Ask your vault:** an optional bring-your-own-key helper in the header (keys stay in tab `sessionStorage`, never written to disk).
 
 ### 3. CLI Exports & Read-Only External MCP
 ```powershell
