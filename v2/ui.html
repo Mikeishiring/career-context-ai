@@ -253,10 +253,9 @@ main { max-width: 1320px; margin: 0 auto; padding: 2rem clamp(1rem, 2.5vw, 2.2re
   font-family: var(--serif); font-size: 1.25rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.25;
 }
 .section-head h3 { margin: 0; }
-.story-grid {
-  display: flex; flex-wrap: wrap; gap: 1px; margin-bottom: 2.75rem; overflow: hidden;
-  background: var(--line); border-radius: var(--r-panel);
-}
+.story-grid { display: flex; flex-wrap: wrap; gap: 1px; margin-bottom: 2.75rem; }
+.story-grid:has(.story-card) { overflow: hidden; background: var(--line); border-radius: var(--r-panel); }
+.story-grid > .meta { margin: 0; }
 .story-card {
   position: relative; flex: 1 1 320px; display: flex; flex-direction: column;
   background: var(--paper); padding: 1.3rem 1.5rem 1.1rem; cursor: pointer;
@@ -1034,8 +1033,7 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
     <div id="empty-vault-banner" class="empty-starter hidden sheet-animate">
       <div class="split" style="align-items:center">
         <div>
-          <span class="pill ok">New Local Vault Ready</span>
-          <h3 style="margin:0.45rem 0 0.2rem;font-size:1.25rem;letter-spacing:-0.025em">Start in 2 minutes—pick whichever fits your setup</h3>
+          <h3 class="scene-title" style="margin:0 0 0.3rem">Start in two minutes</h3>
           <p class="meta" style="margin:0">Works with MCP connectors, regular web AI chats (ChatGPT / Claude / Gemini), or offline files on a locked work laptop.</p>
         </div>
       </div>
@@ -1110,7 +1108,7 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
       <div class="hero-launch">
         <div class="hero-copy">
           <h3>Your stories, ready at every level</h3>
-          <p id="hero-progress-label">0 of 0 stories ready for confidential-safe sharing</p>
+          <p id="hero-progress-label">No stories yet</p>
           <div class="progress-track"><div id="hero-progress-fill" class="progress-fill" style="width:0%"></div></div>
           <div class="hero-actions">
             <button class="hero-cta" onclick="switchTab('sharing')">Open sharing studio <span class="arrow">→</span></button>
@@ -1119,7 +1117,7 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
         </div>
         <div class="story-folder" id="hero-folder" title="Open featured flagship story">
           <div class="folder-sheet">
-            <div class="folder-period" id="folder-period">FLAGSHIP STORY</div>
+            <div class="folder-period" id="folder-period">Flagship story</div>
             <div class="folder-title" id="folder-title">Your top career story</div>
           </div>
           <div class="folder-pocket"></div>
@@ -2012,7 +2010,9 @@ async function refresh() {
   document.getElementById("lib-unlinked").textContent = c.unlinked_sources;
   document.getElementById("lib-tiers").textContent = `${g.L2.ready}/${g.L3.ready}`;
   const pct = g.L2.total ? Math.round((g.L2.ready / g.L2.total) * 100) : 0;
-  document.getElementById("hero-progress-label").textContent = `${g.L2.ready} of ${g.L2.total} stories ready for confidential-safe L2 sharing (${g.L3.ready} public L3)`;
+  document.getElementById("hero-progress-label").textContent = g.L2.total
+    ? `${g.L2.ready} of ${g.L2.total} stories ready for confidential-safe L2 sharing (${g.L3.ready} public L3)`
+    : "No stories yet";
   document.getElementById("hero-progress-fill").style.width = `${pct}%`;
 
   const topEp = episodes[0];
@@ -2037,7 +2037,7 @@ async function refresh() {
         <span class="go">Open story →</span>
       </div>
     </div>`;
-  }).join("") || '<p class="meta">No stories yet.</p>';
+  }).join("") || '<p class="meta">No stories yet. Add one from Stories, or load the sample vault from Overview.</p>';
 
   // Overview Tab: 5 Live Stages & Supported MCP Channels
   renderOverview();
@@ -2050,7 +2050,8 @@ async function refresh() {
   const ds = gaps.depth_score || 0;
   const dsPill = document.getElementById("depth-score-pill");
   dsPill.textContent = ds;
-  dsPill.className = ds >= 80 ? 'ok' : (ds >= 55 ? 'warn' : 'danger');
+  // A vault with nothing in it yet is new, not failing.
+  dsPill.className = !(episodes.length + sources.length) || ds >= 80 ? 'ok' : (ds >= 55 ? 'warn' : 'danger');
   const b = gaps.breakdown || {};
   document.getElementById("depth-pillars").innerHTML = [
     ["Coverage", b.coverage ?? 0, 25], ["Story depth", b.depth ?? 0, 30],
@@ -2090,7 +2091,7 @@ async function refresh() {
     const click = ev.kind === "episode" ? `onclick="openStory('${esc(ev.id)}','read')"` : "";
     return `
     <div class="timeline-item ${esc(ev.kind)} ${ev.kind === 'episode' ? 'clickable' : ''}" ${click}>
-      <div class="row"><span class="pill">${esc(ev.kind)}</span><span class="meta">${esc(shortPeriod(ev.period))}</span></div>
+      <div class="row"><span class="pill">${esc({ episode: "Story", role: "Role", unlinked_source: "Unlinked source" }[ev.kind] || ev.kind)}</span><span class="meta">${esc(shortPeriod(ev.period))}</span></div>
       <strong>${esc(ev.title)}</strong>
       <div class="meta">${esc(cleanSnippet(ev.summary, 150))}</div>
     </div>`;
@@ -2251,7 +2252,7 @@ function renderFlow() {
         }
         if (total > shown) marks += `<span class="more">+${total - shown}</span>`;
       }
-      const num = fig ? (fig.of != null ? `${fig.n}<small>/${fig.of}</small>` : fig.n) : "–";
+      const num = fig ? (fig.of ? `${fig.n}<small>/${fig.of}</small>` : fig.n) : "–";
       const unit = FLOW_UNITS[c] ? FLOW_UNITS[c][fig && (fig.of ?? fig.n) === 1 ? 0 : 1] : "";
       return `
       <button type="button" class="flow-stage ${esc(st.status || "")}" role="tab" id="flow-tab-${st.stage}" data-stage="${st.stage}" aria-controls="flow-detail" onclick="selectStage(${st.stage})">
