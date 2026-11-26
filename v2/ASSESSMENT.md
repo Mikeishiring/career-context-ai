@@ -1,4 +1,4 @@
-# Career Context AI v2 — Architecture & Benchmark Report
+# Career Context AI: architecture and benchmark report
 
 Reproducible automated evaluation covering:
 1. Official answerable retrieval holdout (`tests/fixtures/realistic-career-history.json` + `tests/fixtures/retrieval-holdout.json`)
@@ -19,13 +19,13 @@ python -m v2.assess
 
 | Dimension | Result | Evidence |
 |---|---|---|
-| **1. Retrieval Quality (Official Holdout)** | **PASS — Major Win** | `v1` lexical rejected **11/11** natural-language holdout queries (`exit 2`). `v2` FTS5: **0.48 ms**, Recall@5 `0.508`, Recall@10 `0.606`. `v2` Hybrid (`float16` ONNX + RRF): **15.6 ms**, Recall@10 **`0.765`**, MRR **`0.636`**. |
-| **2. Large-Archive Scaling & Speed** | **PASS — >280× Faster** | `v1` uncached CPU re-embedding timed out at **>120,000 ms** on multi-hundred-source archives. `v2` SQLite-cached `float16` hybrid runs in **~420 ms** across both chunks and episodes; pure FTS5 runs in **3–7 ms**. |
+| **1. Retrieval Quality (Holdout)** | **PASS** | FTS5: **0.48 ms**, Recall@5 `0.508`, Recall@10 `0.606`. Hybrid (`float16` ONNX + RRF, needs the optional local model): **15.6 ms**, Recall@10 **`0.765`**, MRR **`0.636`**. |
+| **2. Large-Archive Scaling & Speed** | **PASS** | On multi-hundred-source archives, SQLite-cached `float16` hybrid runs in **~420 ms** across both chunks and episodes; pure FTS5 runs in **3–7 ms**. |
 | **3. Confidentiality & Leak Security** | **11 / 11 PASS** | Deterministically blocks registered sensitive terms (exact + case variants), currency metrics, proprietary rules, emails, `sk-` API keys, `ghp_` tokens, Slack `#channels`, unapproved screenshots, and raw-source reads on L2/L3 MCP. |
 | **4. Self-Deepening Coverage Audit** | **PASS** | `audit_gaps()` deterministically scores Coverage (`25`), Story Depth (`30`), Narrative & Voice (`20`), and Sharing Safety (`25`), catching empty roles, unlinked long docs (`>=1k` chars), unwritten clusters, missing decisions/outcomes/claims, flat Flagship ranking, and courtroom-style legalese in L2/L3. |
 | **5. Data Integrity & Browser BYO-API** | **PASS** | External-content FTS5 syncs on insert & delete; Python verbatim quote-to-offset anchoring verified exact; CSRF blocks unauthenticated POST (`403`); proxy rejects non-localhost `http://` (`400`); OpenAI / Anthropic / Gemini adapters verified; UI JS passes `node --check`. |
 | **6. Static Share Compression** | **PASS — >200× Smaller** | Leak-checked L2/L3 HTML, Markdown, Resume, and JSON exports strip raw L0 sources and JavaScript, compressing multi-MB raw vaults into clean tens-of-KB Tempo editorial briefs. |
-| **7. BYO-LLM Context Efficiency** | **~96% Reduction** | `v1` instruction corpus totaled **29,176 words** across `SKILL.md`, `START-HERE.md`, and 18+ reference files. `v2/SKILL.md` encodes the complete **3-Pass Self-Deepening Protocol** in **~1,100 words**. |
+| **7. Instruction Size** | **About 1,900 words** | `SKILL.md` is the only file an assistant has to read; it holds the complete **3-Pass Self-Deepening Protocol**. |
 
 ---
 

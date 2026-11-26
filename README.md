@@ -69,7 +69,7 @@ In the Studio, **Sources → Work channels → Copy MCP JSON** gives you a ready
 ```powershell
 python -m v2.career mcp private/career.sqlite --tier L1 --rw
 ```
-Give your assistant [`SKILL.md`](SKILL.md) (or [`v2/SKILL.md`](v2/SKILL.md)) alongside your existing Slack / Notion / Calendar / Transcripts / Docs / GitHub MCP servers:
+Give your assistant [`SKILL.md`](SKILL.md) alongside your existing Slack / Notion / Calendar / Transcripts / Docs / GitHub MCP servers:
 > *"Follow `SKILL.md`. First ask what channels I work on, check which MCP connectors are active, log them in `career_log_channel_scan`, scan my work into my career vault, and run `career_audit_gaps` to close gaps before stopping."*
 
 ### 4. Review, edit and export in the Studio
@@ -91,6 +91,20 @@ python -m v2.career export private/career.sqlite --tier L2 --format agent_pack -
 # Read-only leak-checked MCP server for an external agent
 python -m v2.career mcp private/career.sqlite --tier L2
 ```
+
+---
+
+## What is in this repository
+
+| Path | What it is |
+|---|---|
+| `v2/` | The product: the local SQLite vault (`db.py`), the Studio (`ui.html`, served by `server.py`), the launcher, the MCP server, importers and exporters, and the tests. |
+| `SKILL.md` | The instructions you give your own AI assistant so it can fill the vault. |
+| `docs/index.html` | The playable experiment, published with GitHub Pages. |
+| `tools/` | Checks that keep commit identities private before a push. |
+| `tests/fixtures/` | Fictional data used by `python -m v2.assess`. |
+
+Everything in the repository is fictional sample data. Your own vault lives outside it.
 
 ---
 
