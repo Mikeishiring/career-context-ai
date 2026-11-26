@@ -1,6 +1,6 @@
 # Career Context AI
 
-> **[? Try the 30-second playable experiment live ?](https://mikeishiring.github.io/career-context-ai/)** � see how real work records and a local L2 privacy shutter beat a 1-page resume.
+> **[Try the 30-second playable experiment](https://mikeishiring.github.io/career-context-ai/)**: see how real work records and a local L2 privacy shutter beat a 1-page resume.
 
 **Build your own local career database with your own AI—then export a clean brief for humans or an exhaustive, leak-checked Context Pack for someone else's AI.**
 
@@ -46,30 +46,43 @@ When exporting **`L2`** or **`L3`**, choose the format for who is reading it:
 
 ## Quick Start
 
-Zero mandatory pip packages—**Python 3.11+ stdlib only** (optional local cached `float16` semantic search uses `.semantic-model`).
+You need **Python 3.11 or newer** and nothing else: no packages to install, no account, no API key.
 
-### 1. Connect Your Own AI Assistant (MCP-First)
-Run your local vault as a private read/write MCP server (keeping `career.sqlite` inside gitignored `private/`):
+### 1. Look around with sample data
+```powershell
+git clone https://github.com/Mikeishiring/career-context-ai.git
+cd career-context-ai
+python -m v2.launch --demo --open
+```
+This opens the Studio in your browser on a fictional sample vault. Nothing is saved to your own vault.
+
+### 2. Start your own vault
+```powershell
+python -m v2.launch --open
+```
+The first run creates `career.sqlite` in a `.career-context` folder in your home directory, outside any git repository, and opens the Studio. Pass a path instead (for example `python -m v2.launch private/career.sqlite --open`) if you want the file somewhere else; `private/` is gitignored here.
+
+Open the address the launcher prints rather than the `v2/ui.html` file itself: the page reads your vault through that local server.
+
+### 3. Let your own AI fill it
+In the Studio, **Overview → Work channels → Copy MCP JSON** gives you a ready-made MCP entry for your assistant, with the right paths for your machine. Or start the private read/write MCP server yourself:
 ```powershell
 python -m v2.career mcp private/career.sqlite --tier L1 --rw
 ```
 Give your assistant [`SKILL.md`](SKILL.md) (or [`v2/SKILL.md`](v2/SKILL.md)) alongside your existing Slack / Notion / Calendar / Transcripts / Docs / GitHub MCP servers:
-> *"Follow `SKILL.md`. First ask what channels I work on, check which MCP connectors are active, log them in `career_log_channel_scan`, scan my work into `private/career.sqlite`, and run `career_audit_gaps` to close gaps before stopping."*
+> *"Follow `SKILL.md`. First ask what channels I work on, check which MCP connectors are active, log them in `career_log_channel_scan`, scan my work into my career vault, and run `career_audit_gaps` to close gaps before stopping."*
 
-### 2. Review, Edit & Export in the Local Front End
-```powershell
-python -m v2.launch private/career.sqlite --open
-```
+### 4. Review, edit and export in the Studio
 Opens **`http://127.0.0.1:8765/`** directly over your local SQLite file:
-- **Overview:** Interactive 5-stage tracker, live `L0 → L3` tier preview, and branded MCP channels dock.
-- **Studio:** Flagship stories, readiness progress, and live Deepening Radar.
+- **Overview:** A stage strip with your vault's live counts, the `L0 → L3` tier scene (one record read at four distances), and the work-channel ledger.
+- **Studio:** Flagship stories, readiness progress, and the depth score with its four parts and open gaps.
 - **Experience:** Editorial profile, Master-Detail Roles workbench (see stories per role and `0`-story gaps), Timeline, and Skills.
 - **Stories:** Master-Detail `L1` workbench (`Overview` / `Edit Story` / `+ Claim`, sliding `Flagship / Core / Proof / Background` selector, visual lightbox).
 - **Share:** Sensitive terms registry, `L2 / L3` Tier Studio, succinct human exports (`HTML` / `Resume`), and exhaustive **AI Context Packs** (`agent_pack` Markdown / `agent_json` + read-only `L2` MCP command).
 - **Vault:** MCP scan ledger, FTS5/hybrid search, inbox triage, source reader, and offline file upload drawer.
 - **AI:** Optional direct BYO-API helper (keys stay strictly in tab `sessionStorage`, never written to disk).
 
-### 3. CLI Exports & Read-Only External MCP
+### 5. CLI exports and a read-only MCP server for someone else's agent
 ```powershell
 # Succinct human brief (zero-JS static HTML)
 python -m v2.career export private/career.sqlite --tier L2 --format html --out career-l2.html
