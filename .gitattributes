@@ -1,2 +1,2 @@
-# Preserve the exact bytes covered by historical experiment hashes.
+# Keep every file byte-exact on all platforms: no line-ending conversion.
 * -text

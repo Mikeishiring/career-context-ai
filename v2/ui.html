@@ -121,7 +121,6 @@ nav {
   position: relative; align-self: stretch;
   display: flex; align-items: stretch; gap: clamp(0.9rem, 1.8vw, 1.6rem); flex-wrap: nowrap;
 }
-.nav-hover { display: none; }
 .nav-glider {
   position: absolute; bottom: -1px; left: 0; height: 2px; background: var(--accent);
   transition: transform 220ms var(--ease-spring), width 220ms var(--ease-spring), opacity 140ms ease;
@@ -168,23 +167,6 @@ main { max-width: 1320px; margin: 0 auto; padding: 2rem clamp(1rem, 2.5vw, 2.2re
   margin: 0; font-family: var(--serif); font-size: clamp(1.7rem, 2.6vw, 2.1rem);
   font-weight: 600; letter-spacing: -0.02em; line-height: 1.12;
 }
-
-/* Studio stage and context library */
-.studio-desk {
-  display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(260px, 1fr);
-  gap: 16px; align-items: stretch; margin-bottom: 2.75rem;
-}
-.hero-launch {
-  position: relative; overflow: hidden;
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(160px, 250px);
-  align-items: center; gap: clamp(16px, 3vw, 48px); min-height: 232px;
-  padding: clamp(22px, 3vw, 40px); border-radius: var(--r-stage); color: #f8f5ed;
-  background: var(--deep);
-}
-.hero-copy h3 { margin: 0; font-family: var(--serif); font-size: clamp(1.6rem, 2.6vw, 2.2rem); line-height: 1.1; letter-spacing: -0.02em; font-weight: 600; max-width: 20ch; }
-.hero-copy p { margin: 0.75rem 0 0.5rem; font-size: 0.9rem; color: #d5e0d9; }
-.progress-track { width: min(100%, 200px); height: 4px; border-radius: 2px; background: rgba(255,255,255,0.2); overflow: hidden; }
-.progress-fill { height: 100%; background: #e6b574; transition: width 420ms var(--ease-spring); }
 .hero-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1.4rem; }
 .hero-cta {
   display: inline-flex; align-items: center; gap: 9px; min-height: 42px; padding: 0.5rem 1rem;
@@ -199,57 +181,11 @@ main { max-width: 1320px; margin: 0 auto; padding: 2rem clamp(1rem, 2.5vw, 2.2re
 .hero-cta.ghost { background: transparent; color: #f8f5ed; border-color: rgba(255, 253, 249, 0.34); }
 .hero-cta.ghost:hover { background: rgba(255, 253, 249, 0.1); border-color: rgba(255, 253, 249, 0.6); }
 
-/* The next story stands in its file: parallel sheets behind it, one flat pocket in front */
-.story-folder { position: relative; justify-self: end; width: 100%; max-width: 250px; height: 176px; cursor: pointer; }
-.story-folder::before, .story-folder::after, .folder-sheet {
-  position: absolute; inset: 22px 12px 8px; border-radius: 8px 8px 4px 4px;
-}
-.story-folder::before, .story-folder::after { content: ""; transform-origin: 50% 0; }
-.story-folder::before { background: #a98c5b; transform: translateY(-18px) scaleX(0.86); animation: file-back 420ms var(--ease-spring) both; }
-.story-folder::after { background: #d9c39b; transform: translateY(-9px) scaleX(0.93); animation: file-middle 340ms var(--ease-spring) both; }
-@keyframes file-back { from { transform: translateY(0) scaleX(0.86); } to { transform: translateY(-18px) scaleX(0.86); } }
-@keyframes file-middle { from { transform: translateY(0) scaleX(0.93); } to { transform: translateY(-9px) scaleX(0.93); } }
-.folder-sheet {
-  z-index: 1; background: #fffdf9; padding: 14px 16px; overflow: hidden;
-  transition: transform 180ms var(--ease-spring);
-}
-.hero-launch:hover .folder-sheet { transform: translateY(-6px); }
-.folder-period { font: 500 0.75rem/1.4 var(--sans); color: #5c635d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.folder-title {
-  margin-top: 6px; color: #1b221e; font: 600 1.05rem/1.2 var(--serif); letter-spacing: -0.015em;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-}
-.folder-pocket {
-  position: absolute; z-index: 2; inset: auto 0 0; height: 48px;
-  background: #d2a467; border-radius: 0 8px 10px 10px; box-shadow: inset 0 1px #ecd3a8;
-  transform-origin: 50% 100%; transition: transform 180ms ease-out;
-}
-.hero-launch:hover .folder-pocket { transform: perspective(220px) rotateX(-10deg); }
-.folder-pocket::before {
-  content: ""; position: absolute; left: 0; top: -9px; width: 36%; height: 10px;
-  background: inherit; border-radius: 7px 7px 0 0; box-shadow: inset 0 1px #ecd3a8;
-}
-
-.library-card {
-  background: var(--paper); border-radius: var(--r-stage);
-  padding: 1.2rem 1.4rem 0.6rem; display: flex; flex-direction: column;
-}
-.library-card h3 { margin: 0 0 0.3rem; }
-.lib-row {
-  flex: 1 1 44px; display: grid; grid-template-columns: minmax(0, 1fr) auto 12px; gap: 12px; align-items: center;
-  min-height: 44px; padding: 0.4rem 0; border: 0; border-top: 1px solid var(--line);
-  cursor: pointer; background: transparent; text-align: left; color: var(--ink); font: 500 0.92rem var(--sans);
-}
-.lib-row:first-of-type { border-top: 0; }
-.lib-row:hover { color: var(--accent); }
-.lib-row:hover .chev { transform: translateX(3px); color: var(--accent); }
-.lib-icon { display: none; }
-.lib-row strong { font-variant-numeric: tabular-nums; font-size: 0.98rem; font-weight: 650; }
-.lib-row .chev { color: var(--muted); transition: transform 180ms var(--ease-spring), color 140ms ease; }
+/* The next story stands in its file: parallel sheets behind it { position: relative; justify-self: end; width: 100%; max-width: 250px; height: 176px; cursor: pointer; }
 
 /* Section headings and the flagship strip */
 .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin: 0 0 1rem; }
-.section-head h3, .library-card h3, .card h3, .split-pane h3, .mcp-dock h3 {
+.section-head h3, .card h3, .split-pane h3 {
   font-family: var(--serif); font-size: 1.25rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.25;
 }
 .section-head h3 { margin: 0; }
@@ -284,11 +220,9 @@ main { max-width: 1320px; margin: 0 auto; padding: 2rem clamp(1rem, 2.5vw, 2.2re
   background: var(--paper); margin-bottom: 2.5rem;
 }
 .portrait-intro { position: relative; padding: clamp(22px, 2.8vw, 34px); }
-.portrait-side { border-left: 1px solid var(--line); }
 .portrait-name { margin: 0.55rem 0 0.25rem; font-family: var(--serif); font-size: clamp(1.4rem, 2.2vw, 1.8rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; }
 .portrait-headline { margin: 0 0 0.85rem; font-size: 0.98rem; font-weight: 600; color: var(--accent); line-height: 1.4; }
 .portrait-overview { margin: 0; font-size: 0.95rem; line-height: 1.62; color: var(--ink); max-width: 80ch; }
-.portrait-side { padding: clamp(18px, 2.4vw, 30px); }
 
 /* Depth: one score and the four parts it is made of */
 .depth { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: end; gap: 1.2rem clamp(1.5rem, 4vw, 3.5rem); margin: 0.6rem 0 1.6rem; }
@@ -400,7 +334,6 @@ main { max-width: 1320px; margin: 0 auto; padding: 2rem clamp(1rem, 2.5vw, 2.2re
 
 /* General layout */
 .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.2rem; align-items: start; }
-.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; align-items: start; }
 .card {
   background: var(--paper); border-radius: var(--r-panel);
   padding: 1.4rem 1.6rem; margin-bottom: 1.75rem;
@@ -589,7 +522,6 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
 .index-group:first-child { padding-top: 0; }
 .story-stack { min-width: 0; display: grid; gap: 0.9rem; justify-items: start; }
 .story-stack > .sheet-panel { width: 100%; }
-#tier-sheet #active-tier-seg { display: none; }
 
 /* Overview scenes stand on the page ground: no shells, only the construction */
 .scene-title { margin: 0 0 1.5rem; font-family: var(--serif); font-size: 1.25rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.25; }
@@ -844,10 +776,8 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
 }
 
 @media (max-width: 920px) {
-  .studio-desk, .portrait-card, .workbench { grid-template-columns: minmax(0, 1fr); }
+  .portrait-card, .workbench { grid-template-columns: minmax(0, 1fr); }
   .index-panel { position: static; max-height: 320px; }
-  .hero-launch { grid-template-columns: minmax(0, 1fr); }
-  .story-folder { display: none; }
 }
 
 /* Narrow: the tabs take their own row and scroll if they must */
@@ -865,7 +795,6 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
   .landing-hero h2 { max-width: none; }
   .page-head .seg-control { display: grid; width: 100%; }
   .seg-control button { white-space: normal; padding-inline: 0.4rem; }
-  .portrait-side { border-left: 0; border-top: 1px solid var(--line); }
   main { padding-top: 1.5rem; }
   .page-head { margin-bottom: 1.1rem; }
   .grid-2 { grid-template-columns: minmax(0, 1fr); }
@@ -899,7 +828,6 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
       <h1>Career Context</h1>
     </div>
     <nav id="main-nav">
-      <div class="nav-hover" id="nav-hover"></div>
       <div class="nav-glider" id="nav-glider"></div>
       <button class="active" data-tab="home">Home</button>
       <button data-tab="career">Career</button>
@@ -996,7 +924,7 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
         <p>Your work history on your own machine, organised by your own AI. Export a clean brief for people, or a leak-checked pack for someone else's AI.</p>
         <div class="hero-actions">
           <button class="hero-cta" onclick="switchTab('sources')">Add your first source <span class="arrow">→</span></button>
-          <button class="hero-cta ghost" onclick="previewExport('L2')">Preview L2 ↗</button>
+          <button class="hero-cta ghost" onclick="previewExport('L2')">Preview confidential-safe ↗</button>
         </div>
         <div class="hero-trust-note">
           <span>Stored locally in SQLite</span>
@@ -1094,14 +1022,14 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
           </g>
 
           <!-- Interactive Output Tiers (L2 & L3) -->
-          <g class="diag-node" data-node="l2" tabindex="0" role="button" aria-label="L2 Safe export">
+          <g class="diag-node" data-node="l2" tabindex="0" role="button" aria-label="Confidential-safe export">
             <rect class="node-bg" x="336" y="48" width="78" height="52" rx="11" fill="rgba(220,238,229,0.97)" stroke="#287a5e" stroke-width="1.2"/>
             <text x="375" y="68" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="11" font-weight="800" fill="#16543f">L2 Safe</text>
             <text x="375" y="82" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="8.5" font-weight="600" fill="#16543f">Hiring · AI Pack</text>
             <text x="375" y="93" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="8" fill="#16543f">Leak-checked</text>
           </g>
 
-          <g class="diag-node" data-node="l3" tabindex="0" role="button" aria-label="L3 Public export">
+          <g class="diag-node" data-node="l3" tabindex="0" role="button" aria-label="Public export">
             <rect class="node-bg" x="336" y="126" width="78" height="52" rx="11" fill="rgba(255,253,249,0.96)" stroke="#d6c8ad" stroke-width="1.2"/>
             <text x="375" y="146" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="11" font-weight="800" fill="#1b221e">L3 Public</text>
             <text x="375" y="160" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="8.5" font-weight="600" fill="#8a4b10">Profile · Bio</text>
@@ -1159,7 +1087,7 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
         <div id="profile-edit-view" class="hidden sheet-animate">
           <label>Name</label><input id="p-name">
           <label>Headline</label><textarea id="p-headline" style="min-height:54px"></textarea>
-          <label>Private L1 Overview</label><textarea id="p-l1" style="min-height:115px"></textarea>
+          <label>Private overview</label><textarea id="p-l1" style="min-height:115px"></textarea>
           <div class="row" style="margin-top:0.85rem">
             <button class="btn" id="save-person">Save profile</button>
             <button class="btn secondary" id="cancel-profile-edit">Cancel</button>
@@ -1264,29 +1192,8 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
         <button data-sub="blocked">Blocked terms (<span id="share-blocked-count">0</span>)</button>
       </div>
       <div class="row">
-        <button class="btn secondary sm" onclick="previewExport('L2')">Preview L2 ↗</button>
-      </div>
-    </div>
-
-    <!-- SUB-VIEW 1: POLISH STORIES (ONE FOCUSED TIER AT A TIME) -->
-    <div id="share-view-polish" class="hidden">
-      <div class="workbench">
-        <aside class="index-panel">
-          <div class="index-controls">
-            <div class="seg-control full" id="tier-filter-seg">
-              <div class="seg-thumb"></div>
-              <button class="active" data-tfilter="all">All</button>
-              <button data-tfilter="flagship">Flagship</button>
-              <button data-tfilter="needs">Needs review</button>
-            </div>
-          </div>
-          <div id="tier-index-list" class="index-scroll"></div>
-          <div class="rail-foot">
-            <span id="tier-readiness-foot">L2 / L3 status</span>
-            <button type="button" onclick="batchSanitize(ACTIVE_SHARE_TIER)" title="Auto-draft missing or stale stories for active tier">Auto-draft all</button>
-          </div>
-        </aside>
-
+        <button class="btn secondary sm" onclick="batchSanitize('L2')" title="Draft the confidential-safe version of every story that is missing or out of date">Auto-draft safe versions</button>
+        <button class="btn secondary sm" onclick="previewExport('L2')">Preview confidential-safe ↗</button>
       </div>
     </div>
 
@@ -1330,7 +1237,7 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
           <div class="export-list">
             <div class="export-item">
               <div>
-                <strong>L2 Confidential-Safe Visual Brief</strong>
+                <strong>Confidential-safe visual brief</strong>
                 <span class="meta">Self-contained HTML page · leak-checked · zero scripts</span>
               </div>
               <div class="row">
@@ -1340,7 +1247,7 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
             </div>
             <div class="export-item">
               <div>
-                <strong>L3 Public Career Page</strong>
+                <strong>Public career page</strong>
                 <span class="meta">Short open-web summary plus approved links · zero scripts</span>
               </div>
               <div class="row">
@@ -1351,7 +1258,7 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
             <div class="export-item">
               <div>
                 <strong>1-Page Resume (Markdown)</strong>
-                <span class="meta">L2 safe roles, outcomes, and flagship stories</span>
+                <span class="meta">Confidential-safe roles, outcomes and flagship stories</span>
               </div>
               <div class="row">
                 <button class="btn secondary sm" onclick="copyResume('L2')">Copy</button>
@@ -1368,7 +1275,7 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
           <div class="export-list">
             <div class="export-item">
               <div>
-                <strong>L2 AI Context Pack (Markdown)</strong>
+                <strong>Confidential-safe AI Context Pack (Markdown)</strong>
                 <span class="meta">All L2 roles, capabilities, decisions, outcomes, and AI reading guide</span>
               </div>
               <div class="row">
@@ -1387,8 +1294,8 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
             </div>
             <div class="export-item">
               <div>
-                <strong>Read-Only L2 MCP Server Config</strong>
-                <span class="meta">Let an external agent query L2 stories without touching L0 or L1</span>
+                <strong>Read-only MCP server config</strong>
+                <span class="meta">Let an external agent query your confidential-safe stories without touching raw sources or private versions</span>
               </div>
               <div class="row">
                 <button class="btn secondary sm" onclick="copyShareMcp()">Copy config</button>
@@ -1402,17 +1309,17 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
         <div class="split" style="align-items:center;margin-bottom:0.4rem">
           <div>
             <h3>Top-level overviews</h3>
-            <p class="meta" style="margin:0.15rem 0 0">Shown at the top of your exported L2 brief, AI Context Pack, and L3 public page.</p>
+            <p class="meta" style="margin:0.15rem 0 0">Shown at the top of your exported brief, AI Context Pack and public page.</p>
           </div>
           <button class="btn sm" id="save-overviews">Save overviews</button>
         </div>
         <div class="grid-2" style="margin-top:0.65rem">
           <div>
-            <label style="margin-top:0">L2 Confidential-Safe Overview</label>
+            <label style="margin-top:0">Confidential-safe overview</label>
             <textarea id="p-l2" style="min-height:92px" placeholder="High-signal intro for hiring managers and external AI assistants..."></textarea>
           </div>
           <div>
-            <label style="margin-top:0">L3 Public Overview</label>
+            <label style="margin-top:0">Public overview</label>
             <textarea id="p-l3" style="min-height:92px" placeholder="Short, open-web bio summary..."></textarea>
           </div>
         </div>
@@ -1422,7 +1329,7 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
         <div class="split" style="align-items:center">
           <div>
             <h3>Ready-to-copy handoff prompts</h3>
-            <p class="meta" style="margin:0.15rem 0 0">Attach or paste your <strong>L2 AI Context Pack</strong> into any AI along with one of these prompts.</p>
+            <p class="meta" style="margin:0.15rem 0 0">Attach or paste your <strong>Confidential-safe AI Context Pack</strong> into any AI along with one of these prompts.</p>
           </div>
         </div>
         <div class="handoff-grid">
@@ -1451,7 +1358,7 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
     <div class="page-head">
       <div class="row" style="gap:0.75rem">
         <h2>Sources</h2>
-        <span class="pill" id="vault-summary-pill">L0 Local</span>
+        <span class="pill" id="vault-summary-pill">Stays on your disk</span>
       </div>
       <div class="row">
         <a class="btn secondary sm" href="/api/backup" title="Download a complete point-in-time SQLite backup">Backup .sqlite ↓</a>
@@ -1475,7 +1382,7 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
         </div>
       </div>
       <div class="card" style="margin-bottom:0">
-        <h3>Quick note into L0 vault</h3>
+        <h3>Quick note into Sources</h3>
         <label style="margin-top:0.35rem">Title</label><input id="cap-title" placeholder="e.g. Postmortem note or voice memo">
         <div class="form-row">
           <div><label>Channel</label><select id="cap-channel"><option value="transcript">Meeting Transcript</option><option value="calendar">Calendar Event</option><option value="voice_note">Voice Note</option><option value="doc">Doc / Google Doc</option><option value="slack">Slack / Chat</option><option value="notion">Notion / Wiki</option><option value="github">GitHub / Linear</option><option value="gmail">Email / Gmail</option><option value="slides">Slides / Figma</option><option value="linkedin">LinkedIn</option><option value="x">X / Twitter</option><option value="substack">Substack / Blog</option><option value="resume">Resume</option></select></div>
@@ -1639,7 +1546,6 @@ let STORY_MODE = "read"; // "read" | "edit" | "new" | "claim"
 let PENDING_NEW_ROLE_ID = "";
 let STORY_FILTER = "all";
 let ACTIVE_TIER_ID = null;
-let TIER_FILTER = "all";
 let STORY_TIER = "L1";      // which version of the open story is on screen: L1, L2 or L3
 let CAREER_VIEW = "stories"; // "stories" or "roles"
 let EXPLAINER_SET = false;
@@ -1714,19 +1620,6 @@ function syncNavGlider() {
   positionGlider(nav, nav.querySelector("button.active"), document.getElementById("nav-glider"));
 }
 
-/* Magnetic hover ghost pill inside top nav */
-(() => {
-  const nav = document.getElementById("main-nav");
-  const ghost = document.getElementById("nav-hover");
-  if (!nav || !ghost) return;
-  nav.querySelectorAll("button").forEach(btn => {
-    btn.addEventListener("mouseenter", () => positionGlider(nav, btn, ghost));
-    btn.addEventListener("focus", () => positionGlider(nav, btn, ghost));
-  });
-  nav.addEventListener("mouseleave", () => { ghost.style.opacity = "0"; });
-  nav.addEventListener("focusout", (e) => { if (!nav.contains(e.relatedTarget)) ghost.style.opacity = "0"; });
-})();
-
 /* Interactive channel-to-vault diagram */
 (() => {
   const diag = document.getElementById("hero-diagram");
@@ -1795,7 +1688,7 @@ function syncNavGlider() {
       const sc = STATE?.status?.counts;
       traceText.textContent = sc
         ? `career.sqlite · ${sc.sources} L0 sources · ${sc.episodes} L1 stories (local)`
-        : "career.sqlite · Local L0 raw vault + private L1 synthesis";
+        : "career.sqlite · raw sources and private stories, on your disk";
       traceCta.textContent = "Open Studio →";
     } else if (node === "l2") {
       litNodes.add("vault"); litWires.add("l2");
@@ -1803,14 +1696,14 @@ function syncNavGlider() {
       traceText.textContent = g
         ? `L2 Safe · ${g.ready}/${g.total} leak-checked · Raw L0 stays sealed`
         : "L2 Safe · Confidential-safe brief or AI Pack (leak-checked)";
-      traceCta.textContent = "Preview L2 ↗";
+      traceCta.textContent = "Preview confidential-safe ↗";
     } else if (node === "l3") {
       litNodes.add("vault"); litWires.add("l3");
       const g = STATE?.status?.granularity?.L3;
       traceText.textContent = g
         ? `L3 Public · ${g.ready}/${g.total} ready · Short summaries · Zero JS`
         : "L3 Public · Open-web summaries & links (zero JS)";
-      traceCta.textContent = "Preview L3 ↗";
+      traceCta.textContent = "Preview public ↗";
     }
 
     allNodes.forEach(n => {
@@ -1943,10 +1836,9 @@ document.getElementById("toggle-upload-btn").onclick = () => toggleUploadDrawer(
 
 /* Share 3-mode sub-navigation */
 window.setShareSubtab = (sub) => {
-  if (sub === "polish") { STORY_TIER = "L2"; switchTab("episodes"); renderStorySheet(); return; }
   SHARE_SUBTAB = sub;
   document.querySelectorAll("#share-subnav button").forEach(b => b.classList.toggle("active", b.dataset.sub === sub));
-  ["polish", "blocked", "export"].forEach(k => {
+  ["blocked", "export"].forEach(k => {
     document.getElementById("share-view-" + k).classList.toggle("hidden", k !== sub);
   });
   requestAnimationFrame(() => document.querySelectorAll("#tab-sharing .seg-control").forEach(syncSegControl));
@@ -1983,15 +1875,6 @@ document.querySelectorAll("#story-filter-seg button").forEach(b => {
 });
 document.getElementById("story-filter-q").oninput = () => renderStoriesIndex();
 
-document.querySelectorAll("#tier-filter-seg button").forEach(b => {
-  b.onclick = () => {
-    document.querySelectorAll("#tier-filter-seg button").forEach(x => x.classList.toggle("active", x === b));
-    TIER_FILTER = b.dataset.tfilter;
-    syncSegControl(document.getElementById("tier-filter-seg"));
-    renderTierWorkbench();
-  };
-});
-
 /* Load & render full state */
 async function refresh() {
   STATE = await api("/api/state");
@@ -2014,7 +1897,7 @@ async function refresh() {
   document.getElementById("p-l3").value = person.overview_l3 || "";
   document.getElementById("p-name-view").textContent = person.name || "Career Vault";
   document.getElementById("p-headline-view").textContent = person.headline || "Add your headline...";
-  document.getElementById("p-l1-view").textContent = person.overview_l1 || "Add your private L1 overview to anchor your career narrative.";
+  document.getElementById("p-l1-view").textContent = person.overview_l1 || "Add your private overview to anchor your career narrative.";
 
   const c = status.counts, g = status.granularity;
 
@@ -2096,11 +1979,10 @@ async function refresh() {
   // Stories, Share, and Vault summary pills + Day-1 Empty Vault Starter
   const isEmptyVault = (c.sources === 0 && c.episodes === 0);
   document.getElementById("empty-vault-banner").classList.toggle("hidden", !isEmptyVault);
-  document.getElementById("stories-count-pill").textContent = `${c.episodes} private stories · L1`;
+  document.getElementById("stories-count-pill").textContent = `${c.episodes} ${c.episodes === 1 ? "story" : "stories"}`;
   document.getElementById("share-blocked-count").textContent = sensitive_terms.length;
   document.getElementById("vault-summary-pill").textContent = `${c.sources} sources · ${c.unlinked_sources} unlinked`;
   document.getElementById("triage-btn").textContent = c.unlinked_sources ? `Inbox Triage (${c.unlinked_sources})` : "Inbox Triage";
-  document.getElementById("tier-readiness-foot").textContent = `${g.L2.ready}/${g.L2.total} L2 · ${g.L3.ready}/${g.L3.total} L3`;
 
   // Sensitive terms (hover-reveal Remove)
   document.getElementById("sensitive-list").innerHTML = sensitive_terms.map(t => `
@@ -2177,17 +2059,17 @@ const FLOW_DEFAULT = [
   {
     "stage": 1,
     "short_title": "Scan Channels",
-    "title": "Pull raw work from your channels into L0",
+    "title": "Pull raw work from your channels into Sources",
     "summary": "Use your own AI assistant and MCP connectors (Slack, Notion, Calendar, meeting transcripts, Google Docs, GitHub, email) to pull authorized history into local career.sqlite.",
-    "cta": "Open Vault & Channels",
+    "cta": "Open Sources",
     "target_tab": "vault"
   },
   {
     "stage": 2,
     "short_title": "Roles & Stories",
-    "title": "Group into roles and private L1 stories",
+    "title": "Group into roles and private stories",
     "summary": "Organize raw items under your actual roles and write private L1 stories with concrete decisions, who helped, honest outcomes, screenshots, and verbatim source quotes.",
-    "cta": "Open Roles & Experience",
+    "cta": "Open Career",
     "target_tab": "experience"
   },
   {
@@ -2200,17 +2082,17 @@ const FLOW_DEFAULT = [
   },
   {
     "stage": 4,
-    "short_title": "Set L2 / L3",
-    "title": "Block sensitive terms and write L2 / L3",
+    "short_title": "Make it shareable",
+    "title": "Block sensitive terms and write the shareable versions",
     "summary": "Register client names, internal numbers, and coworker names to block, mark your top stories as Flagship, and write clean L2 (confidential-safe) and L3 (public) versions.",
-    "cta": "Open Share & Tiers",
+    "cta": "Open Share",
     "target_tab": "sharing"
   },
   {
     "stage": 5,
     "short_title": "Export & Hand Off",
     "title": "Export for humans or someone else's AI",
-    "summary": "Download a succinct brief for a human reader, or an exhaustive leak-checked AI Context Pack (Markdown/JSON) to drop straight into someone else's AI—or run a read-only L2 MCP server.",
+    "summary": "Download a succinct brief for a human reader, or an exhaustive leak-checked AI Context Pack (Markdown/JSON) to drop straight into someone else's AI—or run a read-only MCP server.",
     "cta": "Export Brief or AI Pack",
     "target_tab": "sharing"
   }
@@ -2451,7 +2333,7 @@ window.copyMcpSetup = async () => {
   try {
     const cfg = await api("/api/mcp-config");
     const txt = [
-      "Follow v2/SKILL.md to build and deepen my local Career Context vault.",
+      "Follow SKILL.md to build and deepen my local Career Context vault.",
       `1) Connect to my local vault MCP server (${cfg.db_path}):`,
       JSON.stringify(cfg.private_mcp, null, 2),
       "2) First ask what work channels I use (Slack, Notion, Google Calendar, Meeting Transcripts, Google Docs, GitHub, Linear, Gmail, Slides/Figma, LinkedIn, X, Substack) and check which MCP connectors are active.",
@@ -2498,7 +2380,7 @@ window.copyShareMcp = async () => {
   try {
     const cfg = await api("/api/mcp-config");
     await navigator.clipboard.writeText(JSON.stringify(cfg.share_mcp, null, 2));
-    toast("Copied exact read-only L2 MCP JSON config");
+    toast("Copied the read-only MCP config");
   } catch (err) { toast("Copy failed: " + err.message); }
 };
 
@@ -2522,7 +2404,7 @@ window.copyHandoffPrompt = async (kind) => {
   };
   try {
     await navigator.clipboard.writeText(prompts[kind] || prompts.external);
-    toast("Copied handoff prompt — paste alongside your L2 AI Context Pack");
+    toast("Copied handoff prompt — paste alongside your AI Context Pack");
   } catch (err) { toast("Copy failed: " + err.message); }
 };
 
@@ -2674,7 +2556,7 @@ function renderStoriesIndex() {
       <div class="index-sub">
         ${levelPill(ep.importance)}
         <span>${esc(shortPeriod(ep.period_label))}</span>
-        <span style="margin-left:auto;display:inline-flex;gap:4px;align-items:center" title="L2 / L3 readiness">
+        <span style="margin-left:auto;display:inline-flex;gap:4px;align-items:center" title="Confidential-safe and public readiness">
           <span class="dot ${l2ok ? 'ok' : (ep.tiers?.L2 ? 'warn' : '')}"></span>
           <span class="dot ${l3ok ? 'ok' : (ep.tiers?.L3 ? 'warn' : '')}"></span>
         </span>
@@ -2846,8 +2728,8 @@ function renderStorySheet() {
 
       <div class="split" style="margin-top:1.5rem;padding-top:1.05rem;border-top:1px solid var(--line);align-items:center">
         <div class="row">
-          <span class="pill ${ep.tiers.L2 ? (ep.tiers.L2.stale ? 'warn' : 'ok') : ''}">L2 ${ep.tiers.L2 ? (ep.tiers.L2.stale ? 'needs update' : 'ready') : 'not drafted'}</span>
-          <span class="pill ${ep.tiers.L3 ? (ep.tiers.L3.stale ? 'warn' : 'ok') : ''}">L3 ${ep.tiers.L3 ? (ep.tiers.L3.stale ? 'needs update' : 'ready') : 'not drafted'}</span>
+          <span class="pill ${ep.tiers.L2 ? (ep.tiers.L2.stale ? 'warn' : 'ok') : ''}">Confidential-safe ${ep.tiers.L2 ? (ep.tiers.L2.stale ? 'needs update' : 'ready') : 'not drafted'}</span>
+          <span class="pill ${ep.tiers.L3 ? (ep.tiers.L3.stale ? 'warn' : 'ok') : ''}">Public ${ep.tiers.L3 ? (ep.tiers.L3.stale ? 'needs update' : 'ready') : 'not drafted'}</span>
         </div>
         <button class="btn secondary sm" onclick="openInSharing('${esc(ep.id)}')">Polish for sharing →</button>
       </div>
@@ -2886,7 +2768,7 @@ function buildStoryFormHTML(ep) {
   const statusOpts = statuses.map(st => `<option value="${st}" ${(ep?.status || "shipped") === st ? 'selected' : ''}>${st}</option>`).join("");
 
   return `
-    ${isNew ? `<div class="sheet-head"><div><span class="pill ok" style="margin-bottom:0.35rem">New L1 Story</span><h3>Create a private career story</h3></div><button class="btn secondary sm" onclick="cancelNewStory()">Cancel</button></div>` : ''}
+    ${isNew ? `<div class="sheet-head"><div><span class="pill ok" style="margin-bottom:0.35rem">New story</span><h3>Create a private career story</h3></div><button class="btn secondary sm" onclick="cancelNewStory()">Cancel</button></div>` : ''}
     <label style="margin-top:0">Story Title</label>
     <input id="ep-title" class="title-input" value="${esc(ep?.title || '')}" placeholder="Concrete project, decision, or turning point">
 
@@ -2924,7 +2806,7 @@ function buildStoryFormHTML(ep) {
 
     <div class="split" style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--line);align-items:center">
       <div class="row">
-        <button class="btn" id="save-episode-btn">${isNew ? 'Create L1 story' : 'Save changes'}</button>
+        <button class="btn" id="save-episode-btn">${isNew ? 'Create story' : 'Save changes'}</button>
         <button class="btn secondary" onclick="${isNew ? 'cancelNewStory()' : "setStoryMode('read')"}">Cancel</button>
       </div>
       ${!isNew ? `<button type="button" class="btn danger sm" onclick="deleteStory('${esc(ep.id)}')">Delete story</button>` : ''}
@@ -2968,7 +2850,7 @@ function wireStoryForm(ep) {
     const saved = await api("/api/episodes", payload);
     ACTIVE_STORY_ID = saved.id || ep?.id || ACTIVE_STORY_ID;
     STORY_MODE = "read";
-    toast(ep ? "Saved L1 story changes" : "Created new L1 story");
+    toast(ep ? "Saved story" : "Created story");
     await refresh();
   };
 }
@@ -2990,21 +2872,8 @@ window.openInSharing = (id) => {
   renderStorySheet();
 };
 
-window.setActiveShareTier = (tier) => {
-  STORY_TIER = tier;
-  applyStoryTier();
-};
-
 function getFilteredTierStories() {
-  if (!STATE) return [];
-  return STATE.episodes.filter(ep => {
-    if (TIER_FILTER === "flagship") return ep.importance >= 3;
-    if (TIER_FILTER === "needs") {
-      const l2 = ep.tiers?.L2, l3 = ep.tiers?.L3;
-      return !l2 || l2.stale || (l2.leaks || []).length || !l3 || l3.stale || (l3.leaks || []).length;
-    }
-    return true;
-  });
+  return STATE ? STATE.episodes : [];
 }
 
 function renderTierWorkbench() {
@@ -3012,27 +2881,11 @@ function renderTierWorkbench() {
   const list = getFilteredTierStories();
   if (list.length && !list.some(e => e.id === ACTIVE_TIER_ID)) ACTIVE_TIER_ID = list[0].id;
 
-  document.getElementById("tier-index-list").innerHTML = list.map(ep => {
-    const active = ep.id === ACTIVE_TIER_ID;
-    const l2 = ep.tiers?.L2, l3 = ep.tiers?.L3;
-    const l2cls = !l2 ? "" : (l2.leaks?.length ? "danger" : (l2.stale ? "warn" : "ok"));
-    const l3cls = !l3 ? "" : (l3.leaks?.length ? "danger" : (l3.stale ? "warn" : "ok"));
-    return `
-    <button class="index-item ${active ? 'active' : ''}" onclick="selectTierStory('${esc(ep.id)}')">
-      <div class="index-title">${esc(ep.title)}</div>
-      <div class="index-sub">
-        <span class="pill ${l2cls}" style="padding:0.1rem 0.45rem">L2</span>
-        <span class="pill ${l3cls}" style="padding:0.1rem 0.45rem">L3</span>
-        ${ep.importance >= 3 ? '<span class="meta">Flagship</span>' : ''}
-      </div>
-    </button>`;
-  }).join("") || '<p class="meta" style="padding:1rem">All stories are clean and up to date.</p>';
-
   const idx = list.findIndex(e => e.id === ACTIVE_TIER_ID);
   const ep = list[idx] || STATE.episodes.find(e => e.id === ACTIVE_TIER_ID);
   const host = document.getElementById("tier-sheet");
   if (!ep) {
-    host.innerHTML = '<div class="meta" style="text-align:center;padding:3rem 1rem">Select a story to polish its shareable L2 and L3 versions.</div>';
+    host.innerHTML = '<div class="meta" style="text-align:center;padding:3rem 1rem">Select a story to write its confidential-safe and public versions.</div>';
     return;
   }
 
@@ -3047,7 +2900,7 @@ function renderTierWorkbench() {
     ? `<span class="pill danger">Blocked: ${cur.leaks.length} sensitive match${cur.leaks.length === 1 ? '' : 'es'}</span>`
     : (!saved
       ? `<span class="pill">Not drafted yet</span>`
-      : (cur.stale ? `<span class="pill warn">Needs update (L1 edited)</span>` : `<span class="pill ok">✓ Ready to share</span>`));
+      : (cur.stale ? `<span class="pill warn">Needs update (private version edited)</span>` : `<span class="pill ok">✓ Ready to share</span>`));
 
   const tierAudience = tier === "L2"
     ? "Safe for hiring managers & external AI"
@@ -3066,20 +2919,12 @@ function renderTierWorkbench() {
         </div>
       </div>
 
-      <!-- Sliding Tier Selector: One focused editor at a time -->
-      <div class="split" style="align-items:center;margin-bottom:1.1rem">
-        <div class="seg-control mint" id="active-tier-seg">
-          <div class="seg-thumb"></div>
-          <button type="button" class="${tier === 'L2' ? 'active' : ''}" onclick="setActiveShareTier('L2')">L2 · Confidential-Safe</button>
-          <button type="button" class="${tier === 'L3' ? 'active' : ''}" onclick="setActiveShareTier('L3')">L3 · Public</button>
-        </div>
-        ${statusPill}
-      </div>
+      <div style="margin-bottom:1.1rem">${statusPill}</div>
 
-      <!-- Compact collapsible Private L1 reference -->
+      <!-- The private version, for reference while writing -->
       <details class="l1-ref-details">
         <summary>
-          <span class="ref-label">Private L1 reference ▾</span>
+          <span class="ref-label">Private version ▾</span>
           <span class="meta ref-preview">${esc(cleanSnippet(ep.summary_l1, 95))}</span>
         </summary>
         <p>${esc(ep.summary_l1)}</p>
@@ -3091,28 +2936,27 @@ function renderTierWorkbench() {
         <div class="split" style="align-items:center;margin-bottom:0.85rem">
           <span class="meta">${tierAudience}</span>
           <div class="row" style="flex-shrink:0">
-            <button class="btn secondary sm" onclick="autoDraft('${esc(ep.id)}','${tier}')">Auto-Sanitize</button>
-            <button class="btn secondary sm" onclick="aiDraftTier('${esc(ep.id)}','${tier}')">AI Polish</button>
+            <button class="btn secondary sm" onclick="autoDraft('${esc(ep.id)}','${tier}')">Auto-sanitize</button>
+            <button class="btn secondary sm" onclick="aiDraftTier('${esc(ep.id)}','${tier}')">AI polish</button>
           </div>
         </div>
 
-        <label style="margin-top:0">${tier} Title</label>
-        <input id="${p}-t-${esc(ep.id)}" class="title-input" value="${esc(cur.title)}" placeholder="Clean ${tier} headline...">
+        <label style="margin-top:0">${tier === 'L2' ? 'Confidential-safe' : 'Public'} title</label>
+        <input id="${p}-t-${esc(ep.id)}" class="title-input" value="${esc(cur.title)}" placeholder="A clean headline...">
 
-        <label>${tier === 'L2' ? 'L2 Confidential-Safe Story' : 'L3 Public Highlight'}</label>
-        <textarea id="${p}-s-${esc(ep.id)}" style="min-height:205px" placeholder="${tier === 'L2' ? 'Click Auto-Sanitize to draft from L1 with blocked terms replaced, then polish in your own voice...' : 'Write a crisp 2-sentence public highlight...'}">${esc(cur.summary)}</textarea>
+        <label>${tier === 'L2' ? 'Confidential-safe story' : 'Public highlight'}</label>
+        <textarea id="${p}-s-${esc(ep.id)}" style="min-height:205px" placeholder="${tier === 'L2' ? 'Click Auto-sanitize to draft from the private version with blocked terms replaced, then polish in your own voice...' : 'Write a crisp 2-sentence public highlight...'}">${esc(cur.summary)}</textarea>
 
         <div class="split" style="margin-top:1.05rem;align-items:center">
           <div class="row">
-            <button class="btn" onclick="saveTier('${esc(ep.id)}','${tier}')">Save ${tier}</button>
-            <button class="btn secondary sm" onclick="previewExport('${tier}')">Preview ${tier} ↗</button>
+            <button class="btn" onclick="saveTier('${esc(ep.id)}','${tier}')">Save</button>
+            <button class="btn secondary sm" onclick="previewExport('${tier}')">Preview ↗</button>
           </div>
-          <button class="btn secondary sm" onclick="openStory('${esc(ep.id)}','edit')">Edit L1 source →</button>
+          <button class="btn secondary sm" onclick="openStory('${esc(ep.id)}','edit')">Edit the private version →</button>
         </div>
       </div>
     </div>`;
 
-  requestAnimationFrame(() => syncSegControl(document.getElementById("active-tier-seg")));
 }
 
 window.selectTierStory = (id) => {
@@ -3398,7 +3242,7 @@ window.batchLinkTop = async () => {
 
 window.batchSanitize = async (tier) => {
   const res = await api("/api/tier/batch-sanitize", { tier });
-  toast(`${tier} batch sanitize: ${res.saved.length} drafted, ${res.skipped.length} already fresh, ${res.blocked.length} blocked`);
+  toast(`${tier === "L3" ? "Public" : "Confidential-safe"} versions: ${res.saved.length} drafted, ${res.skipped.length} already up to date, ${res.blocked.length} held back`);
   await refresh();
 };
 
@@ -3410,7 +3254,7 @@ window.delRole = async (id) => {
 };
 
 window.deleteStory = async (id) => {
-  if (!confirm("Delete this story and its L2/L3 drafts? Raw backing sources stay safely in Vault.")) return;
+  if (!confirm("Delete this story and its confidential-safe and public versions? Its sources stay in Sources.")) return;
   await api("/api/episodes/delete", { id });
   STORY_MODE = "read";
   ACTIVE_STORY_ID = null;
@@ -3425,7 +3269,7 @@ window.unlinkSource = async (episode_id, source_id) => {
 };
 
 window.deleteSource = async (id) => {
-  if (!confirm("Permanently remove this raw document from your local L0 vault?")) return;
+  if (!confirm("Permanently remove this document from your Sources?")) return;
   await api("/api/sources/delete", { id });
   ACTIVE_SOURCE_ID = null;
   ACTIVE_SOURCE_OBJ = null;
@@ -3608,7 +3452,7 @@ document.getElementById("sync-emb-btn").onclick = async () => {
 document.getElementById("st-suggest-btn").onclick = async () => {
   const res = await api("/api/sensitive/suggest?limit=15");
   document.getElementById("suggested-terms").innerHTML = res.suggestions.length
-    ? '<div class="meta" style="margin-bottom:0.35rem">Suggested confidential candidates from L1:</div>' +
+    ? '<div class="meta" style="margin-bottom:0.35rem">Suggested private terms found in your stories:</div>' +
       res.suggestions.map(s => `<button type="button" class="pill warn clickable" style="margin:0.2rem" data-term="${esc(s.term)}" data-replacement="${esc(s.suggested_replacement)}" data-category="${esc(s.category)}">+ ${esc(s.term)} (${s.episode_count} ep)</button>`).join("")
     : '<p class="meta">No unregistered candidates found.</p>';
 };
@@ -3662,13 +3506,13 @@ document.getElementById("save-role").onclick = async () => {
 };
 document.getElementById("save-overviews").onclick = async () => {
   await api("/api/person", { overview_l2: document.getElementById("p-l2").value, overview_l3: document.getElementById("p-l3").value });
-  toast("Saved L2 & L3 overviews");
+  toast("Saved overviews");
 };
 document.getElementById("cap-save").onclick = async () => {
   try {
     await api("/api/sources", { title: document.getElementById("cap-title").value || "Untitled capture", channel: document.getElementById("cap-channel").value, event_date: document.getElementById("cap-date").value, sensitivity: document.getElementById("cap-sens").value, raw_text: document.getElementById("cap-text").value });
     document.getElementById("cap-title").value = ""; document.getElementById("cap-text").value = "";
-    toast("Ingested into L0 vault & indexed in FTS5"); await refresh();
+    toast("Added to Sources and indexed for search"); await refresh();
   } catch (err) { toast("Error: " + err.message); }
 };
 document.getElementById("st-add").onclick = async () => {

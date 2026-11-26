@@ -21,7 +21,7 @@ from .server import StudioApp, build_provider_request, extract_provider_text
 
 
 def run_holdout_assessment(repo_root: Path, model_dir: Path | None) -> dict[str, Any]:
-    """Dimension 1: Official 12-query retrieval holdout (v1 lexical vs v2 FTS5 vs v2 Hybrid)."""
+    """Dimension 1: 12-query retrieval holdout on a fictional career history (FTS5 and optional hybrid search)."""
     hist_path = repo_root / "tests/fixtures/realistic-career-history.json"
     holdout_path = repo_root / "tests/fixtures/retrieval-holdout.json"
     if not hist_path.is_file() or not holdout_path.is_file():
@@ -87,44 +87,9 @@ def run_holdout_assessment(repo_root: Path, model_dir: Path | None) -> dict[str,
                 except Exception as exc:
                     hyb_summary = {"error": str(exc)}
 
-    # Also score v1 lexical (`retrieve_context.py --mode terms`) on the exact same queries
-    v1_rec5, v1_rec10, v1_mrr, v1_ms = [], [], [], []
-    v1_rejected_queries = 0
-    for q in queries:
-        req = set(q["requiredSources"])
-        t0 = time.perf_counter()
-        p = subprocess.run(
-            [sys.executable, str(repo_root / "skills/career-context-sheet/scripts/retrieve_context.py"),
-             str(hist_path), "--query", q["query"], "--mode", "terms", "--limit", "10"],
-            capture_output=True, text=True,
-        )
-        v1_ms.append((time.perf_counter() - t0) * 1000)
-        if p.returncode != 0:
-            v1_rejected_queries += 1
-            v1_rec5.append(0.0)
-            v1_rec10.append(0.0)
-            v1_mrr.append(0.0)
-            continue
-        d = json.loads(p.stdout)
-        ranked_sids = [h["id"] for h in d["layers"]["sources"]["hits"]]
-        for acc in d["layers"]["accounts"]["hits"][:3]:
-            for sid in acc.get("links", {}).get("sourceRefs", []):
-                if sid not in ranked_sids:
-                    ranked_sids.append(sid)
-        v1_rec5.append(len(req & set(ranked_sids[:5])) / len(req))
-        v1_rec10.append(len(req & set(ranked_sids[:10])) / len(req))
-        v1_mrr.append(next((1.0 / (i + 1) for i, sid in enumerate(ranked_sids) if sid in req), 0.0))
-
     return {
         "queries_evaluated": len(queries),
         "migrated_sources": mig["sources_imported"],
-        "v1_lexical": {
-            "rejected_natural_queries": v1_rejected_queries,
-            "recall_at_5": round(sum(v1_rec5) / len(v1_rec5), 3),
-            "recall_at_10": round(sum(v1_rec10) / len(v1_rec10), 3),
-            "mrr": round(sum(v1_mrr) / len(v1_mrr), 3),
-            "avg_cli_ms": round(sum(v1_ms) / len(v1_ms), 1),
-        },
         "v2_fts5": {
             "recall_at_5": round(sum(fts_rec5) / len(fts_rec5), 3),
             "recall_at_10": round(sum(fts_rec10) / len(fts_rec10), 3),
@@ -235,19 +200,8 @@ def run_integrity_and_browser_audit(repo_root: Path) -> dict[str, Any]:
 
 
 def run_context_efficiency_audit(repo_root: Path) -> dict[str, Any]:
-    """Dimension 6: BYO-LLM instruction corpus efficiency (v1 vs v2)."""
-    v1_files = [
-        repo_root / "skills/career-context-sheet/SKILL.md",
-        repo_root / "skills/career-context-sheet/START-HERE.md",
-        *(repo_root / "skills/career-context-sheet/references").glob("*.md"),
-    ]
-    v1_words = sum(len(f.read_text(encoding="utf-8").split()) for f in v1_files if f.is_file())
-    v2_words = len((repo_root / "v2/SKILL.md").read_text(encoding="utf-8").split())
-    return {
-        "v1_instruction_words": v1_words,
-        "v2_instruction_words": v2_words,
-        "reduction_pct": round((1 - v2_words / max(1, v1_words)) * 100, 1),
-    }
+    """Dimension 6: how much instruction text an assistant has to read."""
+    return {"instruction_words": len((repo_root / "SKILL.md").read_text(encoding="utf-8").split())}
 
 
 def main(argv: list[str] | None = None) -> int:
