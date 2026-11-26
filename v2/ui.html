@@ -517,6 +517,15 @@ dialog::backdrop { background: rgba(17, 26, 22, 0.45); animation: backdrop-in 16
 .explainer > summary .scene-title { margin: 0; }
 .explainer[open] > summary { margin-bottom: 1rem; }
 
+/* Blocked terms found in a draft, each with its replacement */
+.term-check { margin-top: 0.9rem; }
+.term-count { margin: 0 0 0.3rem; font-size: 0.92rem; font-weight: 600; }
+.term-count b { margin-right: 0.3rem; font: 600 1.5rem/1 var(--serif); font-variant-numeric: lining-nums tabular-nums; }
+.term-count.private b { color: var(--danger); }
+.term-count.safe b { color: var(--mint-bar); }
+.term-group { margin: 0.9rem 0 0.2rem; font-size: 0.84rem; font-weight: 600; color: var(--muted); }
+.term-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem 1rem; flex-wrap: wrap; padding: 0.55rem 0; border-top: 1px solid var(--line); }
+
 /* Career: stories sit under their roles; one story page holds its three versions */
 .index-group { padding: 1.1rem 0 0.45rem; font-size: 0.82rem; font-weight: 600; color: var(--muted); }
 .index-group:first-child { padding-top: 0; }
@@ -2947,6 +2956,8 @@ function renderTierWorkbench() {
         <label>${tier === 'L2' ? 'Confidential-safe story' : 'Public highlight'}</label>
         <textarea id="${p}-s-${esc(ep.id)}" style="min-height:205px" placeholder="${tier === 'L2' ? 'Click Auto-sanitize to draft from the private version with blocked terms replaced, then polish in your own voice...' : 'Write a crisp 2-sentence public highlight...'}">${esc(cur.summary)}</textarea>
 
+        <div class="term-check" id="term-check" aria-live="polite"></div>
+
         <div class="split" style="margin-top:1.05rem;align-items:center">
           <div class="row">
             <button class="btn" onclick="saveTier('${esc(ep.id)}','${tier}')">Save</button>
@@ -2957,6 +2968,70 @@ function renderTierWorkbench() {
       </div>
     </div>`;
 
+  mountTermCheck(ep, tier);
+}
+
+/* Private terms in the draft. Each one is listed with a one-click replacement; the count is the draft's readiness. */
+let TERM_SUGGESTIONS = { forId: null, items: [] };
+const termPattern = (term) => new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+function termFindings(ep, tier) {
+  const p = tier.toLowerCase();
+  const title = document.getElementById(`${p}-t-${ep.id}`), body = document.getElementById(`${p}-s-${ep.id}`);
+  if (!title || !body) return null;
+  const text = title.value + "\n" + body.value;
+  const has = (term) => !!term && termPattern(term).test(text);
+  const rules = STATE.sensitive_terms || [];
+  const blocked = rules.filter(r => has(r.term)).map(r => ({ term: r.term, replacement: r.replacement, known: true }));
+  const taken = new Set(rules.map(r => r.term.toLowerCase()));
+  const maybe = TERM_SUGGESTIONS.items.filter(sg => !taken.has(sg.term.toLowerCase()) && has(sg.term))
+    .map(sg => ({ term: sg.term, replacement: sg.suggested_replacement, category: sg.category, known: false }));
+  return { title, body, blocked, maybe };
+}
+function renderTermCheck(ep, tier) {
+  const host = document.getElementById("term-check");
+  const found = host && termFindings(ep, tier);
+  if (!found) return;
+  if (!(found.title.value.trim() || found.body.value.trim())) { host.innerHTML = ""; return; }
+  const items = [...found.blocked, ...found.maybe], n = found.blocked.length;
+  const row = (it, i) => `
+      <div class="term-row">
+        <span><strong>${esc(it.term)}</strong></span>
+        <button type="button" class="btn secondary sm" data-term-fix="${i}">Replace with “${esc(it.replacement)}”${it.known ? "" : " and remember"}</button>
+      </div>`;
+  host.innerHTML = `
+    <p class="term-count ${n ? "private" : "safe"}"><b>${n}</b> blocked ${n === 1 ? "term" : "terms"} in this draft</p>
+    ${found.blocked.map((it, i) => row(it, i)).join("")}
+    ${found.maybe.length ? `<p class="term-group">May also be private</p>` + found.maybe.map((it, i) => row(it, n + i)).join("") : ""}`;
+  host.querySelectorAll("[data-term-fix]").forEach(btn => { btn.onclick = () => applyTermFix(ep, tier, items[Number(btn.dataset.termFix)]); });
+}
+async function applyTermFix(ep, tier, item) {
+  const found = termFindings(ep, tier);
+  if (!found || !item) return;
+  try {
+    if (!item.known) {
+      await api("/api/sensitive", { term: item.term, replacement: item.replacement, category: item.category || "custom" });
+      STATE.sensitive_terms = [...(STATE.sensitive_terms || []), { term: item.term, replacement: item.replacement, category: item.category || "custom" }];
+    }
+    found.title.value = found.title.value.replace(termPattern(item.term), item.replacement);
+    found.body.value = found.body.value.replace(termPattern(item.term), item.replacement);
+    renderTermCheck(ep, tier);
+    toast(item.known ? `Replaced “${item.term}”` : `Replaced “${item.term}” and added it to your blocked terms`);
+  } catch (err) { toast("Error: " + err.message); }
+}
+function mountTermCheck(ep, tier) {
+  const p = tier.toLowerCase();
+  [`${p}-t-${ep.id}`, `${p}-s-${ep.id}`].forEach(id => {
+    const field = document.getElementById(id);
+    if (field) field.addEventListener("input", () => renderTermCheck(ep, tier));
+  });
+  renderTermCheck(ep, tier);
+  if (TERM_SUGGESTIONS.forId === ep.id) return;
+  TERM_SUGGESTIONS = { forId: ep.id, items: [] };
+  api("/api/sensitive/suggest?limit=40").then(res => {
+    if (TERM_SUGGESTIONS.forId !== ep.id) return;
+    TERM_SUGGESTIONS.items = (res.suggestions || []).filter(sg => (sg.episodes || []).includes(ep.id));
+    renderTermCheck(ep, tier);
+  }).catch(() => {});
 }
 
 window.selectTierStory = (id) => {
@@ -3323,8 +3398,10 @@ window.autoDraft = async (episode_id, tier) => {
   const d = await api("/api/tier/draft", { episode_id, tier });
   const p = tier.toLowerCase();
   document.getElementById(`${p}-t-${episode_id}`).value = d.title;
-  document.getElementById(`${p}-s-${episode_id}`).value = d.summary;
-  toast(`Drafted sanitized ${tier} (${d.remaining_leaks.length} remaining findings)`);
+  const body = document.getElementById(`${p}-s-${episode_id}`);
+  body.value = d.summary;
+  body.dispatchEvent(new Event("input"));
+  toast(`Drafted the ${tier === "L3" ? "public" : "confidential-safe"} version (${d.remaining_leaks.length} remaining findings)`);
 };
 
 window.saveTier = async (episode_id, tier) => {
@@ -3336,7 +3413,7 @@ window.saveTier = async (episode_id, tier) => {
       summary: document.getElementById(`${p}-s-${episode_id}`).value,
       approved: true,
     });
-    toast(`Saved leak-checked ${tier} projection`);
+    toast(`Saved the leak-checked ${tier === "L3" ? "public" : "confidential-safe"} version`);
     await refresh();
   } catch (err) { toast("BLOCKED: " + err.message); }
 };
