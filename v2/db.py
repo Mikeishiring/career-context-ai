@@ -2077,7 +2077,7 @@ class CareerVault:
                 "severity": "low",
                 "category": "coverage",
                 "title": f"{len(missing_channels)} untapped career channel(s)",
-                "detail": f"No sources ingested yet from: {', '.join(missing_channels)}. Adding code, chat, or public writing deepens signal.",
+                "detail": f"No sources ingested yet from: {', '.join(ch.replace('_', ' ') for ch in missing_channels)}. Adding code, chat, or public writing deepens signal.",
                 "target_tab": "vault",
             })
 

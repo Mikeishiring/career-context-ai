@@ -563,6 +563,26 @@ body::before {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+/* One flat system, shared with the Studio: no ledges, no outlines on surfaces, sentence-case labels. */
+:root { --raised: none; --raised-accent: none; --line: #dfd9cb; --line-strong: #c4bba6; }
+body::before { display: none; }
+.mark::after { background: var(--accent); box-shadow: none; }
+.tag-quiet, .recipe-eyebrow, .q-label, .pane-kicker, .inspect-col h4 { text-transform: none; letter-spacing: 0; }
+.tag-quiet { border: 0; padding-inline: 0; background: none; }
+.btn-quiet { border-color: transparent; background: var(--wash); box-shadow: none; }
+.btn-quiet:hover { background: var(--line); transform: none; box-shadow: none; }
+.btn-primary, .btn-primary:hover { box-shadow: none; transform: none; }
+.btn-primary:active, .btn-quiet:active { transform: translateY(1px); }
+.question-card, .answer-shell, .shutter-card, .inspect-drawer, .about-disclosure { border: 0; box-shadow: none; }
+.vault-tray { background: #16352b; border-color: transparent; box-shadow: none; }
+.vault-tray.drag-over { box-shadow: 0 0 0 3px rgba(230, 181, 116, 0.5); }
+.source-folder, .source-folder::before { border-color: transparent; box-shadow: none; }
+.source-folder:hover:not(.used) { box-shadow: none; transform: none; background: color-mix(in srgb, var(--surface) 45%, var(--paper)); }
+.source-folder.spotlight:not(.used) { box-shadow: inset 0 0 0 1.5px var(--ochre); }
+.sf-cue, .tier-pill { border-color: transparent; background: var(--wash); }
+.missing-note { border: 0; background: var(--surface); }
+.cta-card { background: #16352b; box-shadow: none; }
+.inspect-col pre { border: 0; }
 </style>
 </head>
 <body>
